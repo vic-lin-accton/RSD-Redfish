@@ -1,0 +1,6 @@
+/var/log/rf_server.log {
+weekly
+size=10M
+rotate 5
+compress
+}

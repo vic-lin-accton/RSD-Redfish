@@ -1,0 +1,68 @@
+#!/bin/sh
+#################################################################################
+# Support Platform  type
+#################################################################################
+# Define currnt using variable depend on platform #
+
+	CURRENT_CPU_TEMP_UPPER_TH_NODE_PATH="/sys/devices/platform/coretemp.0/*/hwmon/hwmon0/"
+	CURRENT_FAN_NODE_PATH="/sys/devices/platform/as5812_54t_fan/"
+	CURRENT_PSU1_FAN_NODE_PATH="/sys/bus/i2c/devices/11-003c/"
+	CURRENT_PSU2_FAN_NODE_PATH="/sys/bus/i2c/devices/12-003f/"
+
+	eval CURRENT_THERMAL_NODE1_PATH="/sys/devices/platform/coretemp.0/hwmon/*/temp2_input"
+	eval CURRENT_THERMAL_NODE2_PATH="/sys/bus/i2c/devices/15-0048/hwmon/*/temp1_input"
+	eval CURRENT_THERMAL_NODE3_PATH="/sys/bus/i2c/devices/16-0049/hwmon/*/temp1_input"
+	eval CURRENT_THERMAL_NODE4_PATH="/sys/bus/i2c/devices/17-004a/hwmon/*/temp1_input"
+	eval CURRENT_THERMAL_NODE5_PATH="/sys/bus/i2c/devices/11-003c/psu_temp1_input"
+	eval CURRENT_THERMAL_NODE6_PATH="/sys/bus/i2c/devices/12-003f/psu_temp1_input"
+
+	CURRENT_THERMAL_NUM="6"
+	CURRENT_PORT_NUM="54"
+        CURRENT_PSU_NUM="2"	
+
+	I2C_BUS="0"
+	I2C_CPLD_OFFSET="0"
+	SYSTEM_RESET_OFFSET="0"
+
+	SYSTEM_HALT_VALUE="0"
+	SYSTEM_RESTART_VALUE="0"
+	
+	mapping=("E" "E" "E" "E" "E" "E" "E" "E" "E" "E" 
+	         "E" "E" "E" "E" "E" "E" "E" "E" "E" "E" 
+		 "E" "E" "E" "E" "E" "E" "E" "E" "E" "E" 
+		 "E" "E" "E" "E" "E" "E" "E" "E" "E" "E" 
+		 "E" "E" "E" "E" "E" "E" "E" "E" "XSFP" "XSFP" 
+		 "XSFP" "XSFP" "XSFP" "XSFP")
+	
+	opennsl_pm=("E" "1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" 
+		"21" "22" "23" "24" "25" "26" "27" "28" "29" "30" "31" "32" "33" "34" "35" "36" "37" "38" "39" "40" 
+		"41" "42" "43" "44" "45" "46" "47" "48" "49" "53" "57" "61" "65" "69")
+	
+        fans_type=("S" "S" "S" "S" "S" "P" "P")
+
+        thermals_type=("C" "S" "S" "S" "P" "P")
+
+        psus_type=("S" "S")
+	
+get_sfp_port_path()
+{
+	if [ "${1}" -ge 1 -a "${1}" -le "${CURRENT_PORT_NUM}" ] ; then
+			spath=${mapping[${1}]}
+			eval CURRENT_SFP_PORT_PATH="/sys/bus/i2c/devices/${spath}"
+			echo "${CURRENT_SFP_PORT_PATH}"
+	else
+		echo "error port number"
+	fi
+}
+
+get_upper_cpu_th_thermal_temp()
+{
+    if [ -f "${CURRENT_CPU_TEMP_UPPER_TH_NODE_PATH}temp2_max" ];then
+        UpperThresholdNonCritical=`cat ${CURRENT_CPU_TEMP_UPPER_TH_NODE_PATH}temp2_max`
+        UpperThresholdCritical=`cat ${CURRENT_CPU_TEMP_UPPER_TH_NODE_PATH}temp2_max`
+        UpperThresholdFatal=`cat ${CURRENT_CPU_TEMP_UPPER_TH_NODE_PATH}temp2_crit`
+        echo "${UpperThresholdNonCritical} ${UpperThresholdCritical} ${UpperThresholdFatal}"
+    else
+        echo "82000 82000 104000"
+    fi
+}

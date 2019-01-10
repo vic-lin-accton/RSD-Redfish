@@ -1,0 +1,19 @@
+#!/bin/sh
+#################################################################################
+# Support Platform  type
+#################################################################################
+# Define currnt using variable depend on platform #
+
+    CURRENT_FAN_NODE_PATH="/usr/local/bin/2-0066/"
+    CURRENT_PSU1_FAN_NODE_PATH="/usr/local/bin/ps1hwmon1/"
+    CURRENT_PSU2_FAN_NODE_PATH="/usr/local/bin/ps2hwmon1/"
+    
+    eval CURRENT_THERMAL_NODE1_PATH="/usr/local/bin/hwmon1/temp1_input"
+    eval CURRENT_THERMAL_NODE2_PATH="/usr/local/bin/hwmon2/temp1_input"
+    eval CURRENT_THERMAL_NODE3_PATH="/usr/local/bin/hwmon3/temp1_input"
+    eval CURRENT_THERMAL_NODE4_PATH="/usr/local/bin/hwmon4/temp1_input"
+    eval CURRENT_THERMAL_NODE5_PATH="/usr/local/bin/hwmon5/temp1_input"
+    eval CURRENT_THERMAL_NODE6_PATH="/usr/local/bin/hwmon6/temp1_input"
+    eval CURRENT_THERMAL_NODE7_PATH="/usr/local/bin/hwmon7/temp1_input"
+
+    CURRENT_THERMAL_NUM="7"
