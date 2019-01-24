@@ -22,9 +22,10 @@ from kafka.errors import KafkaError
 import time
 import json
 import logging
+import socket
 
-kafka_IP_address="172.17.8.102"
-kafka_Port="32769"
+KAFKA_IP_ADDRESS="172.17.8.106"
+KAFKA_PORT=32796
 TOPIC="voltha.events"
 
 
@@ -32,17 +33,19 @@ class KafkaAgent(object):
 
     def __init__(self, msg):
         self._msg = msg
-        self._producer = KafkaProducer(bootstrap_servers=kafka_IP_address + ':' + kafka_Port, api_version=(0, 10))
-        #value_serializer=lambda m: json.dumps(m).encode('utf-8'), api_version=(0, 10)
+        self._producer = KafkaProducer(bootstrap_servers=KAFKA_IP_ADDRESS + ':' + str(KAFKA_PORT),
+                api_version=(0, 10))
 
     def send(self):
         try:
-            #msg = json.dumps(self._msg, ensure_ascii=False).encode('utf-8')
-            #producer.send(topic=TOPIC, value=msg).get(timeout=5)
             self._producer.send(topic=TOPIC, value=self._msg).get(timeout=5)
             self._producer.flush()
         except KafkaError as e:
             print(e)
+
+    def detect_port(self, ip=KAFKA_IP_ADDRESS, port=KAFKA_PORT):
+        sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        return sock.connect_ex((ip, port))
 
 def paser_arguments():
 
@@ -55,9 +58,13 @@ if __name__ == "__main__":
     args = paser_arguments()
     #msg=[{"ENTRY" : { "Created" : "2001-01-01T02:35:39+00:00", "EntryCode" : "Assert", "EntryType" : "Event", "Message" : "Port plug in.", "OemRecordForm    at" : "NULL", "SensorNumber" : 50, "SensorType" : "Port", "Severity" : "OK" }}]
     kafka_agent = KafkaAgent(args.msg)
+    port_state = kafka_agent.detect_port(KAFKA_IP_ADDRESS, KAFKA_PORT)
+    if port_state == 0:
     #kafka_agent = KafkaAgent(msg)
     #logging.basicConfig(
     #        format='%(asctime)s.%(msecs)s:%(name)s:%(thread)d:' +
     #        '%(levelname)s:%(process)d:%(message)s',
     #        level=logging.INFO)
     kafka_agent.send()
+    else:
+        print("Kafka server is not available")
