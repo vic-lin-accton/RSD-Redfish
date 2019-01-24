@@ -1,6 +1,6 @@
-# Redfish for Edgecore bare-metal Switch/VOLT
+# Redfish for Edgecore bare-metal Switch/vOLT
 
-Repository source provide Redfish API on Edgecore Networks' Switch/VOLT with a choice of open software of [NOS](https://github.com/opencomputeproject/OpenNetworkLinux).
+Repository source provide Redfish API on Edgecore Networks' Switch/vOLT with a choice of open software of [NOS](https://github.com/opencomputeproject/OpenNetworkLinux).
 Framework modified and based on IntelR Rack Scale Design Software. 
 For more details on IntelR Rack Scale Design, please visit [Official IntelR Rack Scale Design Project Website]
 (http://intel.com/intelRSD).
@@ -25,7 +25,9 @@ More detailed information can be found at [official IntelR Rack Scale Design Sit
   
 - OpenOLT adapter bal_api_dist library.(Optional)
 
-  VOLT platform need build with bal_api_dist library to support port statistics information.
+  Need pre-build OpenOLT agent library bal_api_dist.
+  
+  vOLT platform need build with bal_api_dist library to support port statistics information.
   
 ## Build For Edgecore bare-metal Switch
 
@@ -41,11 +43,13 @@ $ ./pre-inst-X86-pkgs.sh
 $ ./Build_all.sh
 ```
 
-## Build For Edgecore VOLT
+## Build For Edgecore vOLT
 
 Enter ONL build docker environment in openolt 
 
-Currentlly, only support [tag voltha-1.4.0](https://github.com/opencord/openolt.git)
+Currentlly, support OpenOLT agent with [tag voltha-1.4.0](https://github.com/opencord/openolt.git)
+
+Change to openolt built directory that has built out bal_api_dist library.
 ```
 $ cd openolt/build/asfvolt16-onl/OpenNetworkLinux
 $ git clone https://github.com/edge-core/RSD-Redfish.git
@@ -59,11 +63,28 @@ $ ./Build_all.sh volt
 Output file will be in ~/psme-allinone.deb
 
 ## Installing
-cp psme-allinone.deb to Switch/VOLT ~/ and
+cp psme-allinone.deb to Switch or vOLT ~/ directory and
 ```
 dpkt -i psme-allinone.deb
 ```
 ## Starting/Stopping PSME (Redfish) service
+
+For Edgecore bare-metal Switch
+
 ```
-service psme start/stop
+service psme start
+
 ```
+For Edgecore vOLT
+
+After openolt agent start ...then
+
+```
+service psme start
+```
+If want stop PSME agent
+
+```
+service psme stop
+```
+
