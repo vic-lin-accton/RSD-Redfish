@@ -87,4 +87,22 @@ If want stop PSME agent
 ```
 service psme stop
 ```
+## Support on 
 
+|            Platform        | ONL kernel 3.x |ONL kernel 4.14.49|
+|----------------------------|----------------|------------------|
+x86-64-accton-as7712-32x-r0  |        O       |        O                 
+x86-64-accton-as5916-54xm-r0 |        O       |        O                  
+x86-64-accton-as5912-54x-r0  |        O       |        O         
+x86-64-accton-as5712-54x-r0  |        O       |        X         
+x86-64-accton-as5812-54t-r0  |        O       |        O         
+x86-64-accton-as5812-54x-r0  |        O       |        O                      
+x86-64-accton-asxvolt16-r0   |        O       |        O        
+x86-64-accton-as7816-64x-r0  |        O       |        X          
+x86-64-accton-as6712-32X-r0  |        O       |        X          
+x86-64-accton-as6812-32X-r0  |        O       |        X  
+x86-64-accton-as7316-26xb-r0 |        X       |        O
+x86-64-accton-as7726-32x-r0  |        X       |        O  
+x86-64-accton-as7326-56x-r0  |        X       |        O  
+x86-64-accton-as7926-80xk-r0 |        X       |        O    
+x86-64-accton-as9716-32d-r0  |        X       |        O 
