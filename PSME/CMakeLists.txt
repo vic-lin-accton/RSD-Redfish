@@ -40,6 +40,7 @@ message(STATUS "USE ONLP .......")
 add_definitions(-DCOMCAST -DCOCP -DTHERMAL_PSU -DCSYSTEMS -DCSUBSYSTEM -DCSTORAGE -DCACCOUNT -DCSESSION -DONLP) 
 ENDIF()
 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive ")
 
 #For Intel_RSD_TOR_SW 
 #add_definitions()
