@@ -28,6 +28,9 @@ set(ACC_ONLP_HELPER_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     CACHE PATH "acc_onlp_helper include directory"
 )
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive ")
+
 #include current include path
 include_directories(
     include

@@ -25,6 +25,37 @@ typedef enum acc_bcmbal_status
     ACC_BCMBAL_STATUS_NOT_PRESENT                                           = 2
 } acc_bcmbal_status;
 
+struct action_val
+{
+    uint16_t o_vid;                     /**< Outer vid. */
+    uint8_t o_pbits;                    /**< Outer pbits. */
+    uint16_t o_tpid;                    /**< Outer tpid. */
+    uint16_t i_vid;                     /**< Inner vid. */
+    uint8_t i_pbits;                    /**< Inner pbits. */
+    uint16_t i_tpid;                    /**< Inner tpid. */
+    uint16_t ether_type;
+    uint8_t ip_proto;
+    uint16_t src_port;                  /**< Source port of the packet to be classified */
+    uint16_t dst_port;                  /**< Destination port of the packet to be classified */
+
+};
+
+struct class_val
+{
+    uint16_t o_vid;                     /**< Outer vid. */
+    uint8_t o_pbits;                    /**< Outer pbits. */
+    uint16_t o_tpid;                    /**< Outer tpid. */
+    uint16_t i_vid;                     /**< Inner vid. */
+    uint8_t i_pbits;                    /**< Inner pbits. */
+    uint16_t i_tpid;                    /**< Inner tpid. */
+    uint16_t ether_type;
+    uint8_t ip_proto;
+    uint16_t src_port;                  /**< Source port of the packet to be classified */
+    uint16_t dst_port;                  /**< Destination port of the packet to be classified */
+
+};
+
+
 
 constexpr const size_t MAX_PON_PORT_NUM = 16;
 constexpr const size_t MAX_NNI_PORT_NUM = 4;
@@ -79,20 +110,32 @@ namespace acc_bal_api_dist_helper
 
             Olt_Device(int argc, char** argv);
             ~Olt_Device();
+
+            static Olt_Device& get_instance();
+            static void cleanup();
+
+            int   get_board_basic_info();			
             bool is_bal_init(){return  m_bcmbal_init;};
             bool is_bal_lib_init(){return  m_bal_lib_init;};
             void enter_cmd_shell(){while(1){usleep(1000);}};
-            static Olt_Device& get_instance();
-            static void cleanup();
             bool connect_bal(int argc, char *argv[]); 
-            int  get_board_basic_info();
             void register_callback();
             void get_pon_port_type();
             void set_olt_state(bool state);
             void set_olt_status(bool status);
+            bool get_olt_status();
             void set_intf_type(int port,int type);
             void set_pon_status(int port,int status);
             void set_nni_status(int port,int status);
+            bool enable_bal();
+            bool enable_pon_if_(int intf_id);
+            bool activate_onu(int intf_id, int onu_id, const char *vendor_id, const char *vendor_specific); 
+            bool sched_add(int intf_id, int onu_id, int agg_port_id);
+            bool omci_msg_out(int intf_id, int onu_id, const std::string pkt); 
+            bool flow_add(int onu_id, int flow_id, const std::string flow_type, const std::string pkt_tag_type, int access_intf_id, 
+                    int network_intf_id, int gemport_id, int classifier, int action, int action_cmd, struct action_val a_val, struct class_val c_val);
+
+
             json::Value get_port_statistic(int port);
             void *fHandle;
 
@@ -111,6 +154,7 @@ namespace acc_bal_api_dist_helper
             acc_bcmbal_state  m_olt_state  {ACC_BCMBAL_STATE_DOWN};
             acc_bcmbal_status m_olt_status {ACC_BCMBAL_STATUS_DOWN};
 
+            bool m_bal_enable      = {false};
             bool m_bal_state         = {false};
             bool m_bal_status        = {false};
             bool m_bcmbal_init       = {false};
