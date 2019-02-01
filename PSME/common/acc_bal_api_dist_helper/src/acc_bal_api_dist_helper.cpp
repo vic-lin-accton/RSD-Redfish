@@ -112,10 +112,7 @@ bcmos_errno  OltOnuActivationFailureIndication(bcmbal_obj *obj)
     bcmbal_subscriber_terminal_key *key =
         &(((bcmbal_subscriber_terminal_sub_term_act_fail*)obj)->key);
 
-    std::cout << "NICK DEBUG : onu activation failure indication, intf_id:"
-        << key->intf_id
-        << ", onu_id:"
-        << key->sub_term_id << std::endl;
+    printf("NICK DEBUG : onu activation failure indication, intf_id:%d onu_id %d" ,key->intf_id ,key->sub_term_id);
 
     return BCM_ERR_OK;
 }
@@ -160,28 +157,24 @@ const char* serial_number_to_str(bcmbal_serial_number* serial_number)
 
 bcmos_errno OltLosIndication(bcmbal_obj *obj) 
 {
-    printf("OltLosIndication call back!!!!!!!!\r\n");
+    printf("NICK DEBUG : OltLosIndication call back!!!!!!!!\r\n");
 
     bcmbal_interface_los* bcm_los_ind = (bcmbal_interface_los *) obj;
     int intf_id = interface_key_to_port_no(bcm_los_ind->key);
-    //std::string status = bcm_los_ind->data.status;
     printf("LOS indication : [%d] \r\n",intf_id );
     return BCM_ERR_OK;
 }
 
 bcmos_errno OltOnuDiscoveryIndication(bcmbal_obj *obj) 
 {
-    printf("OltOnuDiscoveryIndication call back!!!!!!!!\r\n");
+    printf("NICK DEBUG : OltOnuDiscoveryIndication call back!!!!!!!!\r\n");
 
     bcmbal_subscriber_terminal_key  *key  =  &(((bcmbal_subscriber_terminal_sub_term_disc*)obj)->key);
     bcmbal_subscriber_terminal_sub_term_disc_data *data = &(((bcmbal_subscriber_terminal_sub_term_disc*)obj)->data);
     bcmbal_serial_number *in_serial_number = &(data->serial_number);	
 
-    std::cout << "NICK DEBUG : onu discover indication, intf_id:"
-        << key->intf_id
-        << " serial_number:"
-        << serial_number_to_str(in_serial_number) << std::endl;
-
+    printf("NICK DEBUG : onu discover indication, intf_id: [%d] serial_number: [%s] \r\n", 
+    key->intf_id, serial_number_to_str(in_serial_number));
 
     return BCM_ERR_OK;
 }
@@ -189,7 +182,7 @@ bcmos_errno OltOnuDiscoveryIndication(bcmbal_obj *obj)
 
 bcmos_errno OltOnuOperIndication(bcmbal_obj *obj) 
 {
-    printf("OltOnuOperIndication call back!!!!!!!!\r\n");
+    printf("NICK DEBUG : OltOnuOperIndication call back!!!!!!!!\r\n");
 
     bcmbal_subscriber_terminal_key *key =
         &(((bcmbal_subscriber_terminal_oper_status_change*)obj)->key);
@@ -197,16 +190,8 @@ bcmos_errno OltOnuOperIndication(bcmbal_obj *obj)
     bcmbal_subscriber_terminal_oper_status_change_data *data =
         &(((bcmbal_subscriber_terminal_oper_status_change*)obj)->data);
 
-
-    std::cout << "NICK DEBUG : onu oper state indication, intf_id:"
-        << key->intf_id
-        << "NICK DEBUG :  onu_id: "
-        << key->sub_term_id
-        << " old oper state: "
-        << data->old_oper_status
-        << " new oper state:"
-        << data->new_oper_status << std::endl;
-
+    printf("NICK DEBUG : onu oper state indication, intf_id:[%d]  onu_id:[%d]  old oper state: [%d] new oper state:[%d]\r\n" ,
+    key->intf_id , key->sub_term_id, data->old_oper_status, data->new_oper_status);
 
     return BCM_ERR_OK;
 }
@@ -214,7 +199,7 @@ bcmos_errno OltOnuOperIndication(bcmbal_obj *obj)
 
 bcmos_errno OltOnuIndication(bcmbal_obj *obj) 
 {
-    printf("OltOnuIndication call back!!!!!!!!\r\n");
+    printf("NICK DEBUG : OltOnuIndication call back!!!!!!!!\r\n");
 
     bcmbal_subscriber_terminal_key *key =
         &(((bcmbal_subscriber_terminal_oper_status_change*)obj)->key);
@@ -222,11 +207,11 @@ bcmos_errno OltOnuIndication(bcmbal_obj *obj)
     bcmbal_subscriber_terminal_oper_status_change_data *data =
         &(((bcmbal_subscriber_terminal_oper_status_change*)obj)->data);
 
-    std::cout << "NICK DEBUG : onu indication, intf_id:"
-        << key->intf_id
-        << "NICK DEBUG :  oper_state:" << data->new_oper_status
-        << " admin_state:" << data->admin_state
-        << " onu_id:" << key->sub_term_id << std::endl;
+    printf("NICK DEBUG : onu indication, intf_id: [%d] oper_state: [%d]  admin_state: [%d] onu_id:[%d] \r\n", 
+    key->intf_id,
+    data->new_oper_status,
+    data->admin_state,
+    key->sub_term_id);
 
     return BCM_ERR_OK;
 }
@@ -234,13 +219,33 @@ bcmos_errno OltOnuIndication(bcmbal_obj *obj)
 
 bcmos_errno OltIfOperIndication(bcmbal_obj *obj) 
 {
-    std::cout << "NICK DEBUG : intf oper state indication, intf_id:"
-        << ((bcmbal_interface_oper_status_change *)obj)->key.intf_id
-        << " type:" << ((bcmbal_interface_oper_status_change *)obj)->key.intf_type
-        << " oper_state:" << ((bcmbal_interface_oper_status_change *)obj)->data.new_oper_status
-        << " admin_state:" << ((bcmbal_interface_oper_status_change *)obj)->data.admin_state
-        << std::endl;
+    printf("NICK DEBUG : intf oper state indication, intf_id:[%d] type:[%d] oper_state:[%d] admin_state:[%d]\r\n",
+    ((bcmbal_interface_oper_status_change *)obj)->key.intf_id,
+    ((bcmbal_interface_oper_status_change *)obj)->key.intf_type,
+    ((bcmbal_interface_oper_status_change *)obj)->data.new_oper_status,
+    ((bcmbal_interface_oper_status_change *)obj)->data.admin_state);
 
+    return BCM_ERR_OK;
+}
+
+
+bcmos_errno OltOmciIndication(bcmbal_obj *obj) 
+{
+    printf("OltOmciIndication call back!!!!!!!!\r\n");
+
+    bcmbal_packet_itu_omci_channel_rx *in =
+    (bcmbal_packet_itu_omci_channel_rx *)obj;
+       
+    {
+        printf("NICK DEBUG : ONT ");
+        int count =0;
+        for(count = 1 ; count <= in->data.pkt.len ; count++)
+        {
+        printf("%02X", in->data.pkt.val[count-1]);
+        }
+        printf("\r\n");
+    }
+    
     return BCM_ERR_OK;
 }
 
@@ -559,12 +564,31 @@ namespace acc_bal_api_dist_helper
         {	
             if (BCM_ERR_OK != d_bcmbal_subscribe_ind(DEFAULT_ATERM_ID, &cb_cfg)) 
             {
+                printf("Register_callback BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL error!!!\r\n");
                 return;
             }
             else
                 printf("Register_callback OltOnuActivationFailureIndication ok!!!\r\n");			  
         }
 
+        /*  omci indication */
+        cb_cfg.obj_type = BCMBAL_OBJ_ID_PACKET;
+        subgroup = BCMBAL_IND_SUBGROUP(packet, itu_omci_channel_rx);
+        cb_cfg.p_object_key_info = NULL;
+        cb_cfg.p_subgroup = &subgroup;
+        cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)OltOmciIndication;
+  
+        if(d_bcmbal_subscribe_ind)
+        {	
+            if (BCM_ERR_OK != d_bcmbal_subscribe_ind(DEFAULT_ATERM_ID, &cb_cfg)) 
+            {
+                printf("Register_callback BCMBAL_OBJ_ID_PACKET error!!!\r\n");
+                return;
+            }
+            else
+                printf("Register_callback omci indication ok!!!\r\n");			  
+        }
+	  
         m_subscribed = true;
         return ; 
     }

@@ -726,7 +726,7 @@ struct sFLOW a_Flow[] =
     {
         .interface_id        = 0,
             .onu_id               = 1,
-            .flow_id               = 16,
+            .flow_id               = 78,
             .flow_type           = "upstream",
             .packet_tag_type = "single_tag",
             .gemport_id = 1032,
@@ -763,7 +763,7 @@ struct sFLOW a_Flow[] =
         {
             .interface_id        = 0,
             .onu_id               = 1,
-            .flow_id               = 16,
+            .flow_id               = 78,
             .flow_type           = "downstream",
             .packet_tag_type = "double_tag",
             .gemport_id = 1032,
@@ -796,6 +796,7 @@ struct sFLOW a_Flow[] =
                 .dst_port = 0,
             }
         }
+	
     /*
        ,
        {
@@ -872,7 +873,6 @@ struct sFLOW a_Flow[] =
         .dst_port = 0,
 }
 }
-*/   
 ,
 {
     .interface_id        = 0,
@@ -947,6 +947,7 @@ struct sFLOW a_Flow[] =
         .dst_port = 0,
     }
 }
+*/
 /*
    ,
    {
@@ -1176,7 +1177,7 @@ void TestClass1::SetUp()
     {
 
         int onu_id = 1; 	
-        int interface_id = 0;
+        int interface_id = 1;
         std::string s_vendor_id("ISKT");
         const char cs_vendor_spec[8] = {0x71,0xe8,0x01,0x10};//
 
@@ -1202,9 +1203,15 @@ void TestClass1::SetUp()
             printf("apply flow [%i] settings\r\n", i);
             std::string sft(a_Flow[i].flow_type); //Flow type //
             std::string sptt(a_Flow[i].packet_tag_type); //pack tag type //
+ /*           
             pOLT.flow_add(
                     a_Flow[i].onu_id, a_Flow[i].flow_id, sft  , sptt, a_Flow[i].interface_id , 
                     a_Flow[i].network_interface_id, a_Flow[i].gemport_id, a_Flow[i].classifier, 
+                    a_Flow[i].action , a_Flow[i].acton_cmd , a_Flow[i].action_val_a_val, a_Flow[i].class_val_c_val);
+*/
+            pOLT.flow_add(
+                    a_Flow[i].onu_id, a_Flow[i].flow_id, sft  , sptt, 1 , 
+                    a_Flow[i].network_interface_id , a_Flow[i].gemport_id, a_Flow[i].classifier, 
                     a_Flow[i].action , a_Flow[i].acton_cmd , a_Flow[i].action_val_a_val, a_Flow[i].class_val_c_val);
         }
     }
@@ -1216,7 +1223,8 @@ void TestClass1::SetUp()
         for (int i = 0 ; i < aOMCI_size ; i++)
         {
             printf("apply comi [%i] settings\r\n", i);
-            pOLT.omci_msg_out(a_OMCI[i].interface_id, a_OMCI[i].onu_id, a_OMCI[i].raw_omci);
+            //pOLT.omci_msg_out(a_OMCI[i].interface_id, a_OMCI[i].onu_id, a_OMCI[i].raw_omci);
+            pOLT.omci_msg_out(1 , a_OMCI[i].onu_id, a_OMCI[i].raw_omci);
             usleep(200000);
         }
     }
