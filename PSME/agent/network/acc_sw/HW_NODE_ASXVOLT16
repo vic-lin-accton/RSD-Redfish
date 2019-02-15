@@ -29,6 +29,7 @@
 	CURRENT_THERMAL_NODE7_PATH="/sys/bus/i2c/devices/17-0058/psu_temp1_input"
  
         
+        CURRENT_FAN_NUM="8"
 	CURRENT_THERMAL_NUM="7"
 	CURRENT_PORT_NUM="20"
         CURRENT_PSU_NUM="2"
@@ -89,3 +90,10 @@ get_upper_cpu_th_thermal_temp()
         echo "44000 55000 65000"
     fi
 }
+
+get_max_fan_num()
+{
+    echo "${CURRENT_FAN_NUM}"
+}
+
+
