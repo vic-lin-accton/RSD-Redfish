@@ -1,20 +1,20 @@
 # Redfish for Edgecore bare-metal Switch/vOLT
 
 Repository source provide Redfish API on Edgecore Networks' Switch/vOLT with a choice of open software of [NOS](https://github.com/opencomputeproject/OpenNetworkLinux).
-Framework modified and based on IntelR Rack Scale Design Software. 
-For more details on IntelR Rack Scale Design, please visit [Official IntelR Rack Scale Design Project Website]
+Framework modified and based on Intel Rack Scale Design Software. 
+For more details on Intel Rack Scale Design, please visit [Official Intel Rack Scale Design Project Website]
 (http://intel.com/intelRSD).
 **Keep in mind this code is reference software only.** 
 It is expected that developers will take this reference software and make it their own. 
 
-# IntelR Rack Scale Design Reference Software
+# Intel Rack Scale Design Reference Software
 
-IntelR Rack Scale Design Software is a logical architecture that disaggregates compute, storage, and network resources, 
+Intel Rack Scale Design Software is a logical architecture that disaggregates compute, storage, and network resources, 
 and introduces the ability to more efficiently pool and utilize these resources. 
-IntelR Rack Scale Design Software APIs simplify resource management and provide the ability to dynamically compose resources 
+Intel Rack Scale Design Software APIs simplify resource management and provide the ability to dynamically compose resources 
 based on workload-specific demands.
 
-More detailed information can be found at [official IntelR Rack Scale Design Site](http://intel.com/intelRSD).
+More detailed information can be found at [official Intel Rack Scale Design Site](http://intel.com/intelRSD).
 
 ## How to build
 
@@ -87,6 +87,68 @@ If want stop PSME agent
 ```
 service psme stop
 ```
+## Do basic API query.
+
+On vOLT side:
+
+Assume vOLT's management IP is 172.17.10.9
+
+On client side:
+
+Use curl command to get basic information.
+```
+curl --insecure -v https://172.17.10.9:8888/redfish/v1/ | json_pp
+```
+Then you can get json data respones like:
+```
+{
+   "EventService" : {
+      "@odata.id" : "/redfish/v1/EventService"
+   },
+   "Description" : "Service Root description",
+   "Managers" : {
+      "@odata.id" : "/redfish/v1/Managers"
+   },
+   "Links" : {
+      "Sessions" : {
+         "@odata.id" : "/redfish/v1/SessionService/Sessions"
+      }
+   },
+   "Chassis" : {
+      "@odata.id" : "/redfish/v1/Chassis"
+   },
+   "AccountService" : {
+      "@odata.id" : "/redfish/v1/AccountService"
+   },
+   "@odata.context" : "/redfish/v1/$metadata#ServiceRoot.ServiceRoot",
+   "@odata.id" : "/redfish/v1",
+   "Oem" : {
+      "Intel_RackScale" : {
+         "ApiVersion" : "2.0.0",
+         "EthernetSwitches" : {
+            "@odata.id" : "/redfish/v1/EthernetSwitches"
+         },
+         "@odata.type" : "#Intel.Oem.ServiceRoot"
+      }
+   },
+   "SessionService" : {
+      "@odata.id" : "/redfish/v1/SessionService"
+   },
+   "Registries" : {
+      "@odata.id" : "/redfish/v1/Registries"
+   },
+   "Systems" : {
+      "@odata.id" : "/redfish/v1/Systems"
+   },
+   "Id" : "RootService",
+   "UUID" : "cec9c1d0-30e6-11e9-820c-53995703a902",
+   "RedfishVersion" : "1.0.2",
+   "Name" : "PSME Service Root",
+   "@odata.type" : "#ServiceRoot.v1_1_1.ServiceRoot"
+}
+``` 
+
+
 ## Support on 
 
 |            Platform        | ONL kernel 3.x |ONL kernel 4.14.49|
