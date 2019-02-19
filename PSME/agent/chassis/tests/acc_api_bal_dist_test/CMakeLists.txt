@@ -27,10 +27,12 @@ add_gtest(acc_api_bal_dist_test psme-chassis
 
 include_directories(
     ${ACC_BAL_API_DIST_HELPER_INCLUDE_DIRS}
+    ${JSONCPP_INCLUDE_DIRS}
 )
 
 TARGET_LINK_LIBRARIES(${test_target}
     ${ACC_BAL_API_DIST_HELPER_LIBRARIES}
     ${JSONCXX_LIBRARIES}
+    jsoncpp
     dl 
-    )
+)

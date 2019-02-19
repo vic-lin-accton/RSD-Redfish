@@ -26,8 +26,13 @@
 #include <acc_bal_api_dist_helper/acc_bal_api_dist_helper.hpp>
 using namespace acc_bal_api_dist_helper;
 using namespace std;
-#include "json/json.hpp"
+#include <json/json.h>
 #include <string>
+#include <ostream>
+#include <iostream>
+#include <fstream>
+#include <istream>
+
 
 
 enum bcmbal_action_id
@@ -1148,6 +1153,38 @@ void TestClass1::SetUp()
         }
     }
 #else
+      static constexpr char ONU_CFG_NAME[] = "onu_cfg";
+      ifstream    m_source_files= {};
+      std::string t_path = ONU_CFG_NAME;
+      Json::Value onu_cfg;	  
+
+      m_source_files.open(t_path);
+
+      if(m_source_files.good())
+      {
+          Json::Reader reader;
+          bool isJsonOK = (reader.parse(m_source_files, onu_cfg));
+
+          if(isJsonOK)
+          {
+              printf("Get onu_cfg OK \r\n");
+              printf("onu_cfg onu_id                        [%d]\r\n", onu_cfg["onu_id"].asInt());
+              printf("onu_cfg olt pon interface_id      [%d]\r\n", onu_cfg["interface_id"].asInt());
+              printf("onu_cfg onu vendor_id             [%s]\r\n", onu_cfg["vendor_id"].asString().c_str());
+              printf("onu_cfg onu vendor_specific id [%s]\r\n", onu_cfg["vendor_specific"].asString().c_str());			  
+          }
+          else
+          {
+              printf("Get onu_cfg NG, Check JSON format !!!\r\n");
+              return;			  
+          }
+      }
+      else
+      {
+          printf("Open onu_cfg NG\r\n" );
+          return;		  
+      }
+
     auto& pOLT = Olt_Device::Olt_Device::get_instance();
 
     //Step 1. enable bal //
@@ -1168,22 +1205,43 @@ void TestClass1::SetUp()
     //Step 2. enable pon port//
     int pon_if_max = pOLT.get_max_pon_num();
     int i = 0;
+	
+    printf("//////////// PON interface num[%d]  !!////////////\r\n", pon_if_max);
+	
     for(i = 0; i < pon_if_max ; i++)
     {
+    
         printf("////////////Enable PON interface [%d] UP !!////////////\r\n", i);
         pOLT.enable_pon_if_(i);
     }
 
+    int onu_id = onu_cfg["onu_id"].asInt(); 	
+    int interface_id = onu_cfg["interface_id"].asInt();
+    std::string s_vendor_id = onu_cfg["vendor_id"].asString();
+    std::string s_vendor_spec = onu_cfg["vendor_specific"].asString();
+	
+    int buflen = s_vendor_spec.size();
+    char cs_vendor_spec[8] = {0x71,0xe8,0x01,0x10};//default value //
+    
+    uint16_t idx1 = 0;
+    uint16_t idx2 = 0;
+    char str1[20];
+    char str2[20];
+    memset(&cs_vendor_spec, 0, buflen);
+        
+    for (idx1=0,idx2=0; idx1< buflen ; idx1++,idx2++) 
     {
-
-        int onu_id = 1; 	
-        int interface_id = 0;  //Todo
-        std::string s_vendor_id("ISKT");
-        const char cs_vendor_spec[8] = {0x71,0xe8,0x01,0x10};//
-
-        printf("////////////Active ONU !!////////////\r\n");
-        pOLT.activate_onu(interface_id, onu_id, s_vendor_id.c_str(), cs_vendor_spec);
+        sprintf(str1,"%c", s_vendor_spec[idx1]);
+        sprintf(str2,"%c", s_vendor_spec[++idx1]);
+        strcat(str1,str2);
+        cs_vendor_spec[idx2] = strtol(str1, NULL, 16);
     }
+
+    printf("////////////Active ONU[%s][0x%02X][0x%02X][0x%02X][0x%02X] !!////////////\r\n", 
+    s_vendor_id.c_str(), cs_vendor_spec[0],cs_vendor_spec[1],cs_vendor_spec[2],cs_vendor_spec[3]);
+
+    pOLT.activate_onu(interface_id, onu_id, s_vendor_id.c_str(), cs_vendor_spec);
+    
 
     // usleep(1000000*10); //
 #if 0    
@@ -1197,7 +1255,6 @@ void TestClass1::SetUp()
     { 
         int aFlow_size = (sizeof (a_Flow) / sizeof (a_Flow[0]));
         int i = 0;
-        //aFlow_size =2;
         for (int i = 0 ; i < aFlow_size ; i++)
         {
             printf("apply flow [%i] settings\r\n", i);
@@ -1205,15 +1262,9 @@ void TestClass1::SetUp()
             std::string sptt(a_Flow[i].packet_tag_type); //pack tag type //
            
             pOLT.flow_add(
-                    a_Flow[i].onu_id, a_Flow[i].flow_id, sft  , sptt, a_Flow[i].interface_id , 
+                    onu_id, a_Flow[i].flow_id, sft  , sptt, interface_id , 
                     a_Flow[i].network_interface_id, a_Flow[i].gemport_id, a_Flow[i].classifier, 
-                    a_Flow[i].action , a_Flow[i].acton_cmd , a_Flow[i].action_val_a_val, a_Flow[i].class_val_c_val);
-/*  //Todo
-            pOLT.flow_add(
-                    a_Flow[i].onu_id, a_Flow[i].flow_id, sft  , sptt, 1 , 
-                    a_Flow[i].network_interface_id , a_Flow[i].gemport_id, a_Flow[i].classifier, 
-                    a_Flow[i].action , a_Flow[i].acton_cmd , a_Flow[i].action_val_a_val, a_Flow[i].class_val_c_val);
-*/                    
+                    a_Flow[i].action , a_Flow[i].acton_cmd , a_Flow[i].action_val_a_val, a_Flow[i].class_val_c_val);                    
         }
     }
     usleep(1000000*10); //
@@ -1224,8 +1275,7 @@ void TestClass1::SetUp()
         for (int i = 0 ; i < aOMCI_size ; i++)
         {
             printf("apply comi [%i] settings\r\n", i);
-            pOLT.omci_msg_out(a_OMCI[i].interface_id, a_OMCI[i].onu_id, a_OMCI[i].raw_omci);
-            // pOLT.omci_msg_out(1 , a_OMCI[i].onu_id, a_OMCI[i].raw_omci); //Todo
+            pOLT.omci_msg_out(interface_id, onu_id, a_OMCI[i].raw_omci);
             usleep(200000);
         }
     }
