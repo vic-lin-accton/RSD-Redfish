@@ -55,11 +55,14 @@ struct class_val
 
 };
 
+constexpr const size_t XGS_PON_MAX_PON_PORT_NUM = 16;
+constexpr const size_t XGS_PON_MAX_NNI_PORT_NUM = 4;
+constexpr const size_t XGS_PON_TOTAL_INTF_NUM (XGS_PON_MAX_PON_PORT_NUM+XGS_PON_MAX_NNI_PORT_NUM);
 
+constexpr const size_t G_PON_MAX_PON_PORT_NUM = 64; 
+constexpr const size_t G_PON_MAX_NNI_PORT_NUM = 10;
+constexpr const size_t G_PON_TOTAL_INTF_NUM (G_PON_MAX_PON_PORT_NUM+G_PON_MAX_NNI_PORT_NUM);
 
-constexpr const size_t MAX_PON_PORT_NUM = 16;
-constexpr const size_t MAX_NNI_PORT_NUM = 4;
-constexpr const size_t TOTAL_INTF_NUM (MAX_PON_PORT_NUM+MAX_NNI_PORT_NUM);
 
 namespace acc_bal_api_dist_helper 
 {
@@ -92,16 +95,29 @@ namespace acc_bal_api_dist_helper
             void set_status(bool status){m_status = status;};
     };
 
-    class nni_port : public port
+    class g_pon_nni_port : public port
     {
         public:
-            std::string m_nni_port_type[MAX_NNI_PORT_NUM] = {""};
+            std::string m_nni_port_type[G_PON_MAX_NNI_PORT_NUM] = {""};
     };
 
-    class pon_port : public port
+    class g_pon_pon_port : public port
     {
         public:
-            std::string m_pon_port_type[MAX_PON_PORT_NUM] = {""};
+            std::string m_pon_port_type[G_PON_MAX_PON_PORT_NUM] = {""};
+    };
+
+
+    class xgs_pon_nni_port : public port
+    {
+        public:
+            std::string m_nni_port_type[XGS_PON_MAX_NNI_PORT_NUM] = {""};
+    };
+
+    class xgs_pon_pon_port : public port
+    {
+        public:
+            std::string m_pon_port_type[XGS_PON_MAX_PON_PORT_NUM] = {""};
     };
 
     class Olt_Device
@@ -120,13 +136,10 @@ namespace acc_bal_api_dist_helper
             void enter_cmd_shell(){while(1){usleep(1000);}};
             bool connect_bal(int argc, char *argv[]); 
             void register_callback();
-            void get_pon_port_type();
             void set_olt_state(bool state);
             void set_olt_status(bool status);
             bool get_olt_status();
             void set_intf_type(int port,int type);
-            void set_pon_status(int port,int status);
-            void set_nni_status(int port,int status);
             bool enable_bal();
             bool enable_pon_if_(int intf_id);
             bool activate_onu(int intf_id, int onu_id, const char *vendor_id, const char *vendor_specific); 
@@ -136,8 +149,16 @@ namespace acc_bal_api_dist_helper
                     int network_intf_id, int gemport_id, int classifier, int action, int action_cmd, struct action_val a_val, struct class_val c_val);
 
 
-            json::Value get_port_statistic(int port);
+            void virtual get_pon_port_type()= 0;			
+            void virtual set_pon_status(int port,int status)  = 0;
+            void virtual set_nni_status(int port,int status)  = 0;
+            json::Value virtual get_port_statistic(int port)  = 0;
+            int virtual get_max_pon_num() = 0;
             void *fHandle;
+
+        protected:
+            int  m_pon_ports_num     = {0};
+            int  m_nni_ports_num     = {0};			
 
         private:
 
@@ -148,9 +169,6 @@ namespace acc_bal_api_dist_helper
             std::string m_pon_type          = {""};
             std::string m_bal_version       = {""};
 
-            pon_port m_pon_port[MAX_PON_PORT_NUM]  = {};
-            nni_port m_nni_port[MAX_NNI_PORT_NUM]  = {};
-
             acc_bcmbal_state  m_olt_state  {ACC_BCMBAL_STATE_DOWN};
             acc_bcmbal_status m_olt_status {ACC_BCMBAL_STATUS_DOWN};
 
@@ -160,16 +178,32 @@ namespace acc_bal_api_dist_helper
             bool m_bcmbal_init       = {false};
             bool m_bal_lib_init      = {false};
             bool m_subscribed        = {false};
-            int  m_pon_ports_num     = {0};
-            int  m_nni_ports_num     = {0};
             int  m_mac_devs_num      = {0};
 
-            json::Value get_pon_statistic(int port);
-            json::Value get_nni_statistic(int port);
 
-
-
+            json::Value virtual get_pon_statistic(int port) = 0;
+            json::Value virtual get_nni_statistic(int port) = 0;
     };
+
+    class XGS_PON_Olt_Device : public Olt_Device
+    {
+        public:
+            XGS_PON_Olt_Device(int argc, char** argv):Olt_Device(argc, argv){};				
+            ~XGS_PON_Olt_Device(){};				
+            void get_pon_port_type();			
+            void set_pon_status(int port,int status);
+            void set_nni_status(int port,int status);
+            int    get_max_pon_num(){return XGS_PON_MAX_PON_PORT_NUM;};
+
+            json::Value get_port_statistic(int port);
+
+        private:
+            xgs_pon_pon_port m_pon_port[XGS_PON_MAX_PON_PORT_NUM]   = {};
+            xgs_pon_nni_port  m_nni_port[XGS_PON_MAX_NNI_PORT_NUM]  = {};
+            json::Value get_nni_statistic(int port);
+            json::Value get_pon_statistic(int port);
+    };
+
 }
 
 

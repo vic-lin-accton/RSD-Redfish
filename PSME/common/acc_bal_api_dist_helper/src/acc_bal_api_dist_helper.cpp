@@ -33,7 +33,7 @@ bcmos_errno Olt_itf_change(bcmbal_obj *obj)
         if(bcm_if_oper_ind->key.intf_type == BCMBAL_INTF_TYPE_PON )
         {
             rOLT.set_pon_status(bcm_if_oper_ind->key.intf_id, true);
-            if(bcm_if_oper_ind->key.intf_id == (MAX_PON_PORT_NUM-1))
+            if(bcm_if_oper_ind->key.intf_id == (rOLT.get_max_pon_num()-1))
                 rOLT.get_pon_port_type();
         }
         else if (bcm_if_oper_ind->key.intf_type == BCMBAL_INTF_TYPE_NNI)
@@ -270,13 +270,13 @@ namespace acc_bal_api_dist_helper
         return m_bal_status;
     }
 
-    void Olt_Device::set_pon_status(int port,int status)
+    void XGS_PON_Olt_Device::set_pon_status(int port,int status)
     {
         m_pon_port[port].set_status(status);
         return;
     }
 
-    void Olt_Device::set_nni_status(int port,int status)
+    void XGS_PON_Olt_Device::set_nni_status(int port,int status)
     {
         m_nni_port[port].set_status(status);
         return;
@@ -376,7 +376,8 @@ namespace acc_bal_api_dist_helper
         if (NULL == g_Olt_Device) 
         {
             printf("Creating Olt_Device \r\n");
-            g_Olt_Device = new Olt_Device(sizeof(ARGV)/sizeof(char *),(char **) ARGV);
+            //Check if XGS PON
+            g_Olt_Device = new XGS_PON_Olt_Device(sizeof(ARGV)/sizeof(char *),(char **) ARGV);
         }
         return *g_Olt_Device;
     }
@@ -593,7 +594,7 @@ namespace acc_bal_api_dist_helper
         return ; 
     }
 
-    void Olt_Device::get_pon_port_type()
+    void XGS_PON_Olt_Device::get_pon_port_type()
     {
         for (int port_id = 0; port_id < m_pon_ports_num; ++port_id) 
         {
@@ -642,21 +643,21 @@ namespace acc_bal_api_dist_helper
         }
     }
 
-    json::Value Olt_Device::get_port_statistic(int port)
+    json::Value XGS_PON_Olt_Device::get_port_statistic(int port)
     {
         json::Value status(json::Value::Type::OBJECT);
 
-        if( ((port -1) >= 0) && ((port - 1) < TOTAL_INTF_NUM) )
+        if( ((port -1) >= 0) && ((port - 1) < XGS_PON_TOTAL_INTF_NUM) )
         {
-            if((port-1) < MAX_PON_PORT_NUM)
+            if((port-1) < XGS_PON_MAX_PON_PORT_NUM)
                 return get_pon_statistic( port -1);
             else
-                return get_nni_statistic( port - MAX_PON_PORT_NUM -1);
+                return get_nni_statistic( port - XGS_PON_MAX_PON_PORT_NUM -1);
         }
         return status;
     }
 
-    json::Value Olt_Device::get_pon_statistic(int port)
+    json::Value XGS_PON_Olt_Device::get_pon_statistic(int port)
     {
         json::Value status(json::Value::Type::OBJECT);
 
@@ -729,7 +730,7 @@ namespace acc_bal_api_dist_helper
         return status;
     }
 
-    json::Value Olt_Device::get_nni_statistic(int port)
+    json::Value XGS_PON_Olt_Device::get_nni_statistic(int port)
     {
         json::Value status(json::Value::Type::OBJECT);
 
