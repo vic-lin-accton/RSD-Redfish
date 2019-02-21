@@ -8,6 +8,8 @@ echo ""
 
 sudo apt-get update
 
+sudo apt-get install -f
+
 PACKAGES=("clang" "libgcrypt20-dev" "libncurses5-dev" "libnl-3-dev" "libudev-dev" "libglibmm-2.4-dev" "libglib3.0-cil-dev"
           "libxml++2.6-dev" "libgnutls28-dev" "libnl-route-3-dev" "flex" "bison" "doxygen" "cpp" "ccache" "build-essential"
 	  "linux-libc-dev" "libmpc-dev" "libstdc++6" "libcurl4-openssl-dev" "libmicrohttpd-dev" "libjsoncpp-dev"
@@ -25,7 +27,6 @@ do
     echo "RES[$RES]"
 done
 
-sudo apt-get install -f
 
 #Install cmake version to  3.5.2
 CMAKE_VER=`cmake -version | grep "cmake version"  | awk '{print $3}'`
