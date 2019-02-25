@@ -1156,6 +1156,8 @@ void TestClass1::SetUp()
       static constexpr char ONU_CFG_NAME[] = "onu_cfg";
       ifstream    m_source_files= {};
       std::string t_path = ONU_CFG_NAME;
+      int Onu_count = 0; 
+      Json::Value onus;	  
       Json::Value onu_cfg;	  
 
       m_source_files.open(t_path);
@@ -1167,11 +1169,10 @@ void TestClass1::SetUp()
 
           if(isJsonOK)
           {
+              onus = onu_cfg["ONUs"];
+              Onu_count = onus.size(); 
               printf("Get onu_cfg OK \r\n");
-              printf("onu_cfg onu_id                        [%d]\r\n", onu_cfg["onu_id"].asInt());
-              printf("onu_cfg olt pon interface_id      [%d]\r\n", onu_cfg["interface_id"].asInt());
-              printf("onu_cfg onu vendor_id             [%s]\r\n", onu_cfg["vendor_id"].asString().c_str());
-              printf("onu_cfg onu vendor_specific id [%s]\r\n", onu_cfg["vendor_specific"].asString().c_str());			  
+
           }
           else
           {
@@ -1214,74 +1215,73 @@ void TestClass1::SetUp()
         printf("////////////Enable PON interface [%d] UP !!////////////\r\n", i);
         pOLT.enable_pon_if_(i);
     }
+    int jj=0;
 
-    int onu_id = onu_cfg["onu_id"].asInt(); 	
-    int interface_id = onu_cfg["interface_id"].asInt();
-    std::string s_vendor_id = onu_cfg["vendor_id"].asString();
-    std::string s_vendor_spec = onu_cfg["vendor_specific"].asString();
-	
-    int buflen = s_vendor_spec.size();
-    char cs_vendor_spec[8] = {0x71,0xe8,0x01,0x10};//default value //
-    
-    uint16_t idx1 = 0;
-    uint16_t idx2 = 0;
-    char str1[20];
-    char str2[20];
-    memset(&cs_vendor_spec, 0, buflen);
-        
-    for (idx1=0,idx2=0; idx1< buflen ; idx1++,idx2++) 
-    {
-        sprintf(str1,"%c", s_vendor_spec[idx1]);
-        sprintf(str2,"%c", s_vendor_spec[++idx1]);
-        strcat(str1,str2);
-        cs_vendor_spec[idx2] = strtol(str1, NULL, 16);
-    }
-
-    printf("////////////Active ONU[%s][0x%02X][0x%02X][0x%02X][0x%02X] !!////////////\r\n", 
-    s_vendor_id.c_str(), cs_vendor_spec[0],cs_vendor_spec[1],cs_vendor_spec[2],cs_vendor_spec[3]);
-
-    pOLT.activate_onu(interface_id, onu_id, s_vendor_id.c_str(), cs_vendor_spec);
-    
-
-    // usleep(1000000*10); //
-#if 0    
-    {
-        int intf_id = 0, onu_id = 1, agg_port_id= 1024;		
-        pOLT.sched_add(intf_id, onu_id, agg_port_id) ;
-    }
-#endif	
-
-#if 1
+    for(jj = 0 ; jj< Onu_count; jj++)
     { 
-        int aFlow_size = (sizeof (a_Flow) / sizeof (a_Flow[0]));
-        int i = 0;
-        for (int i = 0 ; i < aFlow_size ; i++)
+        printf("onu_cfg onu_id                        [%d]\r\n", onus[jj]["onu_id"].asInt());
+        printf("onu_cfg olt pon interface_id      [%d]\r\n", onus[jj]["interface_id"].asInt());
+        printf("onu_cfg onu vendor_id             [%s]\r\n", onus[jj]["vendor_id"].asString().c_str());
+        printf("onu_cfg onu vendor_specific id [%s]\r\n", onus[jj]["vendor_specific"].asString().c_str());			  
+
+        int onu_id = onus[jj]["onu_id"].asInt(); 	
+        int interface_id = onus[jj]["interface_id"].asInt();
+        std::string s_vendor_id = onus[jj]["vendor_id"].asString();
+        std::string s_vendor_spec = onus[jj]["vendor_specific"].asString();
+
+        int buflen = s_vendor_spec.size();
+        char cs_vendor_spec[8] = {0x71,0xe8,0x01,0x10};//default value //
+
+        uint16_t idx1 = 0;
+        uint16_t idx2 = 0;
+        char str1[20];
+        char str2[20];
+        memset(&cs_vendor_spec, 0, buflen);
+
+        for (idx1=0,idx2=0; idx1< buflen ; idx1++,idx2++) 
         {
-            printf("apply flow [%i] settings\r\n", i);
-            std::string sft(a_Flow[i].flow_type); //Flow type //
-            std::string sptt(a_Flow[i].packet_tag_type); //pack tag type //
-           
-            pOLT.flow_add(
-                    onu_id, a_Flow[i].flow_id, sft  , sptt, interface_id , 
-                    a_Flow[i].network_interface_id, a_Flow[i].gemport_id, a_Flow[i].classifier, 
-                    a_Flow[i].action , a_Flow[i].acton_cmd , a_Flow[i].action_val_a_val, a_Flow[i].class_val_c_val);                    
+            sprintf(str1,"%c", s_vendor_spec[idx1]);
+            sprintf(str2,"%c", s_vendor_spec[++idx1]);
+            strcat(str1,str2);
+            cs_vendor_spec[idx2] = strtol(str1, NULL, 16);
         }
-    }
-    usleep(1000000*10); //
 
-    {
-        int aOMCI_size = (sizeof (a_OMCI) / sizeof (a_OMCI[0]));
-        int i = 0;
-        for (int i = 0 ; i < aOMCI_size ; i++)
+        printf("////////////Active ONU[%s][0x%02X][0x%02X][0x%02X][0x%02X] !!////////////\r\n", 
+                s_vendor_id.c_str(), cs_vendor_spec[0],cs_vendor_spec[1],cs_vendor_spec[2],cs_vendor_spec[3]);
+
+        pOLT.activate_onu(interface_id, onu_id, s_vendor_id.c_str(), cs_vendor_spec);
+
+
+        { 
+            int aFlow_size = (sizeof (a_Flow) / sizeof (a_Flow[0]));
+            int i = 0;
+            for (int i = 0 ; i < aFlow_size ; i++)
+            {
+                printf("apply flow [%i] settings\r\n", i);
+                std::string sft(a_Flow[i].flow_type); //Flow type //
+                std::string sptt(a_Flow[i].packet_tag_type); //pack tag type //
+
+                pOLT.flow_add(
+                        onu_id, a_Flow[i].flow_id, sft  , sptt, interface_id , 
+                        a_Flow[i].network_interface_id, a_Flow[i].gemport_id, a_Flow[i].classifier, 
+                        a_Flow[i].action , a_Flow[i].acton_cmd , a_Flow[i].action_val_a_val, a_Flow[i].class_val_c_val);                    
+            }
+        }
+        usleep(1000000*10); //
+
         {
-            printf("apply comi [%i] settings\r\n", i);
-            pOLT.omci_msg_out(interface_id, onu_id, a_OMCI[i].raw_omci);
-            usleep(200000);
+            int aOMCI_size = (sizeof (a_OMCI) / sizeof (a_OMCI[0]));
+            int i = 0;
+            for (int i = 0 ; i < aOMCI_size ; i++)
+            {
+                printf("apply comi [%i] settings\r\n", i);
+                pOLT.omci_msg_out(interface_id, onu_id, a_OMCI[i].raw_omci);
+                usleep(200000);
+            }
         }
+
+
     }
-
-
-#endif
 
     printf("////////////Init PON port done !!////////////\r\n");
 
