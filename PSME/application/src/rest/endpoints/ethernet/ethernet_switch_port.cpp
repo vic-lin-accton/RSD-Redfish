@@ -486,7 +486,7 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
     {
         // For NORMAL PORT info //
         int iPort = std::stoi(req.params[PathParam::SWITCH_PORT_ID]);
-        
+#ifndef VOLT        
         sprintf(command, "port_status.sh get  portname %d" , iPort);
         memset(resultA,0x0, sizeof(resultA));
         exec_shell(command, resultA);
@@ -497,6 +497,7 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
             r[constants::EthernetSwitchPort::PORT_ID] = resultA;			   
         }
         else
+#endif			
             r[constants::EthernetSwitchPort::PORT_ID] = port.get_port_identifier();
         
         endpoint::status_to_json(port, r);
@@ -510,7 +511,7 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
             r[Common::STATUS][Common::STATE]  = "Enabled";
             r[Common::STATUS][Common::HEALTH] = "OK";
             r[Common::STATUS][Common::HEALTH_ROLLUP] = "OK";	
-            r[constants::EthernetSwitchPort::LINK_TYPE] = "Ethernet";		
+            r[constants::EthernetSwitchPort::LINK_TYPE] = "Ethernet";	
         }
         else
         {
@@ -520,9 +521,14 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
         }
 
 #ifdef VOLT
-        auto& pOLT = Olt_Device::Olt_Device::get_instance();
+
         if(pOLT.is_bal_lib_init() == true)
-        r["Statistics"] = pOLT.get_port_statistic(iPort); 
+            r["Statistics"] = pOLT.get_port_statistic(iPort); 
+
+/*Todo , Add GPON transceiver 		
+        r["Transceiver Statistics"] = sonlp.get_port_trans_info_by_(iPort);		
+*/
+
 #endif    
 
 
@@ -555,6 +561,7 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
 #endif
 	{    
             r[constants::EthernetSwitchPort::LINK_TYPE] = "Ethernet";		
+#ifndef VOLT        
             
             /*For link status*/
             sprintf(command, "port_status.sh get link %d", iPort );	
@@ -652,6 +659,7 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
                     r[constants::EthernetSwitchPort::ADMINISTRATIVE_STATE] = "Down";
                 }
             }
+#endif
         }
         
         r[constants::EthernetSwitchPort::VLANS][Common::ODATA_ID] =
@@ -659,7 +667,8 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
         
         r[Common::LINKS][constants::EthernetSwitchPort::SWITCH][Common::ODATA_ID] =
         get_switch(req);
-        
+		
+#ifndef VOLT           
         sprintf(command, "port_status.sh get pvid %d" , std::stoi(req.params[PathParam::SWITCH_PORT_ID]));
         memset(resultA,0x0, sizeof(resultA));
         exec_shell(command, resultA);
@@ -702,7 +711,7 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
                 //r[constants::EthernetSwitchPort::PORT_MODE] = "LinkAggregationStatic";
             }
         }
-       
+#endif       
         r[constants::EthernetSwitchPort::STATIC_MACS][Common::ODATA_ID] 
         = PathBuilder(req).append(constants::EthernetSwitchPort::STATIC_MACS).build();
 

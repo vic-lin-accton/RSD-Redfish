@@ -29,14 +29,75 @@
 #include <linux/ethtool.h>
 #include <linux/sockios.h>
 #include <json/json.h>
+#include <json/json.hpp>
 
 #include <acc_net_helper/acc_net_helper.hpp>
+
+#define FF3(readin) (float(int(readin*1000))/1000.000);
 
 namespace acc_onlp_helper 
 {
 
     using namespace std;
     using namespace acc_net_helper;
+
+    static constexpr const int SIZE_EEPROM = 1024; 
+
+    class e_oom
+    {
+        bool get_conf();
+        void set_proto();
+        bool m_support = false;
+        std::string m_eeprom_path ={};
+        unsigned char m_eeprom[SIZE_EEPROM];
+
+        float get_value(std::string attri_name);
+        float get_value_u(std::string attri_name);
+
+        // Std. is using //
+        Json::Value m_std ={}; 
+
+        json::Value m_current_status ={};
+
+        Json::Value get_attri_by_name(std::string att_name , Json::Value in);
+
+        // Collection of support Std. //
+        std::map<std::pair<int,int>, Json::Value> m_8077i ={};
+
+        void refresh_temp();		
+        void refresh_voltage();		
+        void refresh_bias();	
+        void refresh_tx_pwr();	
+        void refresh_rx_pwr();	
+
+        public:
+        e_oom()
+        {
+            get_conf();
+            set_proto();
+        };
+        ~e_oom(){};
+
+        bool get_support(){return m_support;};
+        void set_support(bool support)
+      {
+          m_support = support;
+          if(!support)
+		  	set_proto();
+	};
+
+        // input eeprom raw data //
+        void set_eeprom_path(std::string in){m_eeprom_path = in;};
+		
+        bool store_eeprom(char * in_eeprom);
+        bool refresh_status();
+
+        json::Value get_current_status(){return m_current_status;}; 
+
+        bool get_eeprom_raw();
+        bool get_eeprom_raw( int rindex); 
+    };
+
 
     class Dev_Info
     {
@@ -47,7 +108,7 @@ namespace acc_onlp_helper
             std::string m_Model   = {};	
             std::string m_SN  = {};	
             int m_ID = 0;
-	     int m_Type = 0;
+            int m_Type = 0;
             RFLogEntry    Entry = {};	
 #ifdef VOLT			
             RFKafkaEntry KafkaEntry = {};	
@@ -57,63 +118,92 @@ namespace acc_onlp_helper
     class Thermal_Info : public Dev_Info
     {
         public:    
-        enum Thermal_Type
-	 {
-	    CPU_Sensor     = 1,
-	    SYSTEM_Sensor = 2,
-	    PSU_Sensor = 3
-	 };
-		
-        int m_Current_Temperature  = 0;
-        int m_Warning = 0;
-        int m_Error = 0;	
-        int m_Shutdown = 0;	
-        void set_info(int ID ,int Current_Temperature,int Warning , int Error, int Shutdown, bool present);
-		
+            enum Thermal_Type
+            {
+                CPU_Sensor     = 1,
+                SYSTEM_Sensor = 2,
+                PSU_Sensor = 3
+            };
+
+            int m_Current_Temperature  = 0;
+            int m_Warning = 0;
+            int m_Error = 0;	
+            int m_Shutdown = 0;	
+            void set_info(int ID ,int Current_Temperature,int Warning , int Error, int Shutdown, bool present);
+
     };
 
     class Psu_Info  : public Dev_Info
     {
         public:    
-        enum Psu_Type
-	 {
-	    SYSTEM = 1
-	 };	
-        int m_Vin = 0;
-        int m_Vout = 0;	
-        int m_Iin = 0;	
-        int m_Iout = 0;		
-        int m_Pin = 0;		
-	 int m_Pout = 0;    
-	 void set_info(int ID, std::string Model , std::string SN,  int Vin,  int Vout ,int Iin , int Iout,int Pin , int Pout, bool present);
+            enum Psu_Type
+            {
+                SYSTEM = 1
+            };	
+            int m_Vin = 0;
+            int m_Vout = 0;	
+            int m_Iin = 0;	
+            int m_Iout = 0;		
+            int m_Pin = 0;		
+            int m_Pout = 0;    
+            void set_info(int ID, std::string Model , std::string SN,  int Vin,  int Vout ,int Iin , int Iout,int Pin , int Pout, bool present);
     };
 
     class Fan_Info  : public Dev_Info
     {
         public:    
-        enum Fan_Type
-	 {
-	    PSU_Fan     = 1,
-	    SYSTEM_Fan = 2
-	 };    		
-        int m_RPM = 0;
-        int m_Per = 0;	
-	 void set_info(int ID, std::string Model , std::string SN,  int RPM ,int Per, bool present);
-		
+            enum Fan_Type
+            {
+                PSU_Fan     = 1,
+                SYSTEM_Fan = 2
+            };    		
+            int m_RPM = 0;
+            int m_Per = 0;	
+            void set_info(int ID, std::string Model , std::string SN,  int RPM ,int Per, bool present);
+
     };
 
     class Port_Info : public Dev_Info
     {
+        unsigned char m_EEPROM[SIZE_EEPROM] ={0};
         public:    
         enum Port_Type
-	 {
-	    Ether_Port     = 1,
-	    XSFP_Port        = 2
-	 }; 		
+        {
+            Ether_Port     = 1,
+            XSFP_Port      = 2,
+            XFP_Port        = 3
+            
+        }; 		
         bool m_Present_Status = 0;		
-	 void set_info(int ID,  int Type ,int Present_Status, bool present);
+        void set_info(int ID,  int Type ,int Present_Status, bool present);
+
+#ifdef VOLT  
+        e_oom m_port_oom;
+
+        //bool get_eeprom_raw( int rindex) 
+        bool get_eeprom_raw() 
+        {
+            return m_port_oom.get_eeprom_raw();
+        };
+
+        bool get_eeprom_raw( int rindex) 
+        {
+            return m_port_oom.get_eeprom_raw(rindex);
+        };
+
+        json::Value get_trans_status() 
+        {
+            return m_port_oom.get_current_status();
+        };
+
+        void clean_trans_data() 
+        {
+            m_port_oom.set_support(false);
+        };		
+        void set_eeprom_path(std::string in){ m_port_oom.set_eeprom_path(in);};		
+#endif
     };
-	
+
     class Switch
     {
         public:	
@@ -184,9 +274,15 @@ namespace acc_onlp_helper
 
 
             void get_port_info();
-            int   get_port_info_by_(int portid, Port_Content id);				
+            int   get_port_info_by_(int portid, Port_Content id);	
+#ifdef VOLT 			
+            json::Value get_port_trans_info_by_(int portid);	
+#endif
             int   get_port_num(){return m_port_max_num;};
-            void update_port_present_event();		
+            void update_port_present_event();	
+#ifdef VOLT 			
+            void update_trasceivers_oom_event();		
+#endif			
 
 
             static Switch& get_instance();
@@ -213,6 +309,10 @@ namespace acc_onlp_helper
 
             // more mainboard info //			
             std::string m_platinfo_path  = {"/etc/psme/platform_info.conf"};
+            std::string m_onl_platinfo_path  = {"/etc/onl/platform"};
+            std::string m_onl_platinfo_name  = {"na"};
+            Json::Reader m_eeprom_j_reader  = {};
+			
             std::string m_cpu_manu       = {};
             std::string m_cpu_vid        = {};
             std::string m_cpu_model_name = {};
@@ -311,7 +411,7 @@ namespace acc_onlp_helper
             unsigned long long m_pre_Port_Present = 0 ; 
 
     };
-	
+
 }
 
 #endif

@@ -69,53 +69,62 @@ void TestClass1::SetUp()
 	
     //Switch TESTs;
     auto& sonlp = Switch::Switch::get_instance();
-    sonlp.get_port_info();
-    int port_max = sonlp.get_port_num();
-
-    if(port_max == 0)
+    int ii = 1;
+    while(ii !=0)
     {
-        printf("You need check you have done HW_NODE_ASXXX Poring first!!!!\r\n");
-        return ;
+        sonlp.get_port_info();
+        int port_max = sonlp.get_port_num();
+    
+        if(port_max == 0)
+        {
+            printf("You need check you have done HW_NODE_ASXXX Poring first!!!!\r\n");
+            return ;
+        }
+        printf("Port MAX [%d]\r\n",port_max);	
+    	
+        for(int i = 1; i <= port_max; i++)	
+        {
+            printf("Port present %d [%d] \r\n", i, sonlp.get_port_info_by_(i, acc_onlp_helper::Switch::Port_Present ));
+#ifdef VOLT			
+            sonlp.get_port_trans_info_by_(i);
+#endif
+        }
+		
+        sonlp.get_psu_info();
+        int psu_max = sonlp.get_psu_num();
+    
+        for(int i = 1; i <= psu_max; i++)	
+        {
+            printf("PSU present %d [%d] \r\n", i, sonlp.get_psu_info_by_(i, acc_onlp_helper::Switch::Psu_Present));    
+            printf("PSU health %d [%s] \r\n", i, sonlp.get_psu_info_by_(i, "Status_Health").c_str());
+            printf("PSU state %d [%s] \r\n", i, sonlp.get_psu_info_by_(i, "Status_State").c_str());
+        }	
+             
+        auto& sonlp2 = acc_onlp_helper::Switch::get_instance();
+        sonlp2.get_thermal_info();
+    
+        int thermal_max = sonlp2.get_thermal_num();
+    
+    
+        for(int i = 1; i <= thermal_max; i++)	
+        {
+            printf("Thermal type %d [%d] \r\n", i, sonlp2.get_thermal_info_by_(i, acc_onlp_helper::Switch::Thermal_Type));    
+            printf("Thermal health %d [%s] \r\n", i, sonlp2.get_thermal_info_by_(i, "Status_Health").c_str());
+            printf("Thermal state %d [%s] \r\n", i, sonlp2.get_thermal_info_by_(i, "Status_State").c_str());
+        }		
+    
+        auto& sonlp3 = acc_onlp_helper::Switch::get_instance();
+        sonlp3.get_fan_info();
+        int fan_max = sonlp2.get_fan_num();
+    	
+        for(int i = 1; i <= fan_max; i++)	
+        {
+            printf("fan type %d [%d] \r\n", i, sonlp3.get_fan_info_by_(i, acc_onlp_helper::Switch::Type));    
+            printf("fan health %d [%s] \r\n", i, sonlp3.get_fan_info_by_(i, "Status_Health").c_str());
+            printf("fan state %d [%s] \r\n", i, sonlp3.get_fan_info_by_(i, "Status_State").c_str());
+        }	
+	ii--;
     }
-    printf("Port MAX [%d]\r\n",port_max);	
-	
-    for(int i = 1; i <= port_max; i++)	
-        printf("Port present %d [%d] \r\n", i, sonlp.get_port_info_by_(i, acc_onlp_helper::Switch::Port_Present ));
-
-    sonlp.get_psu_info();
-    int psu_max = sonlp.get_psu_num();
-
-    for(int i = 1; i <= psu_max; i++)	
-    {
-        printf("PSU present %d [%d] \r\n", i, sonlp.get_psu_info_by_(i, acc_onlp_helper::Switch::Psu_Present));    
-        printf("PSU health %d [%s] \r\n", i, sonlp.get_psu_info_by_(i, "Status_Health").c_str());
-        printf("PSU state %d [%s] \r\n", i, sonlp.get_psu_info_by_(i, "Status_State").c_str());
-    }	
-         
-    auto& sonlp2 = acc_onlp_helper::Switch::get_instance();
-    sonlp2.get_thermal_info();
-
-    int thermal_max = sonlp2.get_thermal_num();
-
-
-    for(int i = 1; i <= thermal_max; i++)	
-    {
-        printf("Thermal type %d [%d] \r\n", i, sonlp2.get_thermal_info_by_(i, acc_onlp_helper::Switch::Thermal_Type));    
-        printf("Thermal health %d [%s] \r\n", i, sonlp2.get_thermal_info_by_(i, "Status_Health").c_str());
-        printf("Thermal state %d [%s] \r\n", i, sonlp2.get_thermal_info_by_(i, "Status_State").c_str());
-    }		
-
-    auto& sonlp3 = acc_onlp_helper::Switch::get_instance();
-    sonlp3.get_fan_info();
-    int fan_max = sonlp2.get_fan_num();
-	
-    for(int i = 1; i <= fan_max; i++)	
-    {
-        printf("fan type %d [%d] \r\n", i, sonlp3.get_fan_info_by_(i, acc_onlp_helper::Switch::Type));    
-        printf("fan health %d [%s] \r\n", i, sonlp3.get_fan_info_by_(i, "Status_Health").c_str());
-        printf("fan state %d [%s] \r\n", i, sonlp3.get_fan_info_by_(i, "Status_State").c_str());
-    }	
-	
     printf("TestClass1-SetUp-End      Switch TESTING/////////////////////\r\n");
 	
 }

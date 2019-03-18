@@ -28,6 +28,11 @@ if [ ! -z "${HW_type}" ];then
         "x86"[-_]"64-accton"[-_]"asxvolt16-r0")
         . /etc/psme/HW_NODE_ASXVOLT16
         ;;
+
+        "x86"[-_]"64-accton"[-_]"asgvolt64-r0")
+        . /etc/psme/HW_NODE_ASGVOLT64
+        ;;
+
         "x86"[-_]"64-accton"[-_]"as6812"[-_]"32x-r0")
         . /etc/psme/HW_NODE_AS6812_32X
         ;;

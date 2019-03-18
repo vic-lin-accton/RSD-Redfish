@@ -43,6 +43,7 @@ include_directories(SYSTEM
     ${JSONCPP_INCLUDE_DIRS}
     ${JSONRPCCPP_INCLUDE_DIRS}
     ${ACC_NET_HELPER_INCLUDE_DIRS}
+    ${ACC_ONLP_HELPER_INCLUDE_DIRS}
 )
 
 #include OpenNetworkLinux path
@@ -57,6 +58,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../OpenNetworkLinux/sm/bigcode/modules/cjson/module/inc/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../OpenNetworkLinux/sm/bigcode/modules/sff/module/inc/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../OpenNetworkLinux/sm/infra/modules/AIM/module/inc/
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../common/json-cxx/include/
 )
 
 add_library(acc_onlp_helper STATIC

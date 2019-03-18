@@ -48,6 +48,7 @@ cp ${PSME_ACC_SW_DIR}/logsrv.sh  		$ITEM_PATH/usr/local/bin
 cp ${PSME_ACC_SW_DIR}/mkpasswd                  $ITEM_PATH/usr/local/bin
 cp ${PSME_ACC_SW_DIR}/Kafka_agent.py            $ITEM_PATH/usr/local/bin
 cp ${PSME_ACC_SW_DIR}/Kafka_PM_agent.py         $ITEM_PATH/usr/local/bin
+cp -rf ${PSME_ACC_SW_DIR}/mod_conf              $ITEM_PATH/usr/local/bin
 cp ${PSME_ACC_SW_DIR}/HW_NODE_VM                $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS5916_54XM       $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS7712_32X        $ITEM_PATH/etc/psme
@@ -59,6 +60,7 @@ cp ${PSME_ACC_SW_DIR}/HW_NODE_AS5812_54T        $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS5812_54X        $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS7816_64X        $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_ASXVOLT16         $ITEM_PATH/etc/psme
+cp ${PSME_ACC_SW_DIR}/HW_NODE_ASGVOLT64         $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS7316_26XB       $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS7726_32X        $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS7326_56X        $ITEM_PATH/etc/psme

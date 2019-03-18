@@ -39,5 +39,5 @@ TARGET_LINK_LIBRARIES(${test_target}
     ${LIBONLP_PF_DF}
     libm.so
     jsoncpp
+    json-cxx
     )
-

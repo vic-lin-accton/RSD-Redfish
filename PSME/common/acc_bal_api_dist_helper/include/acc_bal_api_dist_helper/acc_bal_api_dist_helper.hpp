@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "json/json.hpp"
+#include <string.h>
 
 typedef enum acc_bcmbal_state
 {
@@ -91,7 +92,7 @@ namespace acc_bal_api_dist_helper
         public:
             bool           m_status         = {1}; // Disable //
             int            m_port_id        = {0};
-            port_statistic m_port_statistic = {0};  
+            port_statistic m_port_statistic = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};  
             void set_status(bool status){m_status = status;};
     };
 
@@ -154,8 +155,12 @@ namespace acc_bal_api_dist_helper
             void virtual set_nni_status(int port,int status)  = 0;
             json::Value virtual get_port_statistic(int port)  = 0;
             int virtual get_max_pon_num() = 0;
-            void *fHandle;
+			
+            void *fHandle = 0;
 
+            Olt_Device(const Olt_Device & a){this->fHandle = a.fHandle;};
+            Olt_Device & operator=(const acc_bal_api_dist_helper::Olt_Device& a){this->fHandle = a.fHandle; return *this;};
+			
         protected:
             int  m_pon_ports_num     = {0};
             int  m_nni_ports_num     = {0};			
@@ -200,6 +205,25 @@ namespace acc_bal_api_dist_helper
         private:
             xgs_pon_pon_port m_pon_port[XGS_PON_MAX_PON_PORT_NUM]   = {};
             xgs_pon_nni_port  m_nni_port[XGS_PON_MAX_NNI_PORT_NUM]  = {};
+            json::Value get_nni_statistic(int port);
+            json::Value get_pon_statistic(int port);
+    };
+
+    class G_PON_Olt_Device : public Olt_Device
+    {
+        public:
+            G_PON_Olt_Device(int argc, char** argv):Olt_Device(argc, argv){};				
+            ~G_PON_Olt_Device(){};				
+            void get_pon_port_type();			
+            void set_pon_status(int port,int status);
+            void set_nni_status(int port,int status);
+            int    get_max_pon_num(){return G_PON_MAX_PON_PORT_NUM;};
+
+            json::Value get_port_statistic(int port);
+
+        private:
+            g_pon_pon_port m_pon_port[G_PON_MAX_PON_PORT_NUM]   = {};
+            g_pon_nni_port  m_nni_port[G_PON_MAX_NNI_PORT_NUM]  = {};
             json::Value get_nni_statistic(int port);
             json::Value get_pon_statistic(int port);
     };

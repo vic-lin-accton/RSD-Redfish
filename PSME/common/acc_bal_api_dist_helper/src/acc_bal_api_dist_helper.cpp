@@ -276,7 +276,19 @@ namespace acc_bal_api_dist_helper
         return;
     }
 
+    void G_PON_Olt_Device::set_pon_status(int port,int status)
+    {
+        m_pon_port[port].set_status(status);
+        return;
+    }
+
     void XGS_PON_Olt_Device::set_nni_status(int port,int status)
+    {
+        m_nni_port[port].set_status(status);
+        return;
+    }
+
+    void G_PON_Olt_Device::set_nni_status(int port,int status)
     {
         m_nni_port[port].set_status(status);
         return;
@@ -362,6 +374,7 @@ namespace acc_bal_api_dist_helper
                 return m_bcmbal_init;
             }
         }
+        return false;
     }
 
     Olt_Device& Olt_Device::get_instance()
@@ -375,9 +388,27 @@ namespace acc_bal_api_dist_helper
 
         if (NULL == g_Olt_Device) 
         {
-            printf("Creating Olt_Device \r\n");
+            
             //Check if XGS PON
-            g_Olt_Device = new XGS_PON_Olt_Device(sizeof(ARGV)/sizeof(char *),(char **) ARGV);
+
+            ifstream ifs ("/etc/onl/platform");
+            std::string s;
+            getline (ifs, s, (char) ifs.eof());
+            printf("Creating Olt_Device on platform [%s] size[%d]\r\n", s.c_str(), s.size());	    
+			
+            if(s.compare(0,s.size()-1,"x86-64-accton-asxvolt16-r0") == 0)
+            {           
+                printf("x86-64-accton-asxvolt16-r0\r\n");	    
+                g_Olt_Device = new XGS_PON_Olt_Device(sizeof(ARGV)/sizeof(char *),(char **) ARGV);
+            }
+            else if (s.compare(0,s.size()-1,"x86-64-accton-asgvolt64-r0") == 0)
+            {
+                printf("x86-64-accton-asgvolt64-r0\r\n");	    
+                g_Olt_Device = new G_PON_Olt_Device(sizeof(ARGV)/sizeof(char *),(char **) ARGV);
+            }
+            else
+                g_Olt_Device = NULL;
+				
         }
         return *g_Olt_Device;
     }
@@ -643,6 +674,56 @@ namespace acc_bal_api_dist_helper
         }
     }
 
+    void G_PON_Olt_Device::get_pon_port_type()
+    {
+        for (int port_id = 0; port_id < m_pon_ports_num; ++port_id) 
+        {
+            bcmbal_interface_cfg interface_obj;
+            bcmbal_interface_key interface_key;
+
+            interface_key.intf_id = port_id;
+            interface_key.intf_type = BCMBAL_INTF_TYPE_PON;
+
+            BCMBAL_CFG_INIT(&interface_obj, interface, interface_key);
+            BCMBAL_CFG_PROP_GET(&interface_obj, interface, admin_state);
+            BCMBAL_CFG_PROP_GET(&interface_obj, interface, transceiver_type);
+
+            bcmos_errno err = BCM_ERR_INTERNAL; 
+
+            if(d_bcmbal_cfg_get)
+                err = d_bcmbal_cfg_get(DEFAULT_ATERM_ID, &(interface_obj.hdr));
+
+            if (err != BCM_ERR_OK) 
+            {
+
+                m_pon_port[port_id].m_pon_port_type[port_id] = "UNKNOWN"; 
+                if(err != BCM_ERR_RANGE) 
+                    printf("ERROR get PON port %d type \n", port_id);
+            }
+            else 
+            {
+                switch(interface_obj.data.transceiver_type) 
+                {
+                    case BCMBAL_TRX_TYPE_GPON_LTE_3680_P:
+                    case BCMBAL_TRX_TYPE_GPON_SPS_43_48:
+                    case BCMBAL_TRX_TYPE_GPON_LTE_3680_M:
+                    case BCMBAL_TRX_TYPE_GPON_SPS_SOG_4321:
+                    case BCMBAL_TRX_TYPE_GPON_SOURCE_PHOTONICS:
+
+                        m_pon_port[port_id].m_pon_port_type[port_id] = "GPON";
+                        break;
+
+                    default:
+
+                        m_pon_port[port_id].m_pon_port_type[port_id] = "XGSPON";
+                        break;
+                }
+                printf("PON port_id:%d type:%d:%s\n", port_id, interface_obj.data.transceiver_type, m_pon_port[port_id].m_pon_port_type[port_id].c_str());
+            }
+        }
+    }
+
+
     json::Value XGS_PON_Olt_Device::get_port_statistic(int port)
     {
         json::Value status(json::Value::Type::OBJECT);
@@ -657,11 +738,99 @@ namespace acc_bal_api_dist_helper
         return status;
     }
 
+    json::Value G_PON_Olt_Device::get_port_statistic(int port)
+    {
+        json::Value status(json::Value::Type::OBJECT);
+
+        if( ((port -1) >= 0) && ((port - 1) < G_PON_TOTAL_INTF_NUM) )
+        {
+            if((port-1) < G_PON_MAX_PON_PORT_NUM)
+                return get_pon_statistic( port -1);
+            else
+                return get_nni_statistic( port - G_PON_MAX_PON_PORT_NUM -1);
+        }
+        return status;
+    }
+
     json::Value XGS_PON_Olt_Device::get_pon_statistic(int port)
     {
         json::Value status(json::Value::Type::OBJECT);
 
-        bcmos_errno err;
+        bcmos_errno err  =BCM_ERR_INTERNAL;
+        bcmbal_interface_stat stat;    
+        bcmos_bool clear_on_read = false;
+
+        bcmbal_interface_key pon_interface;
+        pon_interface.intf_type = BCMBAL_INTF_TYPE_PON;
+        pon_interface.intf_id = port;
+
+        BCMBAL_STAT_INIT(&stat, interface, pon_interface);
+        BCMBAL_STAT_PROP_GET(&stat, interface, all_properties);
+
+        if (d_bcmbal_stat_get) 
+        {
+            err =d_bcmbal_stat_get(DEFAULT_ATERM_ID, &stat.hdr, clear_on_read);
+        }
+
+        if (err == BCM_ERR_OK)
+        {
+            status["rx_bytes"]         = m_pon_port[port].m_port_statistic.rx_bytes         = stat.data.rx_bytes; 
+            status["rx_packets"]       = m_pon_port[port].m_port_statistic.rx_packets       = stat.data.rx_packets;
+            status["rx_ucast_packets"] = m_pon_port[port].m_port_statistic.rx_ucast_packets = stat.data.rx_ucast_packets;
+            status["rx_mcast_packets"] = m_pon_port[port].m_port_statistic.rx_mcast_packets = stat.data.rx_mcast_packets;
+            status["rx_bcast_packets"] = m_pon_port[port].m_port_statistic.rx_bcast_packets = stat.data.rx_bcast_packets;
+            status["rx_error_packets"] = m_pon_port[port].m_port_statistic.rx_error_packets = stat.data.rx_error_packets;
+
+            status["tx_bytes"]         = m_pon_port[port].m_port_statistic.tx_bytes         = stat.data.tx_bytes; 
+            status["tx_packets"]       = m_pon_port[port].m_port_statistic.tx_packets       = stat.data.tx_packets;
+            status["tx_ucast_packets"] = m_pon_port[port].m_port_statistic.tx_ucast_packets = stat.data.tx_ucast_packets;
+            status["tx_mcast_packets"] = m_pon_port[port].m_port_statistic.tx_mcast_packets = stat.data.tx_mcast_packets;
+            status["tx_bcast_packets"] = m_pon_port[port].m_port_statistic.tx_bcast_packets = stat.data.tx_bcast_packets;
+            status["tx_error_packets"] = m_pon_port[port].m_port_statistic.tx_error_packets = stat.data.tx_error_packets;
+
+            printf( 
+                    "pon port_id[%d]\r\n\
+                    rx_bytes[%llu]\r\n\
+                    rx_packets[%llu]\r\n\
+                    rx_ucast_packets[%llu]\r\n\
+                    rx_mcast_packets[%llu]\r\n\
+                    rx_bcast_packets[%llu]\r\n\
+                    rx_error_packets[%llu]\r\n\
+                    tx_bytes[%llu]\r\n\
+                    tx_packets[%llu]\r\n\
+                    tx_ucast_packets[%llu]\r\n\
+                    tx_mcast_packets[%llu]\r\n\
+                    tx_bcast_packets[%llu]\r\n\
+                    tx_error_packets[%llu]\r\n"\
+                    ,
+                    m_pon_port[port].m_port_id,\
+                    (unsigned long long)m_pon_port[port].m_port_statistic.rx_bytes,\
+                    (unsigned long long)m_pon_port[port].m_port_statistic.rx_packets,\
+                    (unsigned long long)m_pon_port[port].m_port_statistic.rx_ucast_packets,\
+                    (unsigned long long)m_pon_port[port].m_port_statistic.rx_mcast_packets,\
+                    (unsigned long long)m_pon_port[port].m_port_statistic.rx_bcast_packets,\
+                    (unsigned long long)m_pon_port[port].m_port_statistic.rx_error_packets,\
+                    (unsigned long long)m_pon_port[port].m_port_statistic.tx_bytes,\
+                    (unsigned long long)m_pon_port[port].m_port_statistic.tx_packets,\
+                    (unsigned long long)m_pon_port[port].m_port_statistic.tx_ucast_packets,\
+                    (unsigned long long)m_pon_port[port].m_port_statistic.tx_mcast_packets, \
+                    (unsigned long long)m_pon_port[port].m_port_statistic.tx_bcast_packets,\
+                    (unsigned long long)m_pon_port[port].m_port_statistic.tx_error_packets\
+                    );
+        } 
+        else 
+        {
+            printf("Failed to get pon port statistics, port_id %d, intf_type %d\n", (int)pon_interface.intf_id, (int)pon_interface.intf_type);
+        }
+        return status;
+    }
+
+
+    json::Value G_PON_Olt_Device::get_pon_statistic(int port)
+    {
+        json::Value status(json::Value::Type::OBJECT);
+
+        bcmos_errno err = BCM_ERR_INTERNAL;
         bcmbal_interface_stat stat;    
         bcmos_bool clear_on_read = false;
 
@@ -814,6 +983,92 @@ namespace acc_bal_api_dist_helper
         }
         return status;
     }
+
+    json::Value G_PON_Olt_Device::get_nni_statistic(int port)
+    {
+        json::Value status(json::Value::Type::OBJECT);
+
+        bcmos_errno err = BCM_ERR_INTERNAL;
+        bcmbal_interface_stat stat;    
+        bcmos_bool clear_on_read = false;
+
+        bcmbal_interface_key nni_interface;
+        nni_interface.intf_type = BCMBAL_INTF_TYPE_NNI;
+        nni_interface.intf_id = port;
+
+        BCMBAL_STAT_INIT(&stat, interface, nni_interface);
+        BCMBAL_STAT_PROP_GET(&stat, interface, all_properties);
+
+        if(d_bcmbal_stat_get)
+            err = d_bcmbal_stat_get(DEFAULT_ATERM_ID, &stat.hdr, clear_on_read);
+
+        if (err == BCM_ERR_OK)
+        {
+            status["rx_bytes"]         = m_nni_port[port].m_port_statistic.rx_bytes         = stat.data.rx_bytes; 
+            status["rx_packets"]       = m_nni_port[port].m_port_statistic.rx_packets       = stat.data.rx_packets;
+            status["rx_ucast_packets"] = m_nni_port[port].m_port_statistic.rx_ucast_packets = stat.data.rx_ucast_packets;
+            status["rx_mcast_packets"] = m_nni_port[port].m_port_statistic.rx_mcast_packets = stat.data.rx_mcast_packets;
+            status["rx_bcast_packets"] = m_nni_port[port].m_port_statistic.rx_bcast_packets = stat.data.rx_bcast_packets;
+            status["rx_error_packets"] = m_nni_port[port].m_port_statistic.rx_error_packets = stat.data.rx_error_packets;
+
+            status["tx_bytes"]         = m_nni_port[port].m_port_statistic.tx_bytes         = stat.data.tx_bytes; 
+            status["tx_packets"]       = m_nni_port[port].m_port_statistic.tx_packets       = stat.data.tx_packets;
+            status["tx_ucast_packets"] = m_nni_port[port].m_port_statistic.tx_ucast_packets = stat.data.tx_ucast_packets;
+            status["tx_mcast_packets"] = m_nni_port[port].m_port_statistic.tx_mcast_packets = stat.data.tx_mcast_packets;
+            status["tx_bcast_packets"] = m_nni_port[port].m_port_statistic.tx_bcast_packets = stat.data.tx_bcast_packets;
+            status["tx_error_packets"] = m_nni_port[port].m_port_statistic.tx_error_packets = stat.data.tx_error_packets;
+
+            printf( 
+                    "pon port_id[%d]\r\n\
+                    rx_bytes[%llu]\r\n\
+                    rx_packets[%llu]\r\n\
+                    rx_ucast_packets[%llu]\r\n\
+                    rx_mcast_packets[%llu]\r\n\
+                    rx_bcast_packets[%llu]\r\n\
+                    rx_error_packets[%llu]\r\n\
+                    tx_bytes[%llu]\r\n\
+                    tx_packets[%llu]\r\n\
+                    tx_ucast_packets[%llu]\r\n\
+                    tx_mcast_packets[%llu]\r\n\
+                    tx_bcast_packets[%llu]\r\n\
+                    tx_error_packets[%llu]\r\n"\
+                    ,
+                    m_nni_port[port].m_port_id,\
+                    (unsigned long long)m_nni_port[port].m_port_statistic.rx_bytes,\
+                    (unsigned long long)m_nni_port[port].m_port_statistic.rx_packets,\
+                    (unsigned long long)m_nni_port[port].m_port_statistic.rx_ucast_packets,\
+                    (unsigned long long)m_nni_port[port].m_port_statistic.rx_mcast_packets,\
+                    (unsigned long long)m_nni_port[port].m_port_statistic.rx_bcast_packets,\
+                    (unsigned long long)m_nni_port[port].m_port_statistic.rx_error_packets,\
+                    (unsigned long long)m_nni_port[port].m_port_statistic.tx_bytes,\
+                    (unsigned long long)m_nni_port[port].m_port_statistic.tx_packets,\
+                    (unsigned long long)m_nni_port[port].m_port_statistic.tx_ucast_packets,\
+                    (unsigned long long)m_nni_port[port].m_port_statistic.tx_mcast_packets, \
+                    (unsigned long long)m_nni_port[port].m_port_statistic.tx_bcast_packets,\
+                    (unsigned long long)m_nni_port[port].m_port_statistic.tx_error_packets\
+                    );
+        } 
+        else 
+        {
+            status["rx_bytes"]         = 0; 
+            status["rx_packets"]       = 0; 
+            status["rx_ucast_packets"] = 0; 
+            status["rx_mcast_packets"] = 0; 
+            status["rx_bcast_packets"] = 0; 
+            status["rx_error_packets"] = 0; 
+
+            status["tx_bytes"]         = 0; 
+            status["tx_packets"]       = 0; 
+            status["tx_ucast_packets"] = 0; 
+            status["tx_mcast_packets"] = 0;
+            status["tx_bcast_packets"] = 0; 
+            status["tx_error_packets"] = 0; 
+
+            printf("Failed to get pon port statistics, port_id %d, intf_type %d\n", (int)nni_interface.intf_id, (int)nni_interface.intf_type);
+        }
+        return status;
+    }
+	
     bool Olt_Device::enable_bal()
     {
         bcmbal_access_terminal_cfg acc_term_obj;
@@ -952,12 +1207,12 @@ namespace acc_bal_api_dist_helper
         return true;
     }
 
-#define MAX_CHAR_LENGTH  20
-#define MAX_OMCI_MSG_LENGTH 44
+#define MAX_CHAR_LEN  20
+#define MAX_OMCI_MSG_LEN 44
     bool Olt_Device::omci_msg_out(int intf_id, int onu_id, const std::string pkt) 
     {
         bcmbal_u8_list_u32_max_2048 buf; /* A structure with a msg pointer and length value */
-        bcmos_errno err = BCM_ERR_OK;
+        bcmos_errno err = BCM_ERR_INTERNAL;
 
         /* The destination of the OMCI packet is a registered ONU on the OLT PON interface */
         bcmbal_dest proxy_pkt_dest;
@@ -966,9 +1221,9 @@ namespace acc_bal_api_dist_helper
         proxy_pkt_dest.u.itu_omci_channel.sub_term_id = onu_id;
         proxy_pkt_dest.u.itu_omci_channel.intf_id = intf_id;
 
-        if ((pkt.size()/2) > MAX_OMCI_MSG_LENGTH) 
+        if ((pkt.size()/2) > MAX_OMCI_MSG_LEN) 
         {
-            buf.len = MAX_OMCI_MSG_LENGTH;
+            buf.len = MAX_OMCI_MSG_LEN;
         } 
         else 
         {
@@ -979,8 +1234,8 @@ namespace acc_bal_api_dist_helper
         uint16_t idx1 = 0;
         uint16_t idx2 = 0;
         uint8_t arraySend[buf.len];
-        char str1[MAX_CHAR_LENGTH];
-        char str2[MAX_CHAR_LENGTH];
+        char str1[MAX_CHAR_LEN];
+        char str2[MAX_CHAR_LEN];
         memset(&arraySend, 0, buf.len);
 
         printf("Sending omci msg to ONU of length is %d\r\n", buf.len);
@@ -1009,10 +1264,13 @@ namespace acc_bal_api_dist_helper
 
         printf("NICK DEBUG : omci raw data: ");
         int count =0;
-        for(count = 1 ; count <= buf.len ; count++)
+        int buf_len = buf.len ;
+		
+        for(count = 1 ; count <= buf_len ; count++)
         {
             printf("%02X", buf.val[count-1]);
         }
+		
         printf("\r\n");
 
         free(buf.val);
@@ -1024,7 +1282,6 @@ namespace acc_bal_api_dist_helper
             int network_intf_id, int gemport_id, int classifier, 
             int action ,int action_cmd, struct action_val a_val, struct class_val c_val)
     {
-        bcmos_errno err;
         bcmbal_flow_cfg cfg;
         bcmbal_flow_key key = { };
 
@@ -1162,7 +1419,7 @@ namespace acc_bal_api_dist_helper
         }
 
         {
-            bcmbal_action val = { };
+            bcmbal_action val = { 0 };
 
             if (action_cmd == BCMBAL_ACTION_CMD_ID_ADD_OUTER_TAG) 
             {

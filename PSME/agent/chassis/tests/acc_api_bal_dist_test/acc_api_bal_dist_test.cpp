@@ -768,7 +768,7 @@ struct sFLOW a_Flow[] =
         {
             .interface_id        = 0,
             .onu_id               = 1,
-    .flow_id               = 16,
+            .flow_id               = 16,
             .flow_type           = "downstream",
             .packet_tag_type = "double_tag",
             .gemport_id = 1032,
@@ -1186,7 +1186,7 @@ void TestClass1::SetUp()
           return;		  
       }
 
-    auto& pOLT = Olt_Device::Olt_Device::get_instance();
+    Olt_Device& pOLT = Olt_Device::Olt_Device::get_instance();
 
     //Step 1. enable bal //
     if(!pOLT.enable_bal())
@@ -1229,13 +1229,12 @@ void TestClass1::SetUp()
         std::string s_vendor_id = onus[jj]["vendor_id"].asString();
         std::string s_vendor_spec = onus[jj]["vendor_specific"].asString();
 
-        int buflen = s_vendor_spec.size();
-        char cs_vendor_spec[8] = {0x71,0xe8,0x01,0x10};//default value //
-
+        long unsigned int buflen = s_vendor_spec.size();
+        char cs_vendor_spec[8] = {0x0};
         uint16_t idx1 = 0;
         uint16_t idx2 = 0;
-        char str1[20];
-        char str2[20];
+        char str1[20]= {0x0};;
+        char str2[20]= {0x0};;
         memset(&cs_vendor_spec, 0, buflen);
 
         for (idx1=0,idx2=0; idx1< buflen ; idx1++,idx2++) 
@@ -1243,7 +1242,7 @@ void TestClass1::SetUp()
             sprintf(str1,"%c", s_vendor_spec[idx1]);
             sprintf(str2,"%c", s_vendor_spec[++idx1]);
             strcat(str1,str2);
-            cs_vendor_spec[idx2] = strtol(str1, NULL, 16);
+            cs_vendor_spec[idx2] = (char) strtol(str1, NULL, 16);
         }
 
         printf("////////////Active ONU[%s][0x%02X][0x%02X][0x%02X][0x%02X] !!////////////\r\n", 
@@ -1254,28 +1253,28 @@ void TestClass1::SetUp()
 
         { 
             int aFlow_size = (sizeof (a_Flow) / sizeof (a_Flow[0]));
-            int i = 0;
-            for (int i = 0 ; i < aFlow_size ; i++)
+            int ii = 0;
+            for (ii = 0 ; ii < aFlow_size ; ii++)
             {
-                printf("apply flow [%i] settings\r\n", i);
-                std::string sft(a_Flow[i].flow_type); //Flow type //
-                std::string sptt(a_Flow[i].packet_tag_type); //pack tag type //
+                printf("apply flow [%i] settings\r\n", ii);
+                std::string sft(a_Flow[ii].flow_type); //Flow type //
+                std::string sptt(a_Flow[ii].packet_tag_type); //pack tag type //
 
                 pOLT.flow_add(
-                        onu_id, a_Flow[i].flow_id, sft  , sptt, interface_id , 
-                        a_Flow[i].network_interface_id, a_Flow[i].gemport_id, a_Flow[i].classifier, 
-                        a_Flow[i].action , a_Flow[i].acton_cmd , a_Flow[i].action_val_a_val, a_Flow[i].class_val_c_val);                    
+                        onu_id, a_Flow[ii].flow_id, sft  , sptt, interface_id , 
+                        a_Flow[ii].network_interface_id, a_Flow[ii].gemport_id, a_Flow[ii].classifier, 
+                        a_Flow[ii].action , a_Flow[ii].acton_cmd , a_Flow[ii].action_val_a_val, a_Flow[ii].class_val_c_val);                    
             }
         }
         usleep(1000000*10); //
 
         {
             int aOMCI_size = (sizeof (a_OMCI) / sizeof (a_OMCI[0]));
-            int i = 0;
-            for (int i = 0 ; i < aOMCI_size ; i++)
+            int ij = 0;
+            for (ij = 0 ; ij < aOMCI_size ; ij++)
             {
-                printf("apply comi [%i] settings\r\n", i);
-                pOLT.omci_msg_out(interface_id, onu_id, a_OMCI[i].raw_omci);
+                printf("apply comi [%i] settings\r\n", ij);
+                pOLT.omci_msg_out(interface_id, onu_id, a_OMCI[ij].raw_omci);
                 usleep(200000);
             }
         }
