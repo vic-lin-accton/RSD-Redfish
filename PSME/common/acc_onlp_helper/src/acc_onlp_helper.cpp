@@ -137,6 +137,72 @@ namespace acc_onlp_helper {
         return 0;
     }
 
+    std::string e_oom::get_value_s(std::string attri_name)
+    {
+        try 
+        {
+            std::string ret_attri ={};    
+            unsigned char tmp_value[32] = {0};
+			
+            Json::Value Att_Json = m_std["Attributes"];
+            Json::Value _Json = get_attri_by_name(attri_name, Att_Json);
+
+            int tmp_base = _Json[attri_name]["Byte_Address"].asInt();
+            printf("get_status_s [%s] base offset[%d]\r\n",attri_name.c_str(), tmp_base);
+            int tmp_size = _Json[attri_name]["Size"].asInt();
+            printf("get_status_s  Size[%d]\r\n", tmp_size);
+
+            if(tmp_size < (int) sizeof(tmp_value))
+            {
+                memcpy(tmp_value,m_eeprom + tmp_base, tmp_size );
+                ret_attri = (char *)tmp_value;	
+                ret_attri.erase( remove( ret_attri.begin(), ret_attri.end(), ' ' ), ret_attri.end() );
+            }
+
+            return ret_attri;
+        }
+        catch (const exception& e)
+        {
+            printf("get_value_s error\r\n");
+        }
+        return 0;
+    }
+		
+
+
+    void e_oom::refresh_vendor_info()
+{
+        /*vendor_info Begin:*/
+        std::string ff ;
+        /* get SFP Vendor Name */
+        if(m_current_status["SFP Vendor Name"] == json::Value::Type::NIL)
+        {
+            ff = get_value_s("Vendor_name");
+            m_current_status["SFP Vendor Name"] = ff;
+        }
+
+        /* get Part Number */
+        if(m_current_status["Part Number"]  == json::Value::Type::NIL)
+        {
+            ff = get_value_s("Vendor_PN");
+            m_current_status["Part Number"]= ff;
+        }			
+
+        /* get Serial Number */
+        if(m_current_status["Serial Number"] == json::Value::Type::NIL)
+        {
+            ff =  get_value_s("Vendor_SN");
+            m_current_status["Serial Number"] = ff;
+        }				     
+
+        /* get Manufacture Date */
+        if(m_current_status["Manufacture Date"] == json::Value::Type::NIL)
+        {
+            ff =  get_value_s("Data_Code");
+            m_current_status["Manufacture Date"] = ff;
+        }				
+        /*vendor_info End  :*/
+    }
 
     void e_oom::refresh_temp()
     {
@@ -146,28 +212,28 @@ namespace acc_onlp_helper {
         if(m_current_status["Temperature"] ["UpperThresholdFatal"] == json::Value::Type::NIL)
         {
             ff = get_value("Temp_High_Alarm");
-            m_current_status["Temperature"] ["UpperThresholdFatal"] = ff;
+            m_current_status["Temperature"] ["UpperThresholdFatal"] =FF3(ff);
         }
 
         /* get Temp_Low_Alarm */
         if(m_current_status["Temperature"] ["LowerThresholdFatal"] == json::Value::Type::NIL)
         {
             ff = get_value("Temp_Low_Alarm");
-            m_current_status["Temperature"] ["LowerThresholdFatal"] = ff;
+            m_current_status["Temperature"] ["LowerThresholdFatal"] =FF3(ff);
         }			
 
         /* get Temp_High_Warning */
         if(m_current_status["Temperature"] ["UpperThresholdCritical"] == json::Value::Type::NIL)
         {
             ff =  get_value("Temp_High_Warning");
-            m_current_status["Temperature"] ["UpperThresholdCritical"] = ff;
+            m_current_status["Temperature"] ["UpperThresholdCritical"] =FF3(ff);
         }				     
 
         /* get Temp_Low_Warning */
         if(m_current_status["Temperature"] ["LowerThresholdCritical"] == json::Value::Type::NIL)
         {
             ff =  get_value("Temp_Low_Warning");
-            m_current_status["Temperature"] ["LowerThresholdCritical"] = ff;
+            m_current_status["Temperature"] ["LowerThresholdCritical"] = FF3(ff);
         }				
 
         /* get Temperature */
@@ -282,28 +348,28 @@ namespace acc_onlp_helper {
         if(m_current_status["Bias Current"] ["UpperThresholdFatal"] == json::Value::Type::NIL)
         {
             ff = get_value_u("Bias_High_Alarm");
-            m_current_status["Bias Current"] ["UpperThresholdFatal"] =ff;
+            m_current_status["Bias Current"] ["UpperThresholdFatal"] =FF3(ff);
         }			
 
         /* get Bias_Low_Alarm */
         if(m_current_status["Bias Current"] ["LowerThresholdFatal"] == json::Value::Type::NIL)
         {
             ff = get_value_u("Bias_Low_Alarm");
-            m_current_status["Bias Current"] ["LowerThresholdFatal"] =ff;
+            m_current_status["Bias Current"] ["LowerThresholdFatal"] =FF3(ff);
         }				        
 
         /* get Bias_High_Warning */
         if(m_current_status["Bias Current"] ["UpperThresholdCritical"] == json::Value::Type::NIL)
         {
             ff =  get_value_u("Bias_High_Warning");
-            m_current_status["Bias Current"] ["UpperThresholdCritical"] =ff;
+            m_current_status["Bias Current"] ["UpperThresholdCritical"] =FF3(ff);
         }					
 
         /* get Bias_Low_Warning */
         if(m_current_status["Bias Current"] ["LowerThresholdCritical"] == json::Value::Type::NIL)
         {
             ff = get_value_u("Bias_Low_Warning");
-            m_current_status["Bias Current"] ["LowerThresholdCritical"] =ff;
+            m_current_status["Bias Current"] ["LowerThresholdCritical"] = FF3(ff);
         }				
 
         /* get Bias */
@@ -482,8 +548,8 @@ namespace acc_onlp_helper {
     {
         if(get_support())
         {
-            /*Threshold value olny get once until un-plug or restart service*/
-
+            /*Threshold value / Vendor info / olny get once until un-plug or restart service*/
+            refresh_vendor_info();		
             refresh_temp();
             refresh_voltage();			
             refresh_bias();
@@ -501,7 +567,7 @@ namespace acc_onlp_helper {
         {
             is.seekg (0, is.end);
             //int length = is.tellg();
-            int length = 256; 
+            int length = 384; 
             is.seekg (0, is.beg);
 
             char * buffer = new char [length];
@@ -514,7 +580,7 @@ namespace acc_onlp_helper {
             {
                 if(store_eeprom(buffer))
                 {
-                /*
+                
                     int i = 0; 
                     while(i < length)
                     {
@@ -523,7 +589,7 @@ namespace acc_onlp_helper {
                         if(i % 8 == 0)
                             printf("\r\n");
                     }
-                */
+                
                     refresh_status();
                 }
             } 
@@ -552,7 +618,7 @@ namespace acc_onlp_helper {
         {
             printf("onlp_sfpi_eeprom_read [%d] ok!!\r\n", rindex);
 
-            /*
+            
                int i = 0; 
                while(i < 256)
                {
@@ -561,7 +627,7 @@ namespace acc_onlp_helper {
                if(i % 8 == 0)
                printf("\r\n");
                }
-               */
+               
             if(store_eeprom((char *)data))
             {
                 refresh_status();
@@ -611,7 +677,7 @@ namespace acc_onlp_helper {
                     std::string C_PN= tmp_std["C_PN"].asString();
                     std::string STD_PN = "8077i";
 
-                    printf("C_PN[%s]\r\n", C_PN.c_str());
+                    printf("8077 C_PN[%s]\r\n", C_PN.c_str());
 
                     Json::Value Att_Json = tmp_std["Attributes"];
 
@@ -653,6 +719,59 @@ namespace acc_onlp_helper {
 
                 return true;
             }
+            else if(id == 0x3)
+            { 
+                int size = m_8472.size();
+                Json::Value tmp_std;
+
+                for(int i = 1; i <= size; i++)
+                {
+                    tmp_std =  m_8472[std::make_pair(id, i)];
+                    std::string C_PN= tmp_std["C_PN"].asString();
+                    std::string STD_PN = "8472";
+
+                    printf("8472 C_PN[%s]\r\n", C_PN.c_str());
+
+                    Json::Value Att_Json = tmp_std["Attributes"];
+
+                    Json::Value PN_Json = get_attri_by_name("Vendor_PN" , Att_Json);
+
+                    int PN_Base = PN_Json["Vendor_PN"]["Byte_Address"].asInt();
+                    printf("PN_Base offset[%d]\r\n", PN_Base);
+
+                    unsigned int PN_Size = PN_Json["Vendor_PN"]["Size"].asInt();
+                    printf("PN_Base Size[%d]\r\n", PN_Size);
+
+                    if(C_PN.size() < PN_Size)
+                    {
+                        char tmp_PN[16] = {0}; 
+                        memcpy(tmp_PN,in_eeprom + PN_Base, C_PN.size());
+                        printf("tmp_PN[%s]\r\n", tmp_PN);
+                        std::string tstring = tmp_PN;
+
+                        if(tstring == C_PN)
+                        {
+                            m_std = tmp_std;
+                            printf("Use C_PN[%s] !!!!\r\n", C_PN.c_str());
+                            set_support(true);
+                            memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
+                            break;
+                        }
+                        else if(C_PN == STD_PN)
+                        {
+                            // Use 8472 as default //
+                            m_std = tmp_std;
+                            printf("Cannot get customer's define. Use Std[%s] one.\r\n", STD_PN.c_str());
+                            set_support(true);
+                            memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
+                        }
+                    }
+                    else
+                        return false;
+                }
+
+                return true;
+            }			
             else
             {
                 printf("Not support Std.\r\n");
@@ -668,6 +787,10 @@ namespace acc_onlp_helper {
 
     void e_oom::set_proto()
     {
+        m_current_status["SFP Vendor Name"] = json::Value::Type::NIL;    
+        m_current_status["Part Number"] = json::Value::Type::NIL;
+        m_current_status["Serial Number"] = json::Value::Type::NIL;
+        m_current_status["Manufacture Date"] = json::Value::Type::NIL;
 
 
         json::Value Temperatures(json::Value::Type::OBJECT); 
@@ -764,7 +887,9 @@ namespace acc_onlp_helper {
 
     bool e_oom::get_conf()
     {
-        int count_std = 0;
+        int count_8077i = 0;
+        int count_8472 = 0;
+		
         std::string ME_S_DIR(STD_SEC_PATH);
         struct dirent *entry;
 
@@ -790,8 +915,6 @@ namespace acc_onlp_helper {
             if((dot == tmp_me_name) || (ddot == tmp_me_name) || (maps == tmp_me_name))
                 continue;
 
-            count_std++;
-
             printf("std name[%s] \r\n", tmp_me_name.c_str());
 
             std::string m_config_file_path = ME_S_DIR + tmp_me_name ;
@@ -812,11 +935,23 @@ namespace acc_onlp_helper {
                     int id = std::stoi(std_s["Identifer"].asString());
                     if(id == 0x06) 
                     {
-                        printf("Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
+                        count_8077i++;
+					
+                        printf("0x06 Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
 
-                        printf("Set id[%d] count_std[%d]\r\n", id, count_std);
+                        printf("Set id[%d] count_std[%d]\r\n", id, count_8077i);
 
-                        m_8077i[std::make_pair(id, count_std)]=std_s;
+                        m_8077i[std::make_pair(id, count_8077i)]=std_s;
+                    }
+                    else if(id == 0x03) 
+                    {
+                        count_8472 ++ ;
+						
+                        printf("0x03 Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
+
+                        printf("Set id[%d] count_std[%d]\r\n", id, count_8472);
+
+                        m_8472[std::make_pair(id, count_8472)]=std_s;
                     }
                     else if(id == 0x0D)
                     {

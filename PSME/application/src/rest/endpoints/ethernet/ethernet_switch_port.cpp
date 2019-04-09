@@ -525,9 +525,9 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
         if(pOLT.is_bal_lib_init() == true)
             r["Statistics"] = pOLT.get_port_statistic(iPort); 
 
-/*Todo , Add GPON transceiver 		
+/*Todo , Add GPON transceiver */		
         r["Transceiver Statistics"] = sonlp.get_port_trans_info_by_(iPort);		
-*/
+/**/
 
 #endif    
 

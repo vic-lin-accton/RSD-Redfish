@@ -53,6 +53,7 @@ namespace acc_onlp_helper
 
         float get_value(std::string attri_name);
         float get_value_u(std::string attri_name);
+        std::string get_value_s(std::string attri_name);
 
         // Std. is using //
         Json::Value m_std ={}; 
@@ -63,7 +64,9 @@ namespace acc_onlp_helper
 
         // Collection of support Std. //
         std::map<std::pair<int,int>, Json::Value> m_8077i ={};
+        std::map<std::pair<int,int>, Json::Value> m_8472  ={};
 
+        void refresh_vendor_info();		
         void refresh_temp();		
         void refresh_voltage();		
         void refresh_bias();	

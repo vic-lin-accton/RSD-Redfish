@@ -1,17 +1,59 @@
 {
-    "Identifer": "06",
-    "C_PN":"8077i",
+    "Identifer": "03",
+    "C_PN":"LTE3680M-BH+",
     "Attributes": [
 	{
+	    "Vendor_name": {
+		"Byte_Address": 20,
+		"Size": 16,
+		"Page": "P01"
+	    }
+	},
+	{
+	    "Vendor_OUI": {
+		"Byte_Address": 37,
+		"Size": 3,
+		"Page": "P01"
+	    }
+	},
+	{
+	    "Vendor_PN": {
+		"Byte_Address": 40,
+		"Size": 16,
+		"Page": "P01"
+	    }
+	},
+	{
+	    "Vendor_SN": {
+		"Byte_Address": 68,
+		"Size": 16,
+		"Page": "P01"
+	    }
+	},
+	{
+	    "Vendor_rev": {
+		"Byte_Address": 56,
+		"Size": 4,
+		"Page": "P01"
+	    }
+	},
+	{
+	    "Vendor_Specific": {
+		"Byte_Address": 96,
+		"Size": 32,
+		"Page": "P01"
+	    }
+	},
+	{
 	    "Identifer": {
-		"Byte_Address": 0,
+		"Byte_Address": 256,
 		"Size": 1,
 		"Page": "Lo128B"
 	    }
 	},
 	{
 	    "Temp_High_Alarm": {
-		"Byte_Address": 2,
+		"Byte_Address": 258,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.00390625,
@@ -20,7 +62,7 @@
 	},
 	{
 	    "Temp_Low_Alarm": {
-		"Byte_Address": 4,
+		"Byte_Address": 260,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.00390625,
@@ -29,7 +71,7 @@
 	},
 	{
 	    "Temp_High_Warning": {
-		"Byte_Address": 6,
+		"Byte_Address": 262,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.00390625,
@@ -38,7 +80,7 @@
 	},
 	{
 	    "Temp_Low_Warning": {
-		"Byte_Address": 8,
+		"Byte_Address": 264,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.00390625,
@@ -48,7 +90,7 @@
 	
 	{
 	    "Voltage_High_Alarm": {
-		"Byte_Address": 10,
+		"Byte_Address": 266,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.0001,
@@ -57,7 +99,7 @@
 	},
 	{
 	    "Voltage_Low_Alarm": {
-		"Byte_Address": 12,
+		"Byte_Address": 268,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.0001,
@@ -66,7 +108,7 @@
 	},
 	{
 	    "Voltage_High_Warning": {
-		"Byte_Address": 14,
+		"Byte_Address": 270,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.0001,
@@ -75,7 +117,7 @@
 	},
 	{
 	    "Voltage_Low_Warning": {
-		"Byte_Address": 16,
+		"Byte_Address": 272,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.0001,
@@ -85,7 +127,7 @@
 	
 	{
 	    "Bias_High_Alarm": {
-		"Byte_Address": 18,
+		"Byte_Address": 274,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.004,
@@ -94,7 +136,7 @@
 	},
 	{
 	    "Bias_Low_Alarm": {
-		"Byte_Address": 20,
+		"Byte_Address": 276,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.004,
@@ -103,7 +145,7 @@
 	},
 	{
 	    "Bias_High_Warning": {
-		"Byte_Address": 22,
+		"Byte_Address": 278,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.004,
@@ -112,7 +154,7 @@
 	},
 	{
 	    "Bias_Low_Warning": {
-		"Byte_Address": 24,
+		"Byte_Address": 280,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.004,
@@ -121,7 +163,7 @@
 	},
 	{
 	    "TX_Power_High_Alarm": {
-		"Byte_Address": 26,
+		"Byte_Address": 282,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.0002,
@@ -130,7 +172,7 @@
 	},
 	{
 	    "TX_Power_Low_Alarm": {
-		"Byte_Address": 28,
+		"Byte_Address": 284,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.0002,
@@ -139,7 +181,7 @@
 	},
 	{
 	    "TX_Power_High_Warning": {
-		"Byte_Address": 30,
+		"Byte_Address": 286,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.0002,
@@ -148,7 +190,7 @@
 	},
 	{
 	    "TX_Power_Low_Warning": {
-		"Byte_Address": 32,
+		"Byte_Address": 288,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.0002,
@@ -157,7 +199,7 @@
 	},
 	{
 	    "RX_Power_High_Alarm": {
-		"Byte_Address": 34,
+		"Byte_Address": 290,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.0001,
@@ -166,7 +208,7 @@
 	},
 	{
 	    "RX_Power_Low_Alarm": {
-		"Byte_Address": 36,
+		"Byte_Address": 292,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.0001,
@@ -175,7 +217,7 @@
 	},
 	{
 	    "RX_Power_High_Warning": {
-		"Byte_Address": 38,
+		"Byte_Address": 294,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.0001,
@@ -184,7 +226,7 @@
 	},
 	{
 	    "RX_Power_Low_Warning": {
-		"Byte_Address": 40,
+		"Byte_Address": 296,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.0001,
@@ -193,7 +235,7 @@
 	},
 	{
 	    "Temperature": {
-		"Byte_Address": 96,
+		"Byte_Address": 352,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.00390625,
@@ -203,7 +245,7 @@
 	
 	{
 	    "Voltage": {
-		"Byte_Address": 98,
+		"Byte_Address": 354,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.0001,
@@ -213,7 +255,7 @@
 	
 	{
 	    "Tx_Bias": {
-		"Byte_Address": 100,
+		"Byte_Address": 356,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit":  0.004,
@@ -222,7 +264,7 @@
 	},
 	{
 	    "Tx_Power": {
-		"Byte_Address": 102,
+		"Byte_Address": 358,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit":  0.0002,
@@ -231,61 +273,14 @@
 	},
 	{
 	    "Rx_Power": {
-		"Byte_Address": 104,
+		"Byte_Address": 360,
 		"Size": 2,
 		"Page": "Lo128B",
 		"unit": 0.0001,
 		"sunit" : "mW"			
 	    }
-	},
-	{
-	    "Vendor_name": {
-		"Byte_Address": 148,
-		"Size": 16,
-		"Page": "P01"
-	    }
-	},
-	{
-	    "Vendor_OUI": {
-		"Byte_Address": 165,
-		"Size": 3,
-		"Page": "P01"
-	    }
-	},
-	{
-	    "Vendor_PN": {
-		"Byte_Address": 168,
-		"Size": 16,
-		"Page": "P01"
-	    }
-	},
-	{
-	    "Vendor_rev": {
-		"Byte_Address": 184,
-		"Size": 2,
-		"Page": "P01"
-	    }
-	},
-	{
-	    "Vendor_SN": {
-		"Byte_Address": 196,
-		"Size": 16,
-		"Page": "P01"
-	    }
-	},
-	{
-	    "Data_Code": {
-		"Byte_Address": 212,
-		"Size": 8,
-		"Page": "P01"
-	    }
-	},
-	{
-	    "Vendor_Specific": {
-		"Byte_Address": 224,
-		"Size": 32,
-		"Page": "P01"
-	    }
 	}
     ]
 }
+
+
