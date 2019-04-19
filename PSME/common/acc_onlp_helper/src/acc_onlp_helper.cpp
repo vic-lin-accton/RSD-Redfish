@@ -1313,9 +1313,6 @@ namespace acc_onlp_helper {
                 std::string sensor_type("PSU ");		   
                 std::string message("PSU UnavailableOffline");    
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, ID);
-#endif
 
             }
             else if (present && (Pout > 0))
@@ -1338,9 +1335,6 @@ namespace acc_onlp_helper {
                 std::string sensor_type("PSU ");		   
                 std::string message("PSU absent");    
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, ID);
-#endif
 
             }		
             else
@@ -1354,9 +1348,6 @@ namespace acc_onlp_helper {
                 std::string sensor_type("PSU ");		   
                 std::string message("PSU absent");    
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, ID);
-#endif
 
             }
         }
@@ -1386,10 +1377,7 @@ namespace acc_onlp_helper {
                 std::string servrity("Warning");					   
                 std::string sensor_type("FAN");		   
                 std::string message("Fan plug in but not SPIN");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, ID);
-#endif		
+                Entry.set_log_entry(event , sensor_type , servrity, message, ID);	
 
             }
             else if (present && (RPM > 0))
@@ -1412,9 +1400,6 @@ namespace acc_onlp_helper {
                 std::string sensor_type("FAN");		   
                 std::string message("System fan absent");    
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, ID);
-#endif	
 
             }		
             else
@@ -1437,10 +1422,7 @@ namespace acc_onlp_helper {
                 std::string servrity("Warning");					   
                 std::string sensor_type("FAN");		   
                 std::string message("PSU plug in but not no power core plug in");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, ID);
-#endif				
+                Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
 
             }
             else if (present && (RPM > 0))
@@ -1463,9 +1445,7 @@ namespace acc_onlp_helper {
                 std::string sensor_type("PSU FAN");		   
                 std::string message("PSU fan absent");    
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, ID);
-#endif
+
 
             }		
             else
@@ -1479,9 +1459,7 @@ namespace acc_onlp_helper {
                 std::string sensor_type("PSU FAN");		   
                 std::string message("PSU fan absent");    
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, ID);
-#endif
+
 
             }    
         }
@@ -1542,10 +1520,7 @@ Area : 5
                 std::string sensor_type("Temperature");		   
                 std::string message; 
                 message = std::string("CPU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over warning temperature.");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, ID);
-#endif			
+                Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
                 gADbg.acc_printf("set_info-----CPU_Sensor-----Warning--\r\n");					    
 
             }
@@ -1561,10 +1536,7 @@ Area : 5
                 std::string sensor_type("Temperature");		   
                 std::string message;
                 message = std::string("CPU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over error temperature.");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, ID);
-#endif			
+                Entry.set_log_entry(event , sensor_type , servrity, message, ID);		
                 gADbg.acc_printf("set_info-----CPU_Sensor-----Warning--\r\n");					    
 
             }
@@ -1579,10 +1551,7 @@ Area : 5
                 std::string sensor_type("Temperature");		   
                 std::string message;
                 message = std::string("CPU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over fatal temperature.");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);	
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, ID);
-#endif			
+                Entry.set_log_entry(event , sensor_type , servrity, message, ID);				
                 gADbg.acc_printf("set_info-----CPU_Sensor-----Critical--\r\n");					    
 
             }
@@ -1607,12 +1576,8 @@ Area : 5
                 std::string sensor_type("Temperature");		   
                 std::string message;
                 message = std::string("SYSTEM Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over warning temperature.");
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, ID);
-#endif			
+                Entry.set_log_entry(event , sensor_type , servrity, message, ID);	
                 gADbg.acc_printf("set_info-----SYSTEM_Sensor-----Warning--\r\n");					    
-
             }
             else if(((m_Current_Temperature >= m_Error))  && (m_Current_Temperature < m_Shutdown))
             {
@@ -1626,10 +1591,7 @@ Area : 5
                 std::string sensor_type("Temperature");		   
                 std::string message;
                 message = std::string("SYSTEM Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over error temperature.");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);	
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, ID);
-#endif			
+                Entry.set_log_entry(event , sensor_type , servrity, message, ID);				
                 gADbg.acc_printf("set_info-----SYSTEM_Sensor-----Warning--\r\n");					    
 
             }
@@ -1644,10 +1606,7 @@ Area : 5
                 std::string sensor_type("Temperature");		   
                 std::string message;
                 message = std::string("SYSTEM_Sensor Thermal is ")+std::to_string(m_Current_Temperature/1000)+std::string(" degrees.Over fatal temperature.");
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, ID);
-#endif			
+                Entry.set_log_entry(event , sensor_type , servrity, message, ID);		
                 gADbg.acc_printf("set_info-----SYSTEM_Sensor-----Critical--\r\n");					    			
             }
             else
@@ -1676,10 +1635,7 @@ Area : 5
                 std::string sensor_type("Temperature");		   
                 std::string message;
                 message = std::string("PSU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over warning temperature.");
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, ID);
-#endif			
+                Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
                 gADbg.acc_printf("set_info-----PSU_Sensor-----Warning--\r\n");					    			
 
             }
@@ -1695,10 +1651,7 @@ Area : 5
                 std::string sensor_type("Temperature");		   
                 std::string message;
                 message = std::string("PSU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over error temperature.");
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);	
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, ID);
-#endif			
+                Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
                 gADbg.acc_printf("set_info-----PSU_Sensor-----Warning--\r\n");					    			
 
             }
@@ -1713,10 +1666,7 @@ Area : 5
                 std::string sensor_type("Temperature");		   
                 std::string message;
                 message = std::string("PSU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over fatal temperature.");
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, ID);
-#endif			
+                Entry.set_log_entry(event , sensor_type , servrity, message, ID);		
                 gADbg.acc_printf("set_info-----PSU_Sensor-----Critical--\r\n");					    			
 
             }
@@ -2019,10 +1969,7 @@ Area : 5
                 std::string servrity("OK");					   
                 std::string sensor_type("Port");		   
                 std::string message("Port unplug.");
-                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);		
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, id+1);		
-#endif		   
+                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
             } 
             else if((p_bit == 0) && (c_bit == 1))
             { // port plug in
@@ -2030,10 +1977,7 @@ Area : 5
                 std::string servrity("OK");					   
                 std::string sensor_type("Port");		   
                 std::string message("Port plug in.");	
-                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);	
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, id+1);		
-#endif		   
+                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
             }  
         }
         m_pre_Port_Present = m_Port_Present;
@@ -2061,10 +2005,7 @@ Area : 5
                 std::string servrity("OK");					   
                 std::string sensor_type("PSU");		   
                 std::string message("PSU unplug.");
-                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, id+1);	   
-#endif			
+                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);		
             }
             else if((p_bit == 0) && (c_bit == 1))
             { // PSU plug in
@@ -2072,10 +2013,7 @@ Area : 5
                 std::string servrity("OK");					   
                 std::string sensor_type("PSU");		   
                 std::string message("PSU plug in.");	
-                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);	
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, id+1);				   
-#endif		   
+                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
             }  
         }
         m_pre_Psu_Present = m_Psu_Present;
@@ -2212,9 +2150,7 @@ Area : 5
                 std::string sensor_type("Fan");		   
                 std::string message("FAN unplug.");
                 Entry.set_log_entry(event , sensor_type , servrity, message, id+1);
-#ifdef VOLT		   
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, id+1);	   
-#endif			
+		
             }
             else if((p_bit == 0) && (c_bit == 1))
             { // FAN plug in
@@ -2222,10 +2158,7 @@ Area : 5
                 std::string servrity("OK");					   
                 std::string sensor_type("Fan");		   
                 std::string message("FAN plug in.");	
-                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);		
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, id+1);	   
-#endif		   
+                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
             }  
         }
         m_pre_Fan_Present = m_Fan_Present;
@@ -2252,10 +2185,7 @@ Area : 5
                 std::string servrity("OK");					   
                 std::string sensor_type("Thermal");		   
                 std::string message("Thermal sensor unplug.");
-                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, id+1);
-#endif		   
+                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);	   
             }
             else if((p_bit == 0) && (c_bit == 1))
             { // Thermal Thermal in
@@ -2263,10 +2193,7 @@ Area : 5
                 std::string servrity("OK");					   
                 std::string sensor_type("Thermal");		   
                 std::string message("Thermal sensor plug in.");	
-                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);		
-#ifdef VOLT
-                KafkaEntry.set_Kaffa_entry(event , sensor_type , servrity, message, id+1);
-#endif		   
+                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);				   
             }  
         }
         m_pre_Thermal_Present = m_Thermal_Present;

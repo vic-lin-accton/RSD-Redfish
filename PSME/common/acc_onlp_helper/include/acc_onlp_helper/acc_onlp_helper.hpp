@@ -113,9 +113,6 @@ namespace acc_onlp_helper
             int m_ID = 0;
             int m_Type = 0;
             RFLogEntry    Entry = {};	
-#ifdef VOLT			
-            RFKafkaEntry KafkaEntry = {};	
-#endif
     };
 
     class Thermal_Info : public Dev_Info
@@ -213,9 +210,6 @@ namespace acc_onlp_helper
             Switch(){get_basic_info();get_board_info();}
             HelperTools m_help_tools = {};
             RFLogEntry Entry = {};	
-#ifdef VOLT			
-            RFKafkaEntry KafkaEntry ={};
-#endif
             ~Switch();
 
             enum Fan_Content

@@ -48,6 +48,16 @@ update_sw_volt()
     echo "NOT support."
 }
 
+set_forceoff()
+{
+    echo "NOT support."
+}
+
+set_forcerestart()
+{
+    echo "NOT support."
+}
+
 ##################################################
 #  Get upper cpu thermal threshold non-critical/critical/fatal temperature. 
 ##################################################
@@ -715,28 +725,14 @@ set_shutdown()
     sync;sync; shutdown -h now;
 }
 
-set_forceoff()
-{
-    if [ "${I2C_BUS}" = "0" ] || [ "${I2C_CPLD_OFFSET}" = "0" ] ; then
-        echo "NOT support."
-    else    
-        i2cset -f  -y "${I2C_BUS}" "${I2C_CPLD_OFFSET}" "${SYSTEM_RESET_OFFSET}"  "${SYSTEM_HALT_VALUE}" 
-    fi
-}
+
 
 set_restart()
 {
     sync;sync; shutdown -r now;
 }
 
-set_forcerestart()
-{
-    if [ "${I2C_BUS}" = "0" ] || [ "${I2C_CPLD_OFFSET}" = "0" ] ; then
-        echo "NOT support."
-    else
-        i2cset -f  -y "${I2C_BUS}" "${I2C_CPLD_OFFSET}" "${SYSTEM_RESET_OFFSET}"  "${SYSTEM_RESTART_VALUE}" 
-    fi
-}
+
 
 case "${1}" in
 "get")  

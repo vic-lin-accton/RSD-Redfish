@@ -67,4 +67,14 @@ get_max_fan_num()
     echo "${CURRENT_FAN_NUM}"
 }
 
+set_forceoff()
+{
+   res=`ipmitool power off`
+}
+
+set_forcerestart()
+{
+   res=`ipmitool power cycle`
+}
+
 

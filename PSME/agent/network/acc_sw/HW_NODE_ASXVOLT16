@@ -96,4 +96,22 @@ get_max_fan_num()
     echo "${CURRENT_FAN_NUM}"
 }
 
+set_forceoff()
+{
+    if [ "${I2C_BUS}" = "0" ] || [ "${I2C_CPLD_OFFSET}" = "0" ] ; then
+        echo "NOT support."
+    else
+        i2cset -f  -y "${I2C_BUS}" "${I2C_CPLD_OFFSET}" "${SYSTEM_RESET_OFFSET}"  "${SYSTEM_HALT_VALUE}"
+    fi
+}
+
+set_forcerestart()
+{
+    if [ "${I2C_BUS}" = "0" ] || [ "${I2C_CPLD_OFFSET}" = "0" ] ; then
+        echo "NOT support."
+    else
+        i2cset -f  -y "${I2C_BUS}" "${I2C_CPLD_OFFSET}" "${SYSTEM_RESET_OFFSET}"  "${SYSTEM_RESTART_VALUE}"
+    fi
+}
+
 
