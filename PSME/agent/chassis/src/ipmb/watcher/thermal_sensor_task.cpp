@@ -27,7 +27,8 @@
 
 #include "agent-framework/module/chassis_components.hpp"
 #include "agent-framework/module/common_components.hpp"
-
+#include "agent-framework/eventing/event_data.hpp"
+#include "agent-framework/eventing/events_queue.hpp"
 #include <ipmb/watcher/thermal_sensor_task.hpp>
 #include <ipmb/command/thermal_sensor_response.hpp>
 #include <ipmb/gpio.hpp>
@@ -341,6 +342,42 @@ void ProcessThermalSensors::fill_thermal_sensor_data() {
     sonlp.get_port_info();
     sonlp.update_port_present_event();		
 
+    /*Send all events */
+    std::vector<std::string> tmp_e_a =  sonlp.get_Event_Resouce_Add();
+	
+    for(unsigned int i = 0; i < tmp_e_a.size(); i++)
+    {
+        std::string t_es = tmp_e_a[i];
+        agent_framework::eventing::EventData edat;
+        edat.set_notification(::agent_framework::eventing::Notification::ResourceAdded);
+        edat.set_event_content(t_es); 		
+        agent_framework::eventing::EventsQueue::get_instance()->push_back(edat);
+    }
+
+    std::vector<std::string> tmp_e_r =  sonlp.get_Event_Resouce_Remove();
+	
+    for(unsigned int i = 0; i < tmp_e_r.size(); i++)
+    {
+        std::string t_er = tmp_e_r[i];
+        agent_framework::eventing::EventData edat;
+        edat.set_notification(::agent_framework::eventing::Notification::ResourceRemoved);
+        edat.set_event_content(t_er); 			 
+        agent_framework::eventing::EventsQueue::get_instance()->push_back(edat);
+    }
+
+    std::vector<std::string> tmp_e_al =  sonlp.get_Event_Resouce_Alert();
+	
+    for(unsigned int i = 0; i < tmp_e_al.size(); i++)
+    {
+        std::string t_ea = tmp_e_al[i];
+        agent_framework::eventing::EventData edat;
+        edat.set_notification(::agent_framework::eventing::Notification::Alert);
+        edat.set_event_content(t_ea); 			 	 
+        agent_framework::eventing::EventsQueue::get_instance()->push_back(edat);
+    }
+    sonlp.clean_Event_Rresouce_Event(); //Reset event //
+
+	
     //For Intel_RSD TOR Switch 5812 //
     // Clean previous data //
 #ifndef COMCAST	
@@ -431,12 +468,8 @@ void ProcessThermalSensors::fill_thermal_sensor_data() {
 
                 RFLogEntry Entry;
 
-
                 if((p_bit == 1) && (c_bit == 0))
                 { // FAN unplug
-                    //memset(lldpcmd, 0x0, sizeof(resultA));
-                    // sprintf(lldpcmd, "logsrv.sh set Fan_UnPlug %d", id+1);
-                    //exec_shell(lldpcmd, resultA);   					
                     std::string event("Event");
                     std::string servrity("OK");					   
                     std::string sensor_type("Fan");		   
@@ -446,9 +479,6 @@ void ProcessThermalSensors::fill_thermal_sensor_data() {
                 }
                 else if((p_bit == 0) && (c_bit == 1))
                 { // FAN plug in
-                    //memset(lldpcmd, 0x0, sizeof(resultA));
-                    //sprintf(lldpcmd, "logsrv.sh set Fan_PlugIn %d", id+1);			   			
-                    //exec_shell(lldpcmd, resultA);    	
                     std::string event("Event");
                     std::string servrity("OK");					   
                     std::string sensor_type("Fan");		   
@@ -497,9 +527,6 @@ void ProcessThermalSensors::fill_thermal_sensor_data() {
 
             if((p_bit == 1) && (c_bit == 0))
             { // PSU unplug
-                //  memset(lldpcmd, 0x0, sizeof(resultA));
-                //  sprintf(lldpcmd, "logsrv.sh set Psu_UnPlug %d", id+1);			   
-                //  exec_shell(lldpcmd, resultA);   	
                 std::string event("Event");
                 std::string servrity("OK");					   
                 std::string sensor_type("Fan");		   
@@ -509,9 +536,6 @@ void ProcessThermalSensors::fill_thermal_sensor_data() {
             }
             else if((p_bit == 0) && (c_bit == 1))
             { // PSU plug in
-                //  memset(lldpcmd, 0x0, sizeof(resultA));
-                //  sprintf(lldpcmd, "logsrv.sh set Psu_PlugIn %d", id+1);			   			
-                //  exec_shell(lldpcmd, resultA);    
                 std::string event("Event");
                 std::string servrity("OK");					   
                 std::string sensor_type("Fan");		   
@@ -561,9 +585,7 @@ void ProcessThermalSensors::fill_thermal_sensor_data() {
             {		   
                 if((tmp1[i] < ZERO) || ((tmp1[i]  < UPPER_CPU_THRESHOLD_CRITICAL) && (tmp1[i]  >= UPPER_CPU_THRESHOLD_NON_CRITICAL)))
                 {
-                    //memset(lldpcmd, 0x0, sizeof(resultA));
-                    //sprintf(lldpcmd, "logsrv.sh set Thermal_Critical %d", i+1);			   			
-                    //exec_shell(lldpcmd, resultA);
+
                     std::string servrity("Warning");					   
                     std::string sensor_type("Temperature");		   
                     std::string message("CPU Thermal Sensor over critical temp.");    
@@ -571,9 +593,7 @@ void ProcessThermalSensors::fill_thermal_sensor_data() {
                 }
                 else if((tmp1[i]  < UPPER_CPU_THRESHOLD_FATAL) && ((tmp1[i]  >= UPPER_CPU_THRESHOLD_CRITICAL)))
                 {
-                    //memset(lldpcmd, 0x0, sizeof(resultA));
-                    //sprintf(lldpcmd, "logsrv.sh set Thermal_Critical %d", i+1);			   			
-                    //exec_shell(lldpcmd, resultA); 	
+	
                     std::string servrity("Warning");					   
                     std::string sensor_type("Temperature");		   
                     std::string message("CPU Thermal Sensor over critical temp.");    
@@ -581,9 +601,7 @@ void ProcessThermalSensors::fill_thermal_sensor_data() {
                 }
                 else if((tmp1[i]  >= UPPER_CPU_THRESHOLD_FATAL))
                 {
-                    //memset(lldpcmd, 0x0, sizeof(resultA));
-                    //sprintf(lldpcmd, "logsrv.sh set Thermal_Fatal %d", i+1);			   			
-                    //exec_shell(lldpcmd, resultA); 		
+	
                     std::string servrity("Warning");					   
                     std::string sensor_type("Temperature");		   
                     std::string message("CPU Thermal Sensor over fatal temp.");    
@@ -594,9 +612,7 @@ void ProcessThermalSensors::fill_thermal_sensor_data() {
             {		   
                 if((tmp1[i] < ZERO) || ((tmp1[i]  < UPPER_SYS_THRESHOLD_CRITICAL) && (tmp1[i]  >= UPPER_SYS_THRESHOLD_NON_CRITICAL)))
                 {
-                    //memset(lldpcmd, 0x0, sizeof(resultA));
-                    //sprintf(lldpcmd, "logsrv.sh set Thermal_Critical %d", i+1);			   			
-                    //exec_shell(lldpcmd, resultA); 
+ 
                     std::string servrity("Warning");					   
                     std::string sensor_type("Temperature");		   
                     std::string message("System Thermal Sensor over critical temp.");    
@@ -604,9 +620,7 @@ void ProcessThermalSensors::fill_thermal_sensor_data() {
                 }
                 else if((tmp1[i]  < UPPER_SYS_THRESHOLD_FATAL) && ((tmp1[i]  >= UPPER_SYS_THRESHOLD_CRITICAL)))
                 {
-                    //memset(lldpcmd, 0x0, sizeof(resultA));
-                    // sprintf(lldpcmd, "logsrv.sh set Thermal_Critical %d", i+1);			   			
-                    //exec_shell(lldpcmd, resultA); 
+
                     std::string servrity("Warning");					   
                     std::string sensor_type("Temperature");		   
                     std::string message("System Thermal Sensor over critical temp.");    
@@ -614,9 +628,7 @@ void ProcessThermalSensors::fill_thermal_sensor_data() {
                 }
                 else if((tmp1[i]  >= UPPER_SYS_THRESHOLD_FATAL))
                 {
-                    //memset(lldpcmd, 0x0, sizeof(resultA));
-                    //sprintf(lldpcmd, "logsrv.sh set Thermal_Fatal %d", i+1);			   			
-                    //exec_shell(lldpcmd, resultA); 		
+		
                     std::string servrity("Warning");					   
                     std::string sensor_type("Temperature");		   
                     std::string message("System Thermal Sensor over fatal temp.");    

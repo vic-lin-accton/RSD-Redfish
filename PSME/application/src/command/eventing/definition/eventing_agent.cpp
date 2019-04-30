@@ -46,6 +46,8 @@ public:
         event.set_notification(request.get_notification());
         event.set_parent(request.get_parent());
         event.set_type(request.get_type());
+/*Nick added for ResourceAdded/ResourceRemoved/Alert/ResourceUpdated/StatusChange/ subscription*/
+        event.set_event_content(request.get_event_content());
 
         log_debug(GET_LOGGER("rest"), "GET EVENT REQUEASTEEEE");
 

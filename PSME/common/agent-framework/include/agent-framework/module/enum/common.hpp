@@ -108,7 +108,12 @@ ENUM(Health, uint32_t, OK, Warning, Critical);
  * @brief ENUM Notification for attribute class ComponentNotification
  * notification member
  */
-ENUM(Notification, uint32_t, Add, Remove, Update);
+ENUM(Notification, uint32_t, Add, Remove, Update,    
+    ResourceAdded,
+    ResourceRemoved,
+    Alert,
+    ResourceUpdated,
+    StatusChange);
 
 /*!
  * @brief ENUM ComponentType for attribute class ComponentNotification type

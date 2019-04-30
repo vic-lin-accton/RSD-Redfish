@@ -142,51 +142,17 @@ int main(int argc, const char* argv[]) {
     server.add(command_ref::Registry::get_instance()->get_commands());
     server.start();
 
-    watcher::Watcher ipmb_watcher{};
-    ipmb_watcher.add_task(std::make_shared<watcher::ThermalSensorTask>());
-    ipmb_watcher.add_task(std::make_shared<watcher::DrawerPowerTask>());
-    ipmb_watcher.start();
+    watcher::Watcher onlp_watcher{};
+    onlp_watcher.add_task(std::make_shared<watcher::ThermalSensorTask>());
+    onlp_watcher.start();
 
-    ipmb::Service ipmb_service;
-    ipmb_service.start();
-
-    /* Start state machine  Nick //
-       try {
-       ::agent::chassis::loader::StateMachineActionLoader state_machine_loader{};
-       if (!state_machine_loader.load(configuration)) {
-       std::cerr << "Invalid IPMI and/or Discovery configuration" << std::endl;
-       return -3;
-       }
-       state_action = state_machine_loader.get_state_machine();
-       state_machine_thread_u_ptr.reset(new StateMachineThread());
-       ::add_state_machine_entries(state_machine_thread_u_ptr.get(), *state_action);
-       state_machine_thread_u_ptr->start();
-       }
-       catch (const std::exception& e) {
-       log_error(GET_LOGGER("agent"), "State Machine error.");
-       log_debug(GET_LOGGER("agent"), e.what());
-       return -10;
-       }
-       */
     ::agent::chassis::loader::ChassisLoader::wait_for_complete();
-
-    auto cc = CommonComponents::get_instance();
-    auto managers_uuids_vec = cc->get_module_manager().get_keys("");
-
-    for (const auto& manager_uuid: managers_uuids_vec) {
-        EventData event_data{};
-        event_data.set_component(manager_uuid);
-        event_data.set_type(agent_framework::model::enums::Component::Manager);
-        event_data.set_notification(eventing::Notification::Add);
-        EventsQueue::get_instance()->push_back(event_data);
-    }
 
     /* Stop the program and wait for interrupt */
     wait_for_interrupt();
 
     /* Cleanup */
-    ipmb_watcher.stop();
-    ipmb_service.stop();
+    onlp_watcher.stop();
 
     server.stop();
     amc_connection.stop();

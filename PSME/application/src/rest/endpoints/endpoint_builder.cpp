@@ -63,11 +63,9 @@ void EndpointBuilder::build_endpoints(psme::rest::server::Multiplexer& mp) {
     // "/redfish/v1/EventService/Subscriptions/{subscriptionId:[0-9]+}"
     mp.register_handler(Subscription::UPtr(new Subscription(constants::Routes::SUBSCRIPTION_PATH)));
 
-#ifndef NDEBUG
     // "/redfish/v1/EventService/TestEventSubscription"
     mp.register_handler(
         TestEventSubscription::UPtr(new TestEventSubscription(constants::Routes::TEST_EVENT_SUBSCRIPTION_PATH)));
-#endif
 
 //viclin add begin
 // "/redfish/v1/AccountService"

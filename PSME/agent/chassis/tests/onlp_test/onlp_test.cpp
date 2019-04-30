@@ -85,9 +85,7 @@ void TestClass1::SetUp()
         for(int i = 1; i <= port_max; i++)	
         {
             printf("Port present %d [%d] \r\n", i, sonlp.get_port_info_by_(i, acc_onlp_helper::Switch::Port_Present ));
-#ifdef VOLT			
             sonlp.get_port_trans_info_by_(i);
-#endif
         }
 		
         sonlp.get_psu_info();

@@ -113,6 +113,10 @@ namespace acc_onlp_helper
             int m_ID = 0;
             int m_Type = 0;
             RFLogEntry    Entry = {};	
+			
+            static std::vector<std::string> m_Event_Resouce_Alert;		
+            static std::vector<std::string> get_Event_Resouce_Alert();	
+            static void Clear_Event_Resouce_Alert();		
     };
 
     class Thermal_Info : public Dev_Info
@@ -177,7 +181,6 @@ namespace acc_onlp_helper
         bool m_Present_Status = 0;		
         void set_info(int ID,  int Type ,int Present_Status, bool present);
 
-#ifdef VOLT  
         e_oom m_port_oom;
 
         //bool get_eeprom_raw( int rindex) 
@@ -201,7 +204,6 @@ namespace acc_onlp_helper
             m_port_oom.set_support(false);
         };		
         void set_eeprom_path(std::string in){ m_port_oom.set_eeprom_path(in);};		
-#endif
     };
 
     class Switch
@@ -210,6 +212,15 @@ namespace acc_onlp_helper
             Switch(){get_basic_info();get_board_info();}
             HelperTools m_help_tools = {};
             RFLogEntry Entry = {};	
+			
+            static std::vector<std::string> m_Event_Resouce_Add;
+            static std::vector<std::string> m_Event_Resouce_Remove;
+            static std::vector<std::string> get_Event_Resouce_Add();
+            static std::vector<std::string> get_Event_Resouce_Remove();
+            static std::vector<std::string> get_Event_Resouce_Alert();
+			
+            static void clean_Event_Rresouce_Event();
+			
             ~Switch();
 
             enum Fan_Content
@@ -272,14 +283,10 @@ namespace acc_onlp_helper
 
             void get_port_info();
             int   get_port_info_by_(int portid, Port_Content id);	
-#ifdef VOLT 			
             json::Value get_port_trans_info_by_(int portid);	
-#endif
             int   get_port_num(){return m_port_max_num;};
             void update_port_present_event();	
-#ifdef VOLT 			
             void update_trasceivers_oom_event();		
-#endif			
 
 
             static Switch& get_instance();
@@ -408,7 +415,6 @@ namespace acc_onlp_helper
             unsigned long long m_pre_Port_Present = 0 ; 
 
     };
-
 }
 
 #endif

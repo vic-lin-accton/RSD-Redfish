@@ -31,8 +31,7 @@
 #include "psme/rest/model/handlers/id_policy.hpp"
 #include "psme/rest/eventing/event.hpp"
 #include "psme/core/agent/agent_unreachable.hpp"
-
-
+#include "psme/rest/eventing/event.hpp"
 
 namespace psme {
 namespace rest {
@@ -360,6 +359,76 @@ bool GenericHandler<Request, Model, IdPolicy>::handle(JsonAgentSPtr agent, const
 
                 return true;
             }
+#if 1
+  	    /*Nick added for ResourceAdded/ResourceRemoved/Alert/ResourceUpdated/StatusChange/ subscription Begin:*/	
+
+            case Notification::ResourceAdded: 
+            {
+                    log_info(GET_LOGGER("rest"), "Got notification about ResourceAdded");
+
+                    EventVec events{};
+                    Event A(EventType::ResourceAdded,event.get_event_old_state());					
+                    A.set_message(event.get_event_content());	
+                    events.emplace_back(A);
+					
+                    SubscriptionManager::get_instance()->notify(events);
+                    return true;
+            }
+
+            case Notification::ResourceRemoved: 
+            {
+                    log_info(GET_LOGGER("rest"), "Got notification about ResourceRemoved");	
+
+                    EventVec events{};
+                    Event A(EventType::ResourceRemoved,event.get_event_old_state());
+                    A.set_message(event.get_event_content());	
+                    events.emplace_back(A);
+					
+                    SubscriptionManager::get_instance()->notify(events);					
+                    return true;
+            }
+
+            case Notification::Alert: 
+            {
+                    log_info(GET_LOGGER("rest"), "Got notification about Alert");	
+
+                    EventVec events{};
+                    Event A(EventType::Alert,event.get_event_old_state());
+                    A.set_message(event.get_event_content());
+                    A.set_severity("Warning");
+                    events.emplace_back(A);					
+                    SubscriptionManager::get_instance()->notify(events);
+                    return true;
+            }
+
+            case Notification::ResourceUpdated: 
+            {
+                    log_info(GET_LOGGER("rest"), "Got notification about ResourceUpdated.");	
+
+                    EventVec events{};
+                    Event A(EventType::Alert,event.get_event_old_state());
+                    A.set_message(event.get_event_content());	
+                    events.emplace_back(A);			
+					
+                    SubscriptionManager::get_instance()->notify(events);
+                    return true;
+            }
+
+            case Notification::StatusChange: 
+            {
+                    log_info(GET_LOGGER("rest"), "Got notification about StatusChange.");			
+					
+                    EventVec events{};
+                    Event A(EventType::StatusChange,event.get_event_content());
+                    A.set_message(event.get_event_content());	
+                    events.emplace_back(A);			
+					
+                    SubscriptionManager::get_instance()->notify(events);
+                    return true;
+            }
+			
+  	    /*Nick added for ResourceAdded/ResourceRemoved/Alert/ResourceUpdated/StatusChange/ subscription End  :*/	
+#endif			
             default:
                 log_error(GET_LOGGER("rest"), "Unknown agent event received: " << event.get_notification().to_string());
                 break;

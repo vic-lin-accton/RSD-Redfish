@@ -29,7 +29,13 @@ namespace eventing {
 ENUM(Notification, std::uint32_t,
     Add,
     Remove,
-    Update
+    Update,
+    /*Nick added for ResourceAdded/ResourceRemoved/Alert/ResourceUpdated/StatusChange/ subscription*/
+    ResourceAdded,
+    ResourceRemoved,
+    Alert,
+    ResourceUpdated,
+    StatusChange
 );
 
 class EventData {
@@ -90,8 +96,29 @@ public:
         json["type"] = get_type().to_string();
         json["component"] = get_component();
         json["notification"] = get_notification().to_string();
-
+        /*Nick added for ResourceAdded/ResourceRemoved/Alert/ResourceUpdated/StatusChange/ subscription*/	
+        json["event_content"] = get_event_content();
         return json;
+    }
+
+    /*Nick added for ResourceAdded/ResourceRemoved/Alert/ResourceUpdated/StatusChange/ subscription*/
+    const std::string&  get_event_content() const {
+        return m_event_content;
+    }
+
+    const std::string&  get_event_old_state() const 
+    {
+        return m_event_old_state;
+    }
+
+    void set_event_content(const std::string&  content) 
+    {
+        m_event_content = content;
+    }
+
+    void set_event_old_state(const std::string&  content) 
+    {
+        m_event_old_state = content;
     }
 
 private:
@@ -101,6 +128,9 @@ private:
     std::string m_parent{};
     std::string m_component{};
     std::string m_gami_id{};
+    /*Nick added for ResourceAdded/ResourceRemoved/Alert/ResourceUpdated/StatusChange/ subscription*/
+    std::string m_event_content{};
+    std::string m_event_old_state{};	
 };
 
 }

@@ -54,7 +54,8 @@ void EventingAgent::notification(const Json::Value& params) {
     request.m_notification = params["notification"].asString();
     request.m_parent = params["parent"].asString();
     request.m_type = params["type"].asString();
-
+/*Nick added for ResourceAdded/ResourceRemoved/Alert/ResourceUpdated/StatusChange/ subscription Begin:*/
+    request.m_event_content = params["event_content"].asString();
     command->execute(request, response);
 }
 

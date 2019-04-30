@@ -1035,7 +1035,6 @@ namespace acc_onlp_helper {
 
                     if(m_port_max_num > 0)			
                     {
-#ifdef VOLT  
                         /*Get mapping json file*/
                         Json::Value mapping_s;
 
@@ -1058,7 +1057,6 @@ namespace acc_onlp_helper {
                         else
                             printf("Get eeprom mapping file error!!\r\n");
 
-#endif
                         int i = 0;
                         for(i = 1 ; i <= m_port_max_num ; i++)
                         { 
@@ -1072,11 +1070,9 @@ namespace acc_onlp_helper {
                             else if (s[0]["onlp"]["ports"][findex +  std::to_string(i) ].asString() == "XSFP" )
                             {
                                 p->m_Type = Port_Info::XSFP_Port;
-#ifdef VOLT  
                                 /*Set XFP eeprom mapping path*/
                                 printf("set_eeprom_path port [%d] [%s]!!\r\n", i , mapping_s[ std::to_string(i)].asString().c_str());
                                 p->set_eeprom_path(mapping_s[ std::to_string(i)].asString());
-#endif							
                             }
                             else
                                 p->m_Type = Port_Info::Ether_Port;
@@ -1206,7 +1202,6 @@ namespace acc_onlp_helper {
 
                             set_port_present(ii , true);			
                             (*pObj)->set_info(ii,  Port_Info::XSFP_Port, 1 , true);  // Type 1: XFP // Type 2 : ETHER				
-#ifdef VOLT  
                             if(!(*pObj)->get_eeprom_raw(rindex))
 //                            if(!(*pObj)->get_eeprom_raw())
                             {
@@ -1216,16 +1211,13 @@ namespace acc_onlp_helper {
                             {
                                 gADbg.acc_printf("catch eeprom data ok");
                             }
-#endif							
                         }
                         else
                         {
                             gADbg.acc_printf("SFP port [%d] not present\r\n",ii);
                             set_port_present(ii , false);
                             (*pObj)->set_info(ii,  Port_Info::XSFP_Port, 0 , false);  // Type 1: XFP // Type 2 : ETHER	
-#ifdef VOLT                            
                             (*pObj)->clean_trans_data();
-#endif
                         }
                     }					
                 }
@@ -1375,10 +1367,12 @@ namespace acc_onlp_helper {
 
                 std::string event("Event");
                 std::string servrity("Warning");					   
-                std::string sensor_type("FAN");		   
+                std::string sensor_type("Fan");		   
                 std::string message("Fan plug in but not SPIN");    
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);	
 
+                std::string message_event = std::string("Fan : ") + std::to_string( ID) +  std::string("not SPIN.");
+                m_Event_Resouce_Alert.push_back(message_event);				
             }
             else if (present && (RPM > 0))
             {
@@ -1397,7 +1391,7 @@ namespace acc_onlp_helper {
 
                 std::string event("Event");
                 std::string servrity("Warning");					   
-                std::string sensor_type("FAN");		   
+                std::string sensor_type("Fan");		   
                 std::string message("System fan absent");    
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);
 
@@ -1420,7 +1414,7 @@ namespace acc_onlp_helper {
 
                 std::string event("Event");
                 std::string servrity("Warning");					   
-                std::string sensor_type("FAN");		   
+                std::string sensor_type("Fan");		   
                 std::string message("PSU plug in but not no power core plug in");    
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
 
@@ -1523,6 +1517,8 @@ Area : 5
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
                 gADbg.acc_printf("set_info-----CPU_Sensor-----Warning--\r\n");					    
 
+                m_Event_Resouce_Alert.push_back(message);				
+
             }
             else if(((m_Current_Temperature >= m_Error))  && (m_Current_Temperature < m_Shutdown))
             {
@@ -1539,6 +1535,7 @@ Area : 5
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);		
                 gADbg.acc_printf("set_info-----CPU_Sensor-----Warning--\r\n");					    
 
+                m_Event_Resouce_Alert.push_back(message);						
             }
             else if((m_Current_Temperature >= m_Shutdown))
             {
@@ -1554,6 +1551,7 @@ Area : 5
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);				
                 gADbg.acc_printf("set_info-----CPU_Sensor-----Critical--\r\n");					    
 
+                m_Event_Resouce_Alert.push_back(message);		
             }
             else
             {
@@ -1578,6 +1576,9 @@ Area : 5
                 message = std::string("SYSTEM Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over warning temperature.");
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);	
                 gADbg.acc_printf("set_info-----SYSTEM_Sensor-----Warning--\r\n");					    
+
+                std::string message_event = std::string("SYSTEM Thermal : ") + std::to_string( ID) +  std::string("Over warning temperature.");
+                m_Event_Resouce_Alert.push_back(message_event);						
             }
             else if(((m_Current_Temperature >= m_Error))  && (m_Current_Temperature < m_Shutdown))
             {
@@ -1594,6 +1595,9 @@ Area : 5
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);				
                 gADbg.acc_printf("set_info-----SYSTEM_Sensor-----Warning--\r\n");					    
 
+                std::string message_event = std::string("SYSTEM Thermal : ") + std::to_string( ID) +  std::string("Over error temperature.");
+                m_Event_Resouce_Alert.push_back(message_event);					
+
             }
             else if((m_Current_Temperature >= m_Shutdown))
             {
@@ -1608,6 +1612,9 @@ Area : 5
                 message = std::string("SYSTEM_Sensor Thermal is ")+std::to_string(m_Current_Temperature/1000)+std::string(" degrees.Over fatal temperature.");
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);		
                 gADbg.acc_printf("set_info-----SYSTEM_Sensor-----Critical--\r\n");					    			
+
+                std::string message_event = std::string("SYSTEM Thermal : ") + std::to_string( ID) +  std::string("Over fatal temperature.");
+                m_Event_Resouce_Alert.push_back(message_event);				
             }
             else
             {
@@ -1638,6 +1645,8 @@ Area : 5
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
                 gADbg.acc_printf("set_info-----PSU_Sensor-----Warning--\r\n");					    			
 
+                std::string message_event = std::string("PSU Thermal : ") + std::to_string( ID) +  std::string("Over warning temperature.");
+                m_Event_Resouce_Alert.push_back(message_event);				
             }
             else if(((m_Current_Temperature >= m_Error))  && (m_Current_Temperature < m_Shutdown))
             {
@@ -1654,6 +1663,8 @@ Area : 5
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
                 gADbg.acc_printf("set_info-----PSU_Sensor-----Warning--\r\n");					    			
 
+                std::string message_event = std::string("PSU Thermal : ") + std::to_string( ID) +  std::string("Over error temperature.");
+                m_Event_Resouce_Alert.push_back(message_event);				
             }
             else if((m_Current_Temperature >= m_Shutdown))
             {
@@ -1669,6 +1680,8 @@ Area : 5
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);		
                 gADbg.acc_printf("set_info-----PSU_Sensor-----Critical--\r\n");					    			
 
+                std::string message_event = std::string("PSU Thermal : ") + std::to_string( ID) +  std::string("Over fatal temperature.");
+                m_Event_Resouce_Alert.push_back(message_event);				
             }
             else
             {
@@ -1916,7 +1929,6 @@ Area : 5
         return 0;	
     }
 
-#ifdef VOLT  
     json::Value Switch::get_port_trans_info_by_(int portid)
     {
         int ii=0;
@@ -1949,8 +1961,6 @@ Area : 5
         return ;
     }
 
-#endif
-
     void Switch::update_port_present_event()
     {
         int id = 0;
@@ -1960,8 +1970,8 @@ Area : 5
 
             // Check port present //
             unsigned long long  m_bit = (1ULL << id);
-            unsigned int p_bit  = ((m_pre_Port_Present & m_bit) >> id);
-            unsigned int c_bit  = ((m_Port_Present  & m_bit) >> id) ;
+            unsigned long long p_bit  = ((m_pre_Port_Present & m_bit) >> id);
+            unsigned long long c_bit  = ((m_Port_Present  & m_bit) >> id) ;
 
             if((p_bit == 1) && (c_bit == 0))
             { // port unplug  					
@@ -1970,6 +1980,9 @@ Area : 5
                 std::string sensor_type("Port");		   
                 std::string message("Port unplug.");
                 Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
+
+                std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug Out.");
+                m_Event_Resouce_Remove.push_back(message_event);				
             } 
             else if((p_bit == 0) && (c_bit == 1))
             { // port plug in
@@ -1978,6 +1991,9 @@ Area : 5
                 std::string sensor_type("Port");		   
                 std::string message("Port plug in.");	
                 Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
+
+                std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug In.");
+                m_Event_Resouce_Add.push_back(message_event);					
             }  
         }
         m_pre_Port_Present = m_Port_Present;
@@ -2006,6 +2022,9 @@ Area : 5
                 std::string sensor_type("PSU");		   
                 std::string message("PSU unplug.");
                 Entry.set_log_entry(event , sensor_type , servrity, message, id+1);		
+
+                std::string message_event = std::string("PSU ") + std::to_string( id + 1) +  std::string(" Plug Out.");
+                m_Event_Resouce_Remove.push_back(message_event);					
             }
             else if((p_bit == 0) && (c_bit == 1))
             { // PSU plug in
@@ -2014,6 +2033,9 @@ Area : 5
                 std::string sensor_type("PSU");		   
                 std::string message("PSU plug in.");	
                 Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
+
+                std::string message_event = std::string("PSU ") + std::to_string( id + 1) +  std::string(" Plug In.");
+                m_Event_Resouce_Add.push_back(message_event);				
             }  
         }
         m_pre_Psu_Present = m_Psu_Present;
@@ -2137,7 +2159,6 @@ Area : 5
 
         for(id = 0; id < m_fan_max_num; id ++)
         {
-
             // Check FAN present //
             unsigned long long m_bit = (1 << id);
             unsigned long long p_bit  = ((m_pre_Fan_Present & m_bit) >> id);
@@ -2151,6 +2172,8 @@ Area : 5
                 std::string message("FAN unplug.");
                 Entry.set_log_entry(event , sensor_type , servrity, message, id+1);
 		
+                std::string message_event = std::string("Fan ") + std::to_string( id + 1) +  std::string(" Plug Out.");
+                m_Event_Resouce_Remove.push_back(message_event);				
             }
             else if((p_bit == 0) && (c_bit == 1))
             { // FAN plug in
@@ -2159,6 +2182,9 @@ Area : 5
                 std::string sensor_type("Fan");		   
                 std::string message("FAN plug in.");	
                 Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
+
+                std::string message_event = std::string("Fan ") + std::to_string( id + 1) +  std::string(" Plug In.");
+                m_Event_Resouce_Add.push_back(message_event);				
             }  
         }
         m_pre_Fan_Present = m_Fan_Present;
@@ -2185,7 +2211,6 @@ Area : 5
                 std::string servrity("OK");					   
                 std::string sensor_type("Thermal");		   
                 std::string message("Thermal sensor unplug.");
-                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);	   
             }
             else if((p_bit == 0) && (c_bit == 1))
             { // Thermal Thermal in
@@ -2193,7 +2218,6 @@ Area : 5
                 std::string servrity("OK");					   
                 std::string sensor_type("Thermal");		   
                 std::string message("Thermal sensor plug in.");	
-                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);				   
             }  
         }
         m_pre_Thermal_Present = m_Thermal_Present;
@@ -2323,4 +2347,43 @@ Area : 5
         g_Switch = NULL;
     }
 
+    std::vector<std::string> Dev_Info::m_Event_Resouce_Alert = {} ;
+
+    std::vector<std::string> Dev_Info::get_Event_Resouce_Alert()
+    { 
+        return m_Event_Resouce_Alert;
+    }
+
+    void Dev_Info::Clear_Event_Resouce_Alert()
+    { 
+        m_Event_Resouce_Alert.clear(); 
+        return;
+    }
+
+    std::vector<std::string> Switch::m_Event_Resouce_Add = {} ;
+	
+    std::vector<std::string> Switch::get_Event_Resouce_Add()
+    { 
+        return m_Event_Resouce_Add;
+    }
+
+    std::vector<std::string> Switch::m_Event_Resouce_Remove = {} ;
+
+    std::vector<std::string> Switch::get_Event_Resouce_Remove()
+    {
+        return m_Event_Resouce_Remove;
+    }
+
+    std::vector<std::string> Switch::get_Event_Resouce_Alert()
+    {
+        return Dev_Info::get_Event_Resouce_Alert();
+    }
+    
+    void Switch::clean_Event_Rresouce_Event()
+    {
+        m_Event_Resouce_Add.clear();
+        m_Event_Resouce_Remove.clear();
+        Dev_Info::Clear_Event_Resouce_Alert()	;	
+        return;
+    }
 }

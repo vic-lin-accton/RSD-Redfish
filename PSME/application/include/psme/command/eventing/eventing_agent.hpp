@@ -86,6 +86,10 @@ public:
         std::string m_notification{};
         std::string m_type{};
         std::string m_parent{};
+        /*Nick added for ResourceAdded/ResourceRemoved/Alert/ResourceUpdated/StatusChange/ subscription*/
+        std::string m_event_content{};
+        std::string m_event_old_state{};
+
 
     public:
         /*!
@@ -122,6 +126,16 @@ public:
         const std::string& get_parent() const {
             return m_parent;
         }
+
+        /*Nick added for ResourceAdded/ResourceRemoved/Alert/ResourceUpdated/StatusChange/ subscription*/
+        const std::string& get_event_content() const {
+           return m_event_content;
+        }
+
+        const std::string& get_event_old_state() const {
+           return m_event_old_state;
+        }
+
 
         /*! Request default constructor */
         Request() = default;

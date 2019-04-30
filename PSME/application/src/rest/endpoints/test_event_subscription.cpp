@@ -53,7 +53,8 @@ TestEventSubscription::~TestEventSubscription() {}
 void TestEventSubscription::get(const server::Request& req, server::Response& res) {
     auto r = ::make_prototype();
     r[Common::ODATA_ID] = PathBuilder(req).build();
-    Event event(EventType::ResourceAdded, "rackscale-test-subscription-passed");
+    Event event(EventType::ResourceAdded, "////TEST EVENT SUB ////");
+    event.set_message("RESOURCE CHANGES!!!!!");	
     SubscriptionManager::get_instance()->notify(event);
     set_response(res, r);
 }

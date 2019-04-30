@@ -59,6 +59,10 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../OpenNetworkLinux/sm/bigcode/modules/sff/module/inc/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../OpenNetworkLinux/sm/infra/modules/AIM/module/inc/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../common/json-cxx/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../common/agent-framework/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../common/logger/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../common/agent-framework/include/agent-framework/exceptions/
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../common/include/
 )
 
 add_library(acc_onlp_helper STATIC

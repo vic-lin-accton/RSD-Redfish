@@ -6,16 +6,9 @@
 CURRENT_CPU_TEMP_UPPER_TH_NODE_PATH="/sys/devices/platform/coretemp.0/hwmon/hwmon0/device/hwmon/hwmon0/"
 
 CURRENT_FAN_NUM="6"
-CURRENT_THERMAL_NUM="7"
+CURRENT_THERMAL_NUM="10"
 CURRENT_PORT_NUM="74"
 CURRENT_PSU_NUM="2"
-
-I2C_BUS="12"
-I2C_CPLD_OFFSET="0x65"
-SYSTEM_RESET_OFFSET="0x03"
-
-SYSTEM_HALT_VALUE="0x01"
-SYSTEM_RESTART_VALUE="0x02"
 
 mapping=("XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
 	"XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
@@ -28,7 +21,7 @@ mapping=("XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
 
 fans_type=("S" "S" "S" "S" "P" "P")
 
-thermals_type=("C" "S" "S" "S" "S" "P" "P")
+thermals_type=("C" "S" "S" "S" "S" "S" "S" "S" "P" "P")
 
 psus_type=("S" "S")
 
