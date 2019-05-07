@@ -240,49 +240,49 @@
 	},
 	{
 	    "Vendor_name": {
-		"Byte_Address": 148,
+		"Byte_Address": 276,
 		"Size": 16,
 		"Page": "P01"
 	    }
 	},
 	{
 	    "Vendor_OUI": {
-		"Byte_Address": 165,
+		"Byte_Address": 293,
 		"Size": 3,
 		"Page": "P01"
 	    }
 	},
 	{
 	    "Vendor_PN": {
-		"Byte_Address": 168,
+		"Byte_Address": 296,
 		"Size": 16,
 		"Page": "P01"
 	    }
 	},
 	{
 	    "Vendor_rev": {
-		"Byte_Address": 184,
+		"Byte_Address": 312,
 		"Size": 2,
 		"Page": "P01"
 	    }
 	},
 	{
 	    "Vendor_SN": {
-		"Byte_Address": 196,
+		"Byte_Address": 324,
 		"Size": 16,
 		"Page": "P01"
 	    }
 	},
 	{
 	    "Data_Code": {
-		"Byte_Address": 212,
+		"Byte_Address": 340,
 		"Size": 8,
 		"Page": "P01"
 	    }
 	},
 	{
 	    "Vendor_Specific": {
-		"Byte_Address": 224,
+		"Byte_Address": 352,
 		"Size": 32,
 		"Page": "P01"
 	    }

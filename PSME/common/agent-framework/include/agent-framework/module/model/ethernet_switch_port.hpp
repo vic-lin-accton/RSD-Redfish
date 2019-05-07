@@ -89,6 +89,23 @@ public:
         return m_port_identifier;
     }
 
+
+    /*!
+     * @brief Set port id
+     * @param[in] port_id switch port identifier
+     * */
+    void set_port_id(const OptionalField<std::uint32_t>& port_id) {
+        m_port_id = port_id;
+    }
+
+    /*!
+     * @brief Get port id
+     * @return Port id of switch port
+     * */
+    const OptionalField<std::uint32_t>& get_port_id() const {
+        return m_port_id;
+    }
+
     /*!
      * @brief Set port class
      * @param[in] port_class switch port class
@@ -460,6 +477,30 @@ public:
         return m_default_vlan;
     }
 
+
+   /*!
+     * @brief Returns trans info.
+     * @return Reference to Trans.
+     * */
+    const attribute::TransInfo& get_trans_info() const {
+        return m_trans_info;
+    }
+
+   /*!
+     * @brief Returns trans info. in jason format
+     * @return Reference to Trans.
+     * */
+    json::Value get_trans_info_json() const ;
+
+
+    /*!
+     * @brief Set  trans info.
+     * @param[in] trans_info
+     * */
+    void set_trans_info(const attribute::TransInfo& trans_info) {
+        m_trans_info = trans_info;
+    }
+	
 private:
 
     OptionalField<std::string> m_port_identifier{};
@@ -483,9 +524,13 @@ private:
     attribute::Ipv4Address m_ipv4_address{};
     attribute::Ipv6Address m_ipv6_address{};
     attribute::NeighborInfo m_neighbor_info{};
+    attribute::TransInfo m_trans_info{};
+	
     OptionalField<std::string> m_neighbor_mac{};
     OptionalField<bool> m_vlan_enable{};
     OptionalField<std::string> m_default_vlan{};
+
+    OptionalField<std::uint32_t> m_port_id{};
 
     static const enums::CollectionName collection_name;
     static const enums::Component component;

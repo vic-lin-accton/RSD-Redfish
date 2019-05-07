@@ -115,9 +115,9 @@ namespace acc_onlp_helper {
 
             float tmp_unit = 0;
             int tmp_base = _Json[attri_name]["Byte_Address"].asInt();
-            printf("get_status_u [%s] base offset[%d]\r\n",attri_name.c_str(), tmp_base);
+            //printf("get_status_u [%s] base offset[%d]\r\n",attri_name.c_str(), tmp_base);
             int tmp_size = _Json[attri_name]["Size"].asInt();
-            printf("get_status_u  Size[%d]\r\n", tmp_size);
+            //printf("get_status_u  Size[%d]\r\n", tmp_size);
             tmp_unit =  _Json[attri_name]["unit"].asFloat();
             //printf("get_status_u  tmp_unit[%f]\r\n", tmp_unit);
 
@@ -148,9 +148,9 @@ namespace acc_onlp_helper {
             Json::Value _Json = get_attri_by_name(attri_name, Att_Json);
 
             int tmp_base = _Json[attri_name]["Byte_Address"].asInt();
-            printf("get_status_s [%s] base offset[%d]\r\n",attri_name.c_str(), tmp_base);
+            //printf("get_status_s [%s] base offset[%d]\r\n",attri_name.c_str(), tmp_base);
             int tmp_size = _Json[attri_name]["Size"].asInt();
-            printf("get_status_s  Size[%d]\r\n", tmp_size);
+            //printf("get_status_s  Size[%d]\r\n", tmp_size);
 
             if(tmp_size < (int) sizeof(tmp_value))
             {
@@ -239,26 +239,34 @@ namespace acc_onlp_helper {
         /* get Temperature */
         ff =  get_value("Temperature");
         m_current_status["Temperature"]["Reading"] =FF3(ff);
-        /*
+
+/*
 
            Critical
 
-           UpperThresholdCritical >=
+       UpperThresholdFatal >=
 
            Warning
 
-           UpperThresholdCritical >=
+       UpperThresholdCritical >=
 
            OK
 
+       LowerrThresholdCritical >=
+      
+           Warning
+
+       LowerThresholdFatal >=
+
+           Critical
 */
-        if(((ff >= m_current_status["Temperature"] ["UpperThresholdCritical"]) && (ff < m_current_status["Temperature"] ["UpperThresholdCritical"]))
-                ||((ff >= m_current_status["Temperature"] ["LowerThresholdCritical"]) && (ff < m_current_status["Temperature"] ["LowerThresholdFatal"])))
+        if(((FF3(ff) >= m_current_status["Temperature"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["Temperature"] ["UpperThresholdFatal"]))
+                ||((FF3(ff) >= m_current_status["Temperature"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["Temperature"] ["LowerThresholdCritical"])))
         {
             m_current_status ["Temperature"] ["Status"]["Health"] = "Warning";
             m_current_status ["Temperature"] ["Status"]["State"] = "Enabled";
         }
-        else if ((ff >= m_current_status["Temperature"] ["UpperThresholdFatal"]) || (ff < m_current_status["Temperature"] ["LowerThresholdFatal"]))
+        else if ((FF3(ff) >= m_current_status["Temperature"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["Temperature"] ["LowerThresholdFatal"]))
         {
             m_current_status ["Temperature"] ["Status"]["Health"] = "Critical";
             m_current_status ["Temperature"] ["Status"]["State"] = "Enabled";
@@ -275,7 +283,7 @@ namespace acc_onlp_helper {
     {
 
         /*Voltage Begin:*/
-        float ff ;
+        double ff ;
         /* get Voltage_High_Alarm */
         if(m_current_status["Voltage"] ["UpperThresholdFatal"] == json::Value::Type::NIL)
         {
@@ -308,26 +316,34 @@ namespace acc_onlp_helper {
         ff = get_value_u("Voltage");
         m_current_status["Voltage"]["Reading"] =FF3(ff);	
 
-        /*
+/*
 
            Critical
 
-           UpperThresholdCritical >=
+       UpperThresholdFatal 
 
            Warning
 
-           UpperThresholdCritical >=
+       UpperThresholdCritical 
 
            OK
 
+       LowerThresholdCritical 
+      
+           Warning
+
+       LowerThresholdFatal 
+
+           Critical
 */
-        if(((ff >= m_current_status["Voltage"] ["UpperThresholdCritical"]) && (ff < m_current_status["Voltage"] ["UpperThresholdCritical"]))
-                ||((ff >= m_current_status["Voltage"] ["LowerThresholdCritical"]) && (ff < m_current_status["Voltage"] ["LowerThresholdFatal"])))
+
+        if(((FF3(ff) >= m_current_status["Voltage"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["Voltage"] ["UpperThresholdFatal"]))
+                ||((FF3(ff) >= m_current_status["Temperature"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["Temperature"] ["LowerThresholdCritical"])))		
         {
             m_current_status ["Voltage"] ["Status"]["Health"] = "Warning";
             m_current_status ["Voltage"] ["Status"]["State"] = "Enabled";
         }
-        else if ((ff >= m_current_status["Voltage"] ["UpperThresholdFatal"]) || (ff < m_current_status["Voltage"] ["LowerThresholdFatal"]))
+        else if ((FF3(ff) >= m_current_status["Voltage"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["Voltage"] ["LowerThresholdFatal"]))
         {
             m_current_status ["Voltage"] ["Status"]["Health"] = "Critical";
             m_current_status ["Voltage"] ["Status"]["State"] = "Enabled";
@@ -375,26 +391,33 @@ namespace acc_onlp_helper {
         /* get Bias */
         ff = get_value_u("Tx_Bias");
         m_current_status["Bias Current"]["Reading"] =FF3(ff);
-        /*
+/*
 
            Critical
 
-           UpperThresholdCritical >=
+       UpperThresholdFatal >=
 
            Warning
 
-           UpperThresholdCritical >=
+       UpperThresholdCritical >=
 
            OK
 
+       LowerThresholdCritical >=
+      
+           Warning
+
+       LowerThresholdFatal >=
+
+           Critical
 */
-        if(((ff >= m_current_status["Bias Current"] ["UpperThresholdCritical"]) && (ff < m_current_status["Bias Current"] ["UpperThresholdCritical"]))
-                ||((ff >= m_current_status["Bias Current"] ["LowerThresholdCritical"]) && (ff < m_current_status["Bias Current"] ["LowerThresholdFatal"])))
+        if(((FF3(ff) >= m_current_status["Bias Current"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["Bias Current"] ["UpperThresholdFatal"]))
+                ||((FF3(ff) >= m_current_status["Bias Current"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["Bias Current"] ["LowerThresholdCritical"])))		
         {
             m_current_status ["Bias Current"] ["Status"]["Health"] = "Warning";
             m_current_status ["Bias Current"] ["Status"]["State"] = "Enabled";
         }
-        else if ((ff >= m_current_status["Bias Current"] ["UpperThresholdFatal"]) || (ff < m_current_status["Bias Current"] ["LowerThresholdFatal"]))
+        else if ((FF3(ff) >= m_current_status["Bias Current"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["Bias Current"] ["LowerThresholdFatal"]))
         {
             m_current_status ["Bias Current"] ["Status"]["Health"] = "Critical";
             m_current_status ["Bias Current"] ["Status"]["State"] = "Enabled";
@@ -444,26 +467,34 @@ namespace acc_onlp_helper {
         ff = get_value_u("Tx_Power");            
         m_current_status["Tx Power"]["Reading"] =FF3(ff);
 
-        /*
+/*
 
            Critical
 
-           UpperThresholdCritical >=
+       UpperThresholdFatal 
 
            Warning
 
-           UpperThresholdCritical >=
+       UpperThresholdCritical 
 
            OK
 
+       LowerThresholdCritical 
+      
+           Warning
+
+       LowerThresholdFatal 
+
+           Critical
 */
-        if(((ff >= m_current_status["Tx Power"] ["UpperThresholdCritical"]) && (ff < m_current_status["Tx Power"] ["UpperThresholdCritical"]))
-                ||((ff >= m_current_status["Tx Power"] ["LowerThresholdCritical"]) && (ff < m_current_status["Tx Power"] ["LowerThresholdFatal"])))
+
+        if(((FF3(ff) >= m_current_status["Tx Power"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["Tx Power"] ["UpperThresholdFatal"]))
+                ||((FF3(ff) >= m_current_status["Tx Power"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["Tx Power"] ["LowerThresholdCritical"])))		
         {
             m_current_status ["Tx Power"] ["Status"]["Health"] = "Warning";
             m_current_status ["Tx Power"] ["Status"]["State"] = "Enabled";
         }
-        else if ((ff >= m_current_status["Tx Power"] ["UpperThresholdFatal"]) || (ff < m_current_status["Tx Power"] ["LowerThresholdFatal"]))
+        else if ((FF3(ff) >= m_current_status["Tx Power"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["Tx Power"] ["LowerThresholdFatal"]))
         {
             m_current_status ["Tx Power"] ["Status"]["Health"] = "Critical";
             m_current_status ["Tx Power"] ["Status"]["State"] = "Enabled";
@@ -512,26 +543,34 @@ namespace acc_onlp_helper {
         ff = get_value("Rx_Power");     
         m_current_status["Rx Power"]["Reading"] =FF3(ff);
 
-        /*
+/*
 
            Critical
 
-           UpperThresholdCritical >=
+       UpperThresholdFatal >=
 
            Warning
 
-           UpperThresholdCritical >=
+       UpperThresholdCritical >=
 
            OK
 
+       LowerThresholdCritical >=
+      
+           Warning
+
+       LowerThresholdFatal >=
+
+           Critical
 */
-        if(((ff >= m_current_status["Rx Power"] ["UpperThresholdCritical"]) && (ff < m_current_status["Rx Power"] ["UpperThresholdCritical"]))
-                ||((ff >= m_current_status["Rx Power"] ["LowerThresholdCritical"]) && (ff < m_current_status["Rx Power"] ["LowerThresholdFatal"])))
+
+        if(((FF3(ff) >= m_current_status["Rx Power"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["Rx Power"] ["UpperThresholdFatal"]))
+                ||((FF3(ff) >= m_current_status["Rx Power"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["Rx Power"] ["LowerThresholdCritical"])))		
         {
             m_current_status ["Rx Power"] ["Status"]["Health"] = "Warning";
             m_current_status ["Rx Power"] ["Status"]["State"] = "Enabled";
         }
-        else if ((ff >= m_current_status["Rx Power"] ["UpperThresholdFatal"]) || (ff < m_current_status["Rx Power"] ["LowerThresholdFatal"]))
+        else if ((FF3(ff) >= m_current_status["Rx Power"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["Rx Power"] ["LowerThresholdFatal"]))
         {
             m_current_status ["Rx Power"] ["Status"]["Health"] = "Critical";
             m_current_status ["Rx Power"] ["Status"]["State"] = "Enabled";
@@ -567,7 +606,7 @@ namespace acc_onlp_helper {
         {
             is.seekg (0, is.end);
             //int length = is.tellg();
-            int length = 384; 
+            int length = 512;
             is.seekg (0, is.beg);
 
             char * buffer = new char [length];
@@ -576,32 +615,27 @@ namespace acc_onlp_helper {
 
             is.read (buffer,length);
 
-            if (is)
+            if(store_eeprom(buffer))
             {
-                if(store_eeprom(buffer))
+                int i = 0; 
+                while(i < length)
                 {
-                
-                    int i = 0; 
-                    while(i < length)
-                    {
-                        printf("%02x ", (unsigned char)buffer[i]);
-                        i++;
-                        if(i % 8 == 0)
-                            printf("\r\n");
-                    }
-                
-                    refresh_status();
+                    printf("%02x ", (unsigned char)buffer[i]);
+                    i++;
+                    if(i % 8 == 0)
+                        printf("\r\n");
                 }
+                refresh_status();
             } 
-            else
-                std::cout << "error: only " << is.gcount() << " could be read";
 
             is.close();
             delete[] buffer;
         }
         else
+        {
+            std::cout << "Port["  << m_eeprom_path << "] reading file error!!"<< std::endl;        
             return false;
-
+        }
         return true;
     }
 	
@@ -646,7 +680,7 @@ namespace acc_onlp_helper {
         {
             if(in[i].isMember(att_name))
             {
-                printf("get_attri_by_name return [%d]\r\n", i);
+                //printf("get_attri_by_name return [%d]\r\n", i);
                 return in[i];
             }
         }
@@ -675,19 +709,16 @@ namespace acc_onlp_helper {
                 {
                     tmp_std =  m_8077i[std::make_pair(id, i)];
                     std::string C_PN= tmp_std["C_PN"].asString();
-                    std::string STD_PN = "8077i";
 
-                    printf("8077 C_PN[%s]\r\n", C_PN.c_str());
+                    printf("8077 C_PN[%s]\r\n\r\n", C_PN.c_str());
 
                     Json::Value Att_Json = tmp_std["Attributes"];
-
                     Json::Value PN_Json = get_attri_by_name("Vendor_PN" , Att_Json);
 
                     int PN_Base = PN_Json["Vendor_PN"]["Byte_Address"].asInt();
-                    printf("PN_Base offset[%d]\r\n", PN_Base);
-
+                    //printf("PN_Base offset[%d]\r\n", PN_Base);
                     unsigned int PN_Size = PN_Json["Vendor_PN"]["Size"].asInt();
-                    printf("PN_Base Size[%d]\r\n", PN_Size);
+                    //printf("PN_Base Size[%d]\r\n", PN_Size);
 
                     if(C_PN.size() < PN_Size)
                     {
@@ -699,24 +730,22 @@ namespace acc_onlp_helper {
                         if(tstring == C_PN)
                         {
                             m_std = tmp_std;
-                            printf("Use C_PN[%s] !!!!\r\n", C_PN.c_str());
+                            printf("8077i Use C_PN[%s] !!!!\r\n", C_PN.c_str());
                             set_support(true);
                             memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
-                            break;
-                        }
-                        else if(C_PN == STD_PN)
-                        {
-                            // Use 8077i as default //
-                            m_std = tmp_std;
-                            printf("Cannot get customer's define. Use Std[%s] one.\r\n", STD_PN.c_str());
-                            set_support(true);
-                            memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
+                            return true;
                         }
                     }
-                    else
-                        return false;
                 }
 
+                // Use 8077i as default //
+                std::string STD_PN = "8077i";
+                m_std = tmp_std;
+                printf("8077i Cannot get customer's define. Use Std[%s] one.\r\n", STD_PN.c_str());
+                set_support(true);
+               
+                memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
+                             
                 return true;
             }
             else if(id == 0x3)
@@ -746,13 +775,13 @@ namespace acc_onlp_helper {
                     {
                         char tmp_PN[16] = {0}; 
                         memcpy(tmp_PN,in_eeprom + PN_Base, C_PN.size());
-                        printf("tmp_PN[%s]\r\n", tmp_PN);
+                        printf("8472 tmp_PN[%s]\r\n", tmp_PN);
                         std::string tstring = tmp_PN;
 
                         if(tstring == C_PN)
                         {
                             m_std = tmp_std;
-                            printf("Use C_PN[%s] !!!!\r\n", C_PN.c_str());
+                            printf("8472 Use C_PN[%s] !!!!\r\n", C_PN.c_str());
                             set_support(true);
                             memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
                             break;
@@ -937,21 +966,24 @@ namespace acc_onlp_helper {
                     {
                         count_8077i++;
 					
-                        printf("0x06 Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
+                        //printf("0x06 Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
 
-                        printf("Set id[%d] count_std[%d]\r\n", id, count_8077i);
+                        printf("Set id[%d] count_std[%d] TRANS_TYPE_8077I\r\n", id, count_8077i);
 
                         m_8077i[std::make_pair(id, count_8077i)]=std_s;
+
                     }
                     else if(id == 0x03) 
                     {
                         count_8472 ++ ;
 						
-                        printf("0x03 Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
+                        //printf("0x03 Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
 
-                        printf("Set id[%d] count_std[%d]\r\n", id, count_8472);
+                        printf("Set id[%d] count_std[%d] TRANS_TYPE_8472\r\n", id, count_8472);
 
                         m_8472[std::make_pair(id, count_8472)]=std_s;
+
+						
                     }
                     else if(id == 0x0D)
                     {
@@ -1071,7 +1103,7 @@ namespace acc_onlp_helper {
                             {
                                 p->m_Type = Port_Info::XSFP_Port;
                                 /*Set XFP eeprom mapping path*/
-                                printf("set_eeprom_path port [%d] [%s]!!\r\n", i , mapping_s[ std::to_string(i)].asString().c_str());
+                                printf("set_eeprom_path port [%d] [%s]!!\r\n \r\n", i , mapping_s[ std::to_string(i)].asString().c_str());
                                 p->set_eeprom_path(mapping_s[ std::to_string(i)].asString());
                             }
                             else
@@ -1201,16 +1233,31 @@ namespace acc_onlp_helper {
                             gADbg.acc_printf("SFP port [%d] present\r\n",ii);
 
                             set_port_present(ii , true);			
-                            (*pObj)->set_info(ii,  Port_Info::XSFP_Port, 1 , true);  // Type 1: XFP // Type 2 : ETHER				
-                            if(!(*pObj)->get_eeprom_raw(rindex))
-//                            if(!(*pObj)->get_eeprom_raw())
+                            (*pObj)->set_info(ii,  Port_Info::XSFP_Port, 1 , true);  // Type 1: XFP // Type 2 : ETHER	
+#if 1
+                            if(1)							
                             {
-                                gADbg.acc_printf("catch eeprom data error");
-                            }
-                            else
-                            {
-                                gADbg.acc_printf("catch eeprom data ok");
-                            }
+                               if(!(*pObj)->get_eeprom_raw())
+                               {
+                                   gADbg.acc_printf("catch eeprom 8472 data error");
+                               }
+                               else
+                               {
+                                   gADbg.acc_printf("catch eeprom 8472 data ok");
+                               }
+                            }        
+#else						
+
+                           if(!(*pObj)->get_eeprom_raw(rindex))   
+                           {
+                               gADbg.acc_printf("catch eeprom 8077I data error");
+                           }
+                           else
+                           {
+                               gADbg.acc_printf("catch eeprom 8077I data ok");
+                           }									
+		
+#endif
                         }
                         else
                         {
@@ -1645,7 +1692,7 @@ Area : 5
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
                 gADbg.acc_printf("set_info-----PSU_Sensor-----Warning--\r\n");					    			
 
-                std::string message_event = std::string("PSU Thermal : ") + std::to_string( ID) +  std::string("Over warning temperature.");
+                std::string  message_event = std::string("PSU Thermal ") + std::to_string( ID) + std::string(" is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.  Over warning temperature.");    		
                 m_Event_Resouce_Alert.push_back(message_event);				
             }
             else if(((m_Current_Temperature >= m_Error))  && (m_Current_Temperature < m_Shutdown))
@@ -1663,7 +1710,7 @@ Area : 5
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
                 gADbg.acc_printf("set_info-----PSU_Sensor-----Warning--\r\n");					    			
 
-                std::string message_event = std::string("PSU Thermal : ") + std::to_string( ID) +  std::string("Over error temperature.");
+                std::string  message_event = std::string("PSU Thermal ") + std::to_string( ID) + std::string(" is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.  Over error temperature.");    		
                 m_Event_Resouce_Alert.push_back(message_event);				
             }
             else if((m_Current_Temperature >= m_Shutdown))
@@ -1680,7 +1727,7 @@ Area : 5
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);		
                 gADbg.acc_printf("set_info-----PSU_Sensor-----Critical--\r\n");					    			
 
-                std::string message_event = std::string("PSU Thermal : ") + std::to_string( ID) +  std::string("Over fatal temperature.");
+                std::string  message_event = std::string("PSU Thermal ") + std::to_string( ID) + std::string(" is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.  Over fatal temperature.");    		
                 m_Event_Resouce_Alert.push_back(message_event);				
             }
             else
@@ -1964,44 +2011,90 @@ Area : 5
     void Switch::update_port_present_event()
     {
         int id = 0;
-
+        
         for(id = 0; id < m_port_max_num; id ++)
         {
-
-            // Check port present //
-            unsigned long long  m_bit = (1ULL << id);
-            unsigned long long p_bit  = ((m_pre_Port_Present & m_bit) >> id);
-            unsigned long long c_bit  = ((m_Port_Present  & m_bit) >> id) ;
-
-            if((p_bit == 1) && (c_bit == 0))
-            { // port unplug  					
-                std::string event("Event");
-                std::string servrity("OK");					   
-                std::string sensor_type("Port");		   
-                std::string message("Port unplug.");
-                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
-
-                std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug Out.");
-                m_Event_Resouce_Remove.push_back(message_event);				
-            } 
-            else if((p_bit == 0) && (c_bit == 1))
-            { // port plug in
-                std::string event("Event");
-                std::string servrity("OK");					   
-                std::string sensor_type("Port");		   
-                std::string message("Port plug in.");	
-                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
-
-                std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug In.");
-                m_Event_Resouce_Add.push_back(message_event);					
-            }  
+            if(id < 64)
+            {
+                // Check port present //
+                unsigned long long  m_bit = (1ULL << id);
+                int p_bit  = ((m_pre_Port_Present & m_bit) >> id);
+                int c_bit  = ((m_Port_Present  & m_bit) >> id) ;
+	
+                if((p_bit == 1) && (c_bit == 0))
+                { // port unplug  					
+                    std::string event("Event");
+                    std::string servrity("OK");					   
+                    std::string sensor_type("Port");		   
+                    std::string message("Port unplug.");
+                    Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
+    
+                    std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug Out.");
+                    m_Event_Resouce_Remove.push_back(message_event);				
+                } 
+                else if((p_bit == 0) && (c_bit == 1))
+                { // port plug in
+                    std::string event("Event");
+                    std::string servrity("OK");					   
+                    std::string sensor_type("Port");		   
+                    std::string message("Port plug in.");	
+                    Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
+    
+                    std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug In.");
+                    m_Event_Resouce_Add.push_back(message_event);					
+                }
+            }
+            else if( (id >= 64) && (id < 128))
+            {
+                int A64_id = id -64;
+			
+                // Check port present //
+                unsigned long long  m_bit = (1ULL << A64_id);
+                unsigned long long p_bit  = ((m_pre_Port_Present_A64 & m_bit) >> A64_id);
+                unsigned long long c_bit  = ((m_Port_Present_A64  & m_bit) >> A64_id) ;
+    
+                if((p_bit == 1) && (c_bit == 0))
+                { // port unplug  					
+                    std::string event("Event");
+                    std::string servrity("OK");					   
+                    std::string sensor_type("Port");		   
+                    std::string message("Port unplug.");
+                    Entry.set_log_entry(event , sensor_type , servrity, message, A64_id+1);			   
+    
+                    std::string message_event = std::string("Port ") + std::to_string( A64_id + 1) +  std::string(" Plug Out.");
+                    m_Event_Resouce_Remove.push_back(message_event);				
+                } 
+                else if((p_bit == 0) && (c_bit == 1))
+                { // port plug in
+                    std::string event("Event");
+                    std::string servrity("OK");					   
+                    std::string sensor_type("Port");		   
+                    std::string message("Port plug in.");	
+                    Entry.set_log_entry(event , sensor_type , servrity, message, A64_id+1);			   
+    
+                    std::string message_event = std::string("Port ") + std::to_string( A64_id + 1) +  std::string(" Plug In.");
+                    m_Event_Resouce_Add.push_back(message_event);					
+                }
+            }			
+            else
+            {
+                 printf("Port chceking more then 128 port!!!!not enough bits to present\r\n\r\n");	
+            }
         }
-        m_pre_Port_Present = m_Port_Present;
 
+        if(id < 64)
+        {
+            m_pre_Port_Present = m_Port_Present;
+        }
+        else if( (id >= 64) && (id < 128))
+        {
+            m_pre_Port_Present_A64 = m_Port_Present_A64;
+        }
+        else
+            printf("Port chceking more then 128 port!!!!not enough bits to present\r\n\r\n");	
+		
         return ;
     }
-
-
 
     void Switch::update_psu_present_event()
     {

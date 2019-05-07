@@ -80,6 +80,7 @@ const char FULL_DUPLEX[] = "FullDuplex";
 const char ACTIVE_ACLS[] = "ActiveACLs";
 const char NEIGHBOR_INTERFACE[] = "NeighborInterface";
 const char STATIC_MACS[] = "StaticMACs";
+const char TRANS_STATIC[] = "Transceiver Statistics";
 }
 
 namespace Vlan {

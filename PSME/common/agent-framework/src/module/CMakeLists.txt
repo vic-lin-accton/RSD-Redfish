@@ -40,6 +40,7 @@ set(SOURCES
     model/attributes/manager_entry.cpp
     model/attributes/message.cpp
     model/attributes/neighbor_info.cpp
+    model/attributes/trans_info.cpp
     model/attributes/network_service.cpp
     model/attributes/next_hop.cpp
     model/attributes/oem.cpp

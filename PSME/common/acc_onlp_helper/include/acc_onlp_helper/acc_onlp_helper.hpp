@@ -33,7 +33,10 @@
 
 #include <acc_net_helper/acc_net_helper.hpp>
 
-#define FF3(readin) (float(int(readin*1000))/1000.000);
+//#define FF3(readin) (float(int(readin*1000))/1000.000);
+/*1000 times of real value to solve json don't provide converting float number problem*/
+#define FF3(readin) float(int(readin*1000))
+
 
 namespace acc_onlp_helper 
 {
@@ -44,7 +47,7 @@ namespace acc_onlp_helper
     static constexpr const int SIZE_EEPROM = 1024; 
 
     class e_oom
-    {
+    {	
         bool get_conf();
         void set_proto();
         bool m_support = false;
@@ -66,6 +69,8 @@ namespace acc_onlp_helper
         std::map<std::pair<int,int>, Json::Value> m_8077i ={};
         std::map<std::pair<int,int>, Json::Value> m_8472  ={};
 
+
+
         void refresh_vendor_info();		
         void refresh_temp();		
         void refresh_voltage();		
@@ -74,6 +79,7 @@ namespace acc_onlp_helper
         void refresh_rx_pwr();	
 
         public:
+		
         e_oom()
         {
             get_conf();
@@ -344,16 +350,29 @@ namespace acc_onlp_helper
             void set_port_present(int ID, bool status)
             {
                 // bitwise mapping : 0x1 means port 1 , 0x2 means port2, 0x3 meane port 1 port2 //
-                if(ID-1 >= 0)
+                if(((ID - 1) >= 0) && ((ID - 1) < 64  ))
                 {
                     if(status)
-                        m_Port_Present |= ((1ULL << (ID-1)));			
+                    {
+                        m_Port_Present |= ((1ULL << (ID-1)));
+                    }
                     else
+                    {
                         m_Port_Present &= (~(1ULL << (ID-1)));
+                    }
+                }
+                else if (((ID - 1) >= 0) && ((ID - 1) < 128  ) &&  (ID - 1 >= 64  ))
+                {
+                    if(status)
+                    {
+                        m_Port_Present_A64 |= ((1ULL << (ID-1)));
+                    }
+                    else
+                    {
+                        m_Port_Present_A64 &= (~(1ULL << (ID-1)));
+                    }	
                 }
             };
-
-            unsigned long long get_port_present(){return m_Port_Present;};
 
             void set_thermal_present(int ID, bool status)
             {
@@ -408,12 +427,13 @@ namespace acc_onlp_helper
             unsigned int m_Psu_Present = 0 ;   
             unsigned int m_Fan_Present = 0 ;   
             unsigned long long  m_Port_Present = 0 ;   
-
+            unsigned long long  m_Port_Present_A64 = 0 ;   
+			
             unsigned int m_pre_Thermal_Present = 0 ;   
             unsigned int m_pre_Psu_Present = 0 ;   
             unsigned int m_pre_Fan_Present = 0 ;   
             unsigned long long m_pre_Port_Present = 0 ; 
-
+            unsigned long long m_pre_Port_Present_A64 = 0 ; 
     };
 }
 

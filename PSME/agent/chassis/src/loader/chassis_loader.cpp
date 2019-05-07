@@ -531,7 +531,7 @@ std::vector<std::string> create_port(const std::string& parent,  int port_num , 
 	
     for (auto i = 0; i < port_num ; ++i) {
         auto port = ::make_port(parent);
-
+        port.set_port_id(i+1);
         log_debug(GET_LOGGER("rpc"), "Adding port: " << port.get_uuid());
         NetworkComponents::get_instance()->get_port_manager().add_entry(port);
         //create_static_macs(port.get_uuid());

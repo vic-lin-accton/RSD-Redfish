@@ -42,6 +42,7 @@ Json::Value EthernetSwitchPort::to_json() const {
     Json::Value result;
     result[literals::EthernetSwitchPort::STATUS] = get_status().to_json();
     result[literals::EthernetSwitchPort::PORT_IDENTIFIER] = get_port_identifier();
+    result[literals::EthernetSwitchPort::PORT_ID] = get_port_id();
     result[literals::EthernetSwitchPort::PORT_CLASS] = get_port_class();
     result[literals::EthernetSwitchPort::PORT_TYPE] = get_port_type();
     result[literals::EthernetSwitchPort::PORT_MODE] = get_port_mode();
@@ -72,6 +73,9 @@ Json::Value EthernetSwitchPort::to_json() const {
     result[literals::EthernetSwitchPort::DEFAULT_VLAN] = get_default_vlan();
     result[literals::EthernetSwitchPort::COLLECTIONS] = get_collections().to_json();
     result[literals::EthernetSwitchPort::OEM] = get_oem().to_json();
+
+    result[literals::EthernetSwitchPort::TRANS_INFO] =
+        get_trans_info().to_json();	
     return result;
 }
 
@@ -80,6 +84,7 @@ EthernetSwitchPort EthernetSwitchPort::from_json(const Json::Value& json) {
 
     port.set_status(attribute::Status::from_json(json[literals::EthernetSwitchPort::STATUS]));
     port.set_port_identifier(json[literals::EthernetSwitchPort::PORT_IDENTIFIER]);
+    port.set_port_id(json[literals::EthernetSwitchPort::PORT_ID]);
     port.set_port_class(json[literals::EthernetSwitchPort::PORT_CLASS]);
     port.set_port_type(json[literals::EthernetSwitchPort::PORT_TYPE]);
     port.set_port_mode(json[literals::EthernetSwitchPort::PORT_MODE]);
@@ -118,5 +123,125 @@ EthernetSwitchPort EthernetSwitchPort::from_json(const Json::Value& json) {
     port.set_oem(attribute::Oem::from_json(json[literals::EthernetSwitchPort::OEM]));
     port.set_resource_hash(json);
 
+    port.set_trans_info(attribute::TransInfo::from_json(
+        json[literals::EthernetSwitchPort::TRANS_INFO]));
+
     return port;
 }
+
+json::Value EthernetSwitchPort::get_trans_info_json() const 
+{
+    json::Value r(json::Value::Type::OBJECT);
+
+    attribute::TransInfo tTransInfo;	
+    
+    tTransInfo = m_trans_info;
+    
+    r[literals::EthernetSwitchPort::SFP_VENDOR_NAME] = tTransInfo.get_spf_vendor_name();
+    r[literals::EthernetSwitchPort::PART_NUMBER] = tTransInfo.get_part_number();
+    r[literals::EthernetSwitchPort::SERIAL_NUMBER] = tTransInfo.get_serial_number();
+    r[literals::EthernetSwitchPort::MANUFACTURE_DATE] = tTransInfo.get_manufacture_date();
+    
+    //Temperature
+    signed int rr = tTransInfo.get_temp_reading();
+    double tmp = (rr /1000.000);
+    
+    r[literals::EthernetSwitchPort::TEMPERATURE][literals::EthernetSwitchPort::READING] = tmp;
+    
+    rr = tTransInfo.get_temp_upper_th_fatal();
+    tmp = (rr /1000.000);				
+    r[literals::EthernetSwitchPort::TEMPERATURE][literals::EthernetSwitchPort::UPPER_THRESHOLD_FATAL] = tmp;
+    
+    rr = tTransInfo.get_temp_upper_th_critical();
+    tmp = (rr /1000.000);	
+    r[literals::EthernetSwitchPort::TEMPERATURE][literals::EthernetSwitchPort::UPPER_THRESHOLD_CRITICAL] = tmp;
+    
+    rr = tTransInfo.get_temp_lower_th_critical();
+    tmp = (rr /1000.000);	
+    r[literals::EthernetSwitchPort::TEMPERATURE][literals::EthernetSwitchPort::LOWER_THRESHOLD_CRITICAL] = tmp;
+    
+    rr = tTransInfo.get_temp_lower_th_fatal();
+    tmp = (rr /1000.000);			
+    r[literals::EthernetSwitchPort::TEMPERATURE][literals::EthernetSwitchPort::LOWER_THRESHOLD_FATAL] = tmp;
+
+    r[literals::EthernetSwitchPort::TEMPERATURE][literals::EthernetSwitchPort::STATUS][literals::TransInfo::STATUS_STATE] =  tTransInfo.get_temp_status_state();
+    r[literals::EthernetSwitchPort::TEMPERATURE][literals::EthernetSwitchPort::STATUS][literals::TransInfo::STATUS_HEALTH] =  tTransInfo.get_temp_status_health();
+
+    //Voltage
+    rr = tTransInfo.get_voltage_reading();
+    tmp = (rr /1000.000);
+    r[literals::EthernetSwitchPort::VOLTAGE][literals::EthernetSwitchPort::READING] = tmp;
+    
+    rr = tTransInfo.get_voltage_upper_th_fatal();
+    tmp = (rr /1000.000);
+    r[literals::EthernetSwitchPort::VOLTAGE][literals::EthernetSwitchPort::UPPER_THRESHOLD_FATAL] = tmp;
+    
+    rr = tTransInfo.get_voltage_upper_th_critical();
+    tmp = (rr /1000.000);
+    r[literals::EthernetSwitchPort::VOLTAGE][literals::EthernetSwitchPort::UPPER_THRESHOLD_CRITICAL] = tmp;
+    
+    rr = tTransInfo.get_voltage_lower_th_critical();
+    tmp = (rr /1000.000);
+    r[literals::EthernetSwitchPort::VOLTAGE][literals::EthernetSwitchPort::LOWER_THRESHOLD_CRITICAL] = tmp;
+    		
+    rr = tTransInfo.get_voltage_lower_th_fatal();
+    tmp = (rr /1000.000);
+    r[literals::EthernetSwitchPort::VOLTAGE][literals::EthernetSwitchPort::LOWER_THRESHOLD_FATAL] = tmp;
+
+    r[literals::EthernetSwitchPort::VOLTAGE][literals::EthernetSwitchPort::STATUS][literals::TransInfo::STATUS_STATE] =  tTransInfo.get_voltage_status_state();
+    r[literals::EthernetSwitchPort::VOLTAGE][literals::EthernetSwitchPort::STATUS][literals::TransInfo::STATUS_HEALTH] =  tTransInfo.get_voltage_status_health();
+
+    
+    // Bias current
+    rr = tTransInfo.get_bias_current_reading();
+    tmp = (rr /1000.000);
+    r[literals::EthernetSwitchPort::BIAS_CURRENT][literals::EthernetSwitchPort::READING] = tmp;
+    
+    rr = tTransInfo.get_bias_current_upper_th_fatal();
+    tmp = (rr /1000.000);
+    r[literals::EthernetSwitchPort::BIAS_CURRENT][literals::EthernetSwitchPort::UPPER_THRESHOLD_FATAL] = tmp;
+    		
+    rr = tTransInfo.get_bias_current_upper_th_critical();
+    tmp = (rr /1000.000);
+    r[literals::EthernetSwitchPort::BIAS_CURRENT][literals::EthernetSwitchPort::UPPER_THRESHOLD_CRITICAL] = tmp;
+    
+    rr = tTransInfo.get_bias_current_lower_th_critical();
+    tmp = (rr /1000.000);
+    r[literals::EthernetSwitchPort::BIAS_CURRENT][literals::EthernetSwitchPort::LOWER_THRESHOLD_CRITICAL] = tmp;
+    
+    rr = tTransInfo.get_bias_current_lower_th_fatal();
+    tmp = (rr /1000.000);
+    r[literals::EthernetSwitchPort::BIAS_CURRENT][literals::EthernetSwitchPort::LOWER_THRESHOLD_FATAL] = tmp;
+
+    r[literals::EthernetSwitchPort::BIAS_CURRENT][literals::EthernetSwitchPort::STATUS][literals::TransInfo::STATUS_STATE] =  tTransInfo.get_bias_current_status_state();
+    r[literals::EthernetSwitchPort::BIAS_CURRENT][literals::EthernetSwitchPort::STATUS][literals::TransInfo::STATUS_HEALTH] =  tTransInfo.get_bias_current_status_health();
+    
+    
+    // Tx Power
+    rr = tTransInfo.get_tx_power_reading();
+    tmp = (rr /1000.000);
+    r[literals::EthernetSwitchPort::TX_POWER][literals::EthernetSwitchPort::READING] = tmp;
+    
+    rr = tTransInfo.get_tx_power_upper_th_fatal();
+    tmp = (rr /1000.000);
+    r[literals::EthernetSwitchPort::TX_POWER][literals::EthernetSwitchPort::UPPER_THRESHOLD_FATAL] = tmp;
+    
+    rr = tTransInfo.get_tx_power_upper_th_critical();
+    tmp = (rr /1000.000);
+    r[literals::EthernetSwitchPort::TX_POWER][literals::EthernetSwitchPort::UPPER_THRESHOLD_CRITICAL] = tmp;
+    
+    rr = tTransInfo.get_tx_power_lower_th_critical();
+    tmp = (rr /1000.000);
+    r[literals::EthernetSwitchPort::TX_POWER][literals::EthernetSwitchPort::LOWER_THRESHOLD_CRITICAL] = tmp;
+    
+    rr = tTransInfo.get_tx_power_lower_th_fatal();
+    tmp = (rr /1000.000);
+    r[literals::EthernetSwitchPort::TX_POWER][literals::EthernetSwitchPort::LOWER_THRESHOLD_FATAL] = tmp;		
+
+    r[literals::EthernetSwitchPort::TX_POWER][literals::EthernetSwitchPort::STATUS][literals::TransInfo::STATUS_STATE] =  tTransInfo.get_tx_power_status_state();
+    r[literals::EthernetSwitchPort::TX_POWER][literals::EthernetSwitchPort::STATUS][literals::TransInfo::STATUS_HEALTH] =  tTransInfo.get_tx_power_status_health();
+
+    return r;
+}
+
+

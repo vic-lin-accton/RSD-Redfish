@@ -39,6 +39,7 @@
 #include "manager_entry.hpp"
 #include "message.hpp"
 #include "neighbor_info.hpp"
+#include "trans_info.hpp"
 #include "network_service.hpp"
 #include "next_hop.hpp"
 #include "oem.hpp"

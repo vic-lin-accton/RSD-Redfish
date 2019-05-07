@@ -34,7 +34,7 @@
 using namespace agent_framework::model;
 using namespace agent_framework::command_ref;
 using namespace agent::network::api::netlink;
-using namespace agent::network;
+//using namespace agent::network;
 
 namespace {
 void add_port_vlan(const AddPortVlan::Request& request, AddPortVlan::Response& response) {

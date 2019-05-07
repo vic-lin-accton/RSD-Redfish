@@ -34,6 +34,77 @@ constexpr const char NeighborInfo::SWITCH_IDENTIFIER[];
 constexpr const char NeighborInfo::PORT_IDENTIFIER[];
 constexpr const char NeighborInfo::CABLE_ID[];
 
+constexpr const char TransInfo::NEIGHBOR_INFO[];
+constexpr const char TransInfo::SWITCH_IDENTIFIER[];
+constexpr const char TransInfo::PORT_IDENTIFIER[];
+constexpr const char TransInfo::CABLE_ID[];
+
+
+constexpr const char TransInfo::SFP_VENDOR_NAME[];
+constexpr const char TransInfo::PART_NUMBER[];
+constexpr const char TransInfo::SERIAL_NUMBER[];
+constexpr const char TransInfo::MANUFACTURE_DATE[];
+
+constexpr const char TransInfo::TEMP_READING[];
+constexpr const char TransInfo::TEMP_UPPER_THRESH_HOLD_FATAL[];
+constexpr const char TransInfo::TEMP_UPPER_THRESH_HOLD_CRITICAL[];
+constexpr const char TransInfo::TEMP_UPPER_THRESH_HOLD_NON_CRITICAL[];
+constexpr const char TransInfo::TEMP_LOWER_THRESH_HOLD_FATAL[];
+constexpr const char TransInfo::TEMP_LOWER_THRESH_HOLD_CRITICAL[];
+constexpr const char TransInfo::TEMP_LOWER_THRESH_HOLD_NON_CRITICAL[];
+constexpr const char TransInfo::TEMP_STATUS_STATE[];
+constexpr const char TransInfo::TEMP_STATUS_HEALTH[];
+constexpr const char TransInfo::TEMP_STATUS_HEALTH_ROLL_UP[];
+
+constexpr const char TransInfo::BIAS_CURRENT_READING[];
+constexpr const char TransInfo::BIAS_CURRENT_UPPER_THRESH_HOLD_FATAL[];
+constexpr const char TransInfo::BIAS_CURRENT_UPPER_THRESH_HOLD_CRITICAL[];
+constexpr const char TransInfo::BIAS_CURRENT_UPPER_THRESH_HOLD_NON_CRITICAL[];
+constexpr const char TransInfo::BIAS_CURRENT_LOWER_THRESH_HOLD_FATAL[];
+constexpr const char TransInfo::BIAS_CURRENT_LOWER_THRESH_HOLD_CRITICAL[];
+constexpr const char TransInfo::BIAS_CURRENT_LOWER_THRESH_HOLD_NON_CRITICAL[];
+constexpr const char TransInfo::BIAS_CURRENT_STATUS_STATE[];
+constexpr const char TransInfo::BIAS_CURRENT_STATUS_HEALTH[];
+constexpr const char TransInfo::BIAS_CURRENT_STATUS_HEALTH_ROLL_UP[];
+
+constexpr const char TransInfo::VOLTAGE_READING[];
+constexpr const char TransInfo::VOLTAGE_UPPER_THRESH_HOLD_FATAL[];
+constexpr const char TransInfo::VOLTAGE_UPPER_THRESH_HOLD_CRITICAL[];
+constexpr const char TransInfo::VOLTAGE_UPPER_THRESH_HOLD_NON_CRITICAL[];
+constexpr const char TransInfo::VOLTAGE_LOWER_THRESH_HOLD_FATAL[];
+constexpr const char TransInfo::VOLTAGE_LOWER_THRESH_HOLD_CRITICAL[];
+constexpr const char TransInfo::VOLTAGE_LOWER_THRESH_HOLD_NON_CRITICAL[];
+constexpr const char TransInfo::VOLTAGE_STATUS_STATE[];
+constexpr const char TransInfo::VOLTAGE_STATUS_HEALTH[];
+constexpr const char TransInfo::VOLTAGE_STATUS_HEALTH_ROLL_UP[];
+
+constexpr const char TransInfo::TX_POWER_READING[];
+constexpr const char TransInfo::TX_POWER_UPPER_THRESH_HOLD_FATAL[];
+constexpr const char TransInfo::TX_POWER_UPPER_THRESH_HOLD_CRITICAL[];
+constexpr const char TransInfo::TX_POWER_UPPER_THRESH_HOLD_NON_CRITICAL[];
+constexpr const char TransInfo::TX_POWER_LOWER_THRESH_HOLD_FATAL[];
+constexpr const char TransInfo::TX_POWER_LOWER_THRESH_HOLD_CRITICAL[];
+constexpr const char TransInfo::TX_POWER_LOWER_THRESH_HOLD_NON_CRITICAL[];	
+constexpr const char TransInfo::TX_POWER_STATUS_STATE[];
+constexpr const char TransInfo::TX_POWER_STATUS_HEALTH[];
+constexpr const char TransInfo::TX_POWER_STATUS_HEALTH_ROLL_UP[];
+
+constexpr const char TransInfo::RX_POWER_READING[];
+constexpr const char TransInfo::RX_POWER_UPPER_THRESH_HOLD_FATAL[];
+constexpr const char TransInfo::RX_POWER_UPPER_THRESH_HOLD_CRITICAL[];
+constexpr const char TransInfo::RX_POWER_UPPER_THRESH_HOLD_NON_CRITICAL[];
+constexpr const char TransInfo::RX_POWER_LOWER_THRESH_HOLD_FATAL[];
+constexpr const char TransInfo::RX_POWER_LOWER_THRESH_HOLD_CRITICAL[];
+constexpr const char TransInfo::RX_POWER_LOWER_THRESH_HOLD_NON_CRITICAL[];
+constexpr const char TransInfo::RX_POWER_STATUS_STATE[];
+constexpr const char TransInfo::RX_POWER_STATUS_HEALTH[];
+constexpr const char TransInfo::RX_POWER_STATUS_HEALTH_ROLL_UP[];
+
+constexpr const char TransInfo::STATUS_STATE[];
+constexpr const char TransInfo::STATUS_HEALTH[];
+constexpr const char TransInfo::STATUS_HEALTH_ROLL_UP[];
+
+
 constexpr const char SwitchPortMembers::PORT[];
 constexpr const char SwitchPortMembers::MEMBERS[];
 constexpr const char SwitchPortMembers::OEM[];
@@ -42,6 +113,7 @@ constexpr const char EthernetSwitchPort::PORT[];
 constexpr const char EthernetSwitchPort::SWITCH[];
 constexpr const char EthernetSwitchPort::STATUS[];
 constexpr const char EthernetSwitchPort::PORT_IDENTIFIER[];
+constexpr const char EthernetSwitchPort::PORT_ID[];
 constexpr const char EthernetSwitchPort::MODE[];
 constexpr const char EthernetSwitchPort::MEMBERS[];
 constexpr const char EthernetSwitchPort::PORT_CLASS[];
@@ -64,6 +136,26 @@ constexpr const char EthernetSwitchPort::MAC_ADDRESS[];
 constexpr const char EthernetSwitchPort::IPV4_ADDRESS[];
 constexpr const char EthernetSwitchPort::IPV6_ADDRESS[];
 constexpr const char EthernetSwitchPort::NEIGHBOR_INFO[];
+constexpr const char EthernetSwitchPort::TRANS_INFO[];
+
+constexpr const char EthernetSwitchPort::SFP_VENDOR_NAME[];
+constexpr const char EthernetSwitchPort::PART_NUMBER[];
+constexpr const char EthernetSwitchPort::SERIAL_NUMBER[];
+constexpr const char EthernetSwitchPort::MANUFACTURE_DATE[];
+
+constexpr const char EthernetSwitchPort::TEMPERATURE[];
+constexpr const char EthernetSwitchPort::VOLTAGE[];
+constexpr const char EthernetSwitchPort::BIAS_CURRENT[];
+constexpr const char EthernetSwitchPort::TX_POWER[];
+constexpr const char EthernetSwitchPort::RX_POWER[];
+
+constexpr const char EthernetSwitchPort::READING[];
+constexpr const char EthernetSwitchPort::UPPER_THRESHOLD_FATAL[];
+constexpr const char EthernetSwitchPort::UPPER_THRESHOLD_CRITICAL[];
+constexpr const char EthernetSwitchPort::LOWER_THRESHOLD_CRITICAL[];
+constexpr const char EthernetSwitchPort::LOWER_THRESHOLD_FATAL[];
+
+
 constexpr const char EthernetSwitchPort::NEIGHBOR_MAC[];
 constexpr const char EthernetSwitchPort::VLAN_ENABLE[];
 constexpr const char EthernetSwitchPort::DEFAULT_VLAN[];

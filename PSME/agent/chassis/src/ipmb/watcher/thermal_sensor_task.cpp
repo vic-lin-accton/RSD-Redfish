@@ -24,9 +24,10 @@
  * @file certificate.cpp
  * @brief Certificate
  * */
-
+#include "agent-framework/module/network_components.hpp"
 #include "agent-framework/module/chassis_components.hpp"
 #include "agent-framework/module/common_components.hpp"
+#include "agent-framework/command-ref/network_commands.hpp"
 #include "agent-framework/eventing/event_data.hpp"
 #include "agent-framework/eventing/events_queue.hpp"
 #include <ipmb/watcher/thermal_sensor_task.hpp>
@@ -57,9 +58,13 @@ using namespace agent::chassis::ipmb::watcher;
 using namespace ipmi;
 using namespace ipmi::command;
 
+using namespace agent_framework::command_ref;
+//using namespace agent::network;
 
 using agent_framework::module::ChassisComponents;
 using agent_framework::module::CommonComponents;
+using agent_framework::module::NetworkComponents;
+
 
 ThermalSensorTask::~ThermalSensorTask() {}
 
@@ -340,6 +345,94 @@ void ProcessThermalSensors::fill_thermal_sensor_data() {
 
     /*Get/Set  Port info.*/			
     sonlp.get_port_info();
+
+    unsigned int port_num =  sonlp.get_port_num();
+    unsigned int portid=1;
+
+    auto network_components = agent_framework::module::NetworkComponents::get_instance();
+    auto &port_manager = network_components->get_instance()->get_port_manager();
+    auto port_uuids = port_manager.get_keys();
+
+    for(portid = 1; portid <=port_num ; portid++)
+    { 	     
+        for (const auto& port_uuid : port_uuids) 
+        {
+            auto port_ = port_manager.get_entry_reference(port_uuid);  //Get Port object by psu_uuid//
+
+            if (port_->get_port_id() == portid) 
+            { 
+                int current_present = sonlp.get_port_info_by_(portid , Switch::Port_Content::Port_Present);
+
+                if(current_present)
+               {
+                   port_->set_status(attribute::Status(
+                   agent_framework::model::enums::State::Enabled,
+                   agent_framework::model::enums::Health::OK));               
+               }
+               else
+               {
+                   port_->set_status(attribute::Status(
+                   agent_framework::model::enums::State::Absent,
+                   agent_framework::model::enums::Health::OK));               
+               }
+			   
+               //Collect  trans info			   
+               json::Value r(json::Value::Type::OBJECT);	
+               attribute::TransInfo tTransInfo;			   
+			   
+               r = sonlp.get_port_trans_info_by_(portid);
+
+               tTransInfo.set_spf_vendor_name(r["SFP Vendor Name"]);
+               tTransInfo.set_part_number(r["Part Number"]);		   
+               tTransInfo.set_serial_number(r["Serial Number"]);		   
+               tTransInfo.set_manufacture_date(r["Manufacture Date"]);
+                
+               tTransInfo.set_temp_reading(r["Temperature"]["Reading"]);
+               tTransInfo.set_temp_upper_th_fatal(r["Temperature"]["UpperThresholdFatal"]);		   
+               tTransInfo.set_temp_upper_th_critical(r["Temperature"]["UpperThresholdCritical"]);
+               tTransInfo.set_temp_lower_th_critical(r["Temperature"]["LowerThresholdCritical"]);
+               tTransInfo.set_temp_lower_th_fatal(r["Temperature"]["LowerThresholdFatal"]);
+               tTransInfo.set_temp_status_state(r["Temperature"]["Status"]["State"]);
+               tTransInfo.set_temp_status_health(r["Temperature"]["Status"]["Health"]);
+			   
+               tTransInfo.set_voltage_reading(r["Voltage"]["Reading"]);
+               tTransInfo.set_voltage_upper_th_fatal(r["Voltage"]["UpperThresholdFatal"]);		   
+               tTransInfo.set_voltage_upper_th_critical(r["Voltage"]["UpperThresholdCritical"]);
+               tTransInfo.set_voltage_lower_th_critical(r["Voltage"]["LowerThresholdCritical"]);
+               tTransInfo.set_voltage_lower_th_fatal(r["Voltage"]["LowerThresholdFatal"]);
+               tTransInfo.set_voltage_status_state(r["Voltage"]["Status"]["State"]);
+               tTransInfo.set_voltage_status_health(r["Voltage"]["Status"]["Health"]);
+
+               tTransInfo.set_bias_current_reading(r["Bias Current"]["Reading"]);
+               tTransInfo.set_bias_current_upper_th_fatal(r["Bias Current"]["UpperThresholdFatal"]);		   
+               tTransInfo.set_bias_current_upper_th_critical(r["Bias Current"]["UpperThresholdCritical"]);
+               tTransInfo.set_bias_current_lower_th_critical(r["Bias Current"]["LowerThresholdCritical"]);
+               tTransInfo.set_bias_current_lower_th_fatal(r["Bias Current"]["LowerThresholdFatal"]);
+               tTransInfo.set_bias_current_status_state(r["Bias Current"]["Status"]["State"]);
+               tTransInfo.set_bias_current_status_health(r["Bias Current"]["Status"]["Health"]);			   
+
+               tTransInfo.set_tx_power_reading(r["Tx Power"]["Reading"]);
+               tTransInfo.set_tx_power_upper_th_fatal(r["Tx Power"]["UpperThresholdFatal"]);		   
+               tTransInfo.set_tx_power_upper_th_critical(r["Tx Power"]["UpperThresholdCritical"]);
+               tTransInfo.set_tx_power_lower_th_critical(r["Tx Power"]["LowerThresholdCritical"]);
+               tTransInfo.set_tx_power_lower_th_fatal(r["Tx Power"]["LowerThresholdFatal"]);
+               tTransInfo.set_tx_power_status_state(r["Tx Power"]["Status"]["State"]);
+               tTransInfo.set_tx_power_status_health(r["Tx Power"]["Status"]["Health"]);			   
+			   
+               tTransInfo.set_rx_power_reading(r["Rx Power"]["Reading"]);
+               tTransInfo.set_rx_power_upper_th_fatal(r["Rx Power"]["UpperThresholdFatal"]);		   
+               tTransInfo.set_rx_power_upper_th_critical(r["Rx Power"]["UpperThresholdCritical"]);
+               tTransInfo.set_rx_power_lower_th_critical(r["Rx Power"]["LowerThresholdCritical"]);
+               tTransInfo.set_rx_power_lower_th_fatal(r["Rx Power"]["LowerThresholdFatal"]);
+               tTransInfo.set_rx_power_status_state(r["Rx Power"]["Status"]["State"]);
+               tTransInfo.set_rx_power_status_health(r["Rx Power"]["Status"]["Health"]);			   
+			   
+               port_->set_trans_info(tTransInfo);			   
+               
+            }
+        }
+    }
+	
     sonlp.update_port_present_event();		
 
     /*Send all events */
