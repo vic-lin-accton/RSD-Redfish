@@ -29,7 +29,8 @@ extern "C"
 #include <fstream>      
 #include <dirent.h>
 #include <string.h>
-
+#include <chrono>
+#include <ctime>  
 
 
 namespace acc_onlp_helper {
@@ -606,7 +607,7 @@ namespace acc_onlp_helper {
         {
             is.seekg (0, is.end);
             //int length = is.tellg();
-            int length = 512;
+            int length = SIZE_EEPROM;
             is.seekg (0, is.beg);
 
             char * buffer = new char [length];
@@ -617,6 +618,7 @@ namespace acc_onlp_helper {
 
             if(store_eeprom(buffer))
             {
+#if 0            
                 int i = 0; 
                 while(i < length)
                 {
@@ -625,6 +627,7 @@ namespace acc_onlp_helper {
                     if(i % 8 == 0)
                         printf("\r\n");
                 }
+#endif				
                 refresh_status();
             } 
 
@@ -652,7 +655,6 @@ namespace acc_onlp_helper {
         {
             printf("onlp_sfpi_eeprom_read [%d] ok!!\r\n", rindex);
 
-            
                int i = 0; 
                while(i < 256)
                {
@@ -689,7 +691,7 @@ namespace acc_onlp_helper {
 
     // ------------------------------------------------------------------
     //  1. Decide XFP/QSFP by identify ID, 
-    //     06h : XFP , 0Dh : QSFP+ , 11h : QSFP28
+    //     06h : XFP , 0Dh : QSFP+ , 11h : QSFP28 ,03h: SFP+
     //  2. Identify which Std. should be used. 
     //  3. Store raw data.  
     // ------------------------------------------------------------------
@@ -784,20 +786,17 @@ namespace acc_onlp_helper {
                             printf("8472 Use C_PN[%s] !!!!\r\n", C_PN.c_str());
                             set_support(true);
                             memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
-                            break;
+                            return true;
                         }
-                        else if(C_PN == STD_PN)
-                        {
+                    }
+                }
+
                             // Use 8472 as default //
+                std::string STD_PN = "8472";
                             m_std = tmp_std;
                             printf("Cannot get customer's define. Use Std[%s] one.\r\n", STD_PN.c_str());
                             set_support(true);
                             memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
-                        }
-                    }
-                    else
-                        return false;
-                }
 
                 return true;
             }			
@@ -944,10 +943,9 @@ namespace acc_onlp_helper {
             if((dot == tmp_me_name) || (ddot == tmp_me_name) || (maps == tmp_me_name))
                 continue;
 
-            printf("std name[%s] \r\n", tmp_me_name.c_str());
-
+            //printf("std name[%s] \r\n", tmp_me_name.c_str());
             std::string m_config_file_path = ME_S_DIR + tmp_me_name ;
-            printf("new pathname[%s]\r\n",  m_config_file_path.c_str());
+            //printf("new pathname[%s]\r\n",  m_config_file_path.c_str());
 
             std::ifstream m_source_files= {};
 
@@ -965,25 +963,16 @@ namespace acc_onlp_helper {
                     if(id == 0x06) 
                     {
                         count_8077i++;
-					
                         //printf("0x06 Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
-
-                        printf("Set id[%d] count_std[%d] TRANS_TYPE_8077I\r\n", id, count_8077i);
-
+                        //printf("Set id[%d] count_std[%d] TRANS_TYPE_8077I\r\n", id, count_8077i);
                         m_8077i[std::make_pair(id, count_8077i)]=std_s;
-
                     }
                     else if(id == 0x03) 
                     {
                         count_8472 ++ ;
-						
                         //printf("0x03 Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
-
-                        printf("Set id[%d] count_std[%d] TRANS_TYPE_8472\r\n", id, count_8472);
-
+                        //printf("Set id[%d] count_std[%d] TRANS_TYPE_8472\r\n", id, count_8472);
                         m_8472[std::make_pair(id, count_8472)]=std_s;
-
-						
                     }
                     else if(id == 0x0D)
                     {
@@ -1237,6 +1226,7 @@ namespace acc_onlp_helper {
 #if 1
                             if(1)							
                             {
+	                        auto start = std::chrono::system_clock::now();		
                                if(!(*pObj)->get_eeprom_raw())
                                {
                                    gADbg.acc_printf("catch eeprom 8472 data error");
@@ -1245,9 +1235,15 @@ namespace acc_onlp_helper {
                                {
                                    gADbg.acc_printf("catch eeprom 8472 data ok");
                                }
+
+                               auto end = std::chrono::system_clock::now();
+                               std::chrono::duration<double> elapsed_seconds = end-start;
+                               std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+                               std::cout << "finished computation at getting get_eeprom_raw info.. " << std::ctime(&end_time)
+                               << "elapsed time: " << elapsed_seconds.count() << "s\n";							   
                             }        
 #else						
-
+//Use ONLP API to get EEPROM data, but only 256 bytes , not enough ..//
                            if(!(*pObj)->get_eeprom_raw(rindex))   
                            {
                                gADbg.acc_printf("catch eeprom 8077I data error");

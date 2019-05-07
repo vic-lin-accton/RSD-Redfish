@@ -34,7 +34,6 @@
 #include <acc_net_helper/acc_net_helper.hpp>
 
 //#define FF3(readin) (float(int(readin*1000))/1000.000);
-/*1000 times of real value to solve json don't provide converting float number problem*/
 #define FF3(readin) float(int(readin*1000))
 
 
@@ -44,13 +43,14 @@ namespace acc_onlp_helper
     using namespace std;
     using namespace acc_net_helper;
 
-    static constexpr const int SIZE_EEPROM = 1024; 
+    static constexpr const int SIZE_EEPROM = 512; 
 
     class e_oom
     {	
         bool get_conf();
         void set_proto();
         bool m_support = false;
+        unsigned m_belong_to_port ={0};
         std::string m_eeprom_path ={};
         unsigned char m_eeprom[SIZE_EEPROM];
 
@@ -68,8 +68,6 @@ namespace acc_onlp_helper
         // Collection of support Std. //
         std::map<std::pair<int,int>, Json::Value> m_8077i ={};
         std::map<std::pair<int,int>, Json::Value> m_8472  ={};
-
-
 
         void refresh_vendor_info();		
         void refresh_temp();		
@@ -95,8 +93,20 @@ namespace acc_onlp_helper
 		  	set_proto();
 	};
 
-        // input eeprom raw data //
-        void set_eeprom_path(std::string in){m_eeprom_path = in;};
+        void set_belong_to_port (unsigned belong_to_port )
+        {
+            m_belong_to_port = belong_to_port;
+        };
+
+        unsigned get_belong_to_port ()
+        {
+            return m_belong_to_port;
+        };
+		
+        void set_eeprom_path(std::string in)
+        {
+            m_eeprom_path = in;
+        };
 		
         bool store_eeprom(char * in_eeprom);
         bool refresh_status();
@@ -189,7 +199,6 @@ namespace acc_onlp_helper
 
         e_oom m_port_oom;
 
-        //bool get_eeprom_raw( int rindex) 
         bool get_eeprom_raw() 
         {
             return m_port_oom.get_eeprom_raw();

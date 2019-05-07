@@ -66,112 +66,38 @@ using agent_framework::module::CommonComponents;
 using agent_framework::module::NetworkComponents;
 
 
-ThermalSensorTask::~ThermalSensorTask() {}
+OnlpSensorTask::~OnlpSensorTask() {}
 
-/*! Drawer thermal sensor processing*/
-class ProcessThermalSensors {
+/*! Drawer onlp sensor processing*/
+class GetOnlpInfo {
 public:
     /*!
      * Executes Drawer thermal sensor processing
      * @param[in] manager_keys Blades' manager keys
      */
     void execute() {
-        fill_thermal_sensor_data();
+        get_onlp_info();
     }
-
-/*Nick_Added Begin:*/
 	void exec_shell(const char* cmd, char * result_a);
-/*Nick_Added End  :*/	
 
 private:
-    static constexpr const uint8_t SLED_TYPE_HSW = 0x00;
-    static constexpr const uint8_t SLED_TYPE_BDX_DE = 0x01;
-
-    static constexpr const uint8_t SENSOR_INLET_TEMP = 0x07;
 
     ThermalSensorIpmbResponse m_response{};
-
-    void fill_thermal_sensor_data();
-
-    uint8_t get_sled_type(ipmi::ManagementController& mc);
-    uint8_t get_desired_pwm(ipmi::ManagementController& mc);
-    uint8_t get_inlet_temp(ipmi::ManagementController& mc);
-
-    uint8_t get_inlet_temp_sensor(ipmi::ManagementController& mc);
-    uint16_t get_inlet_temp_sensor_multiplier(ipmi::ManagementController& mc,
-                                              uint8_t reading_byte);
+    void get_onlp_info();
 };
 
-void ThermalSensorTask::execute() {
+void OnlpSensorTask::execute() {
     try {
-        ProcessThermalSensors ps{};
+        GetOnlpInfo ps{};
         ps.execute();
     }
     catch (const std::exception& e) {
-        log_debug(LOGUSR, "ProcessThermalSensors - exception : " << e.what());
+        log_debug(LOGUSR, "GetOnlpInfo - exception : " << e.what());
     }
 }
 
-uint8_t ProcessThermalSensors::get_sled_type(ipmi::ManagementController& mc) {
-    ipmi::command::generic::request::GetDeviceId ipmi_request;
-    ipmi::command::generic::response::GetDeviceId ipmi_response;
 
-    mc.send(ipmi_request, ipmi_response);
-
-    if (ipmi_response.get_completion_code() != ipmi::Response::COMPLETION_CODE_NORMAL) {
-        throw std::runtime_error("Bad completion code in Get Device Id response");
-    }
-
-    auto product_id = ipmi_response.get_product_id();
-    log_debug(LOGUSR, "ProcessThermalSensors - GetDeviceId: product_id = " << static_cast<int>(product_id));
-    if (ipmi::command::generic::response::GetDeviceId::PRODUCT_ID_INTEL_XEON_BDC_R == product_id ||
-        ipmi::command::generic::response::GetDeviceId::PRODUCT_ID_INTEL_XEON_BDC_A == product_id) {
-        return SLED_TYPE_HSW;
-    } else if (ipmi::command::generic::response::GetDeviceId::PRODUCT_ID_INTEL_BDX_DE_BDC_R == product_id) {
-        return SLED_TYPE_BDX_DE;
-    } else {
-        throw std::runtime_error("Unknown sled type");
-    }
-}
-
-uint8_t ProcessThermalSensors::get_desired_pwm(ipmi::ManagementController& mc) {
-
-    sdv::request::GetFanPwm ipmi_request;
-    sdv::response::GetFanPwm ipmi_response;
-
-    mc.send(ipmi_request, ipmi_response);
-
-    if (ipmi_response.get_completion_code() != ipmi::Response::COMPLETION_CODE_NORMAL) {
-        throw std::runtime_error("Bad completion code in Get Fan PWM response");
-    }
-
-    return ipmi_response.get_maximum_pwm();
-}
-
-uint8_t ProcessThermalSensors::get_inlet_temp(ipmi::ManagementController& mc) {
-    uint8_t reading_byte = get_inlet_temp_sensor(mc);
-    uint16_t multiplier = get_inlet_temp_sensor_multiplier(mc, reading_byte);
-    return static_cast<uint8_t>(reading_byte * multiplier);
-}
-
-uint8_t ProcessThermalSensors::get_inlet_temp_sensor(ipmi::ManagementController& mc) {
-
-    ipmi::command::generic::request::GetSensorReading ipmi_request;
-    ipmi::command::generic::response::GetSensorReading ipmi_response;
-
-    ipmi_request.set_sensor_number(SENSOR_INLET_TEMP);
-
-    mc.send(ipmi_request, ipmi_response);
-
-    if (ipmi_response.get_completion_code() != ipmi::Response::COMPLETION_CODE_NORMAL) {
-        throw std::runtime_error("Bad completion code in Get Sensor Reading response");
-    }
-
-    return ipmi_response.get_sensor_reading();
-}
-
-
-void ProcessThermalSensors::exec_shell(const char* cmd, char * result_a){
+void GetOnlpInfo::exec_shell(const char* cmd, char * result_a){
 	char buffer[128];
 	std::string result = "";
 	FILE* pipe = popen(cmd, "r");
@@ -191,23 +117,6 @@ void ProcessThermalSensors::exec_shell(const char* cmd, char * result_a){
 	return;
 	}
 
-uint16_t  ProcessThermalSensors::get_inlet_temp_sensor_multiplier(ipmi::ManagementController &mc,
-                                                                    uint8_t reading_byte) {
-    ipmi::command::generic::request::GetSensorReadingFactors ipmi_request;
-    ipmi::command::generic::response::GetSensorReadingFactors ipmi_response;
-
-    ipmi_request.set_sensor_number(SENSOR_INLET_TEMP);
-    ipmi_request.set_reading_byte(reading_byte);
-
-    mc.send(ipmi_request, ipmi_response);
-
-    if (ipmi_response.get_completion_code() != ipmi::Response::COMPLETION_CODE_NORMAL) {
-        throw std::runtime_error("Bad completion code in Get Sensor Reading Factor response");
-    }
-
-    return ipmi_response.get_multiplier();
-}
-
 
 #ifndef ONLP
 static unsigned int pre_fan_presence= 0;
@@ -225,7 +134,7 @@ static signed int  UPPER_SYS_THRESHOLD_FATAL=0;
 
 
 
-void ProcessThermalSensors::fill_thermal_sensor_data() {
+void GetOnlpInfo::get_onlp_info() {
 
 
 #ifdef ONLP

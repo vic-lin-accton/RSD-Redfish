@@ -28,6 +28,10 @@ using namespace acc_onlp_helper;
 using namespace std;
 
 #include <string>
+#include <iostream>
+#include <chrono>
+#include <ctime>  
+
 
 class TestClass1 : public ::testing::Test {
 public:
@@ -72,7 +76,18 @@ void TestClass1::SetUp()
     int ii = 1;
     while(ii !=0)
     {
+
+	 auto start = std::chrono::system_clock::now();
         sonlp.get_port_info();
+        auto end = std::chrono::system_clock::now();
+
+
+        std::chrono::duration<double> elapsed_seconds = end-start;
+        std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+        std::cout << "finished computation at getting get_port_info info.. " << std::ctime(&end_time)
+              << "elapsed time: " << elapsed_seconds.count() << "s\n";
+		
+		
         int port_max = sonlp.get_port_num();
     
         if(port_max == 0)
@@ -88,7 +103,14 @@ void TestClass1::SetUp()
             sonlp.get_port_trans_info_by_(i);
         }
 		
+	 start = std::chrono::system_clock::now();	
         sonlp.get_psu_info();
+        end = std::chrono::system_clock::now();
+        elapsed_seconds = end-start;		
+        end_time = std::chrono::system_clock::to_time_t(end);		
+        std::cout << "finished computation at getting get_psu_info info.. " << std::ctime(&end_time)
+              << "elapsed time: " << elapsed_seconds.count() << "s\n";
+		
         int psu_max = sonlp.get_psu_num();
     
         for(int i = 1; i <= psu_max; i++)	
@@ -99,7 +121,14 @@ void TestClass1::SetUp()
         }	
              
         auto& sonlp2 = acc_onlp_helper::Switch::get_instance();
+
+	 start = std::chrono::system_clock::now();			
         sonlp2.get_thermal_info();
+        end = std::chrono::system_clock::now();
+        elapsed_seconds = end-start;		
+        end_time = std::chrono::system_clock::to_time_t(end);		
+        std::cout << "finished computation at getting get_thermal_info info.. " << std::ctime(&end_time)
+              << "elapsed time: " << elapsed_seconds.count() << "s\n";
     
         int thermal_max = sonlp2.get_thermal_num();
     
@@ -112,7 +141,15 @@ void TestClass1::SetUp()
         }		
     
         auto& sonlp3 = acc_onlp_helper::Switch::get_instance();
+		
+	 start = std::chrono::system_clock::now();					
         sonlp3.get_fan_info();
+        end = std::chrono::system_clock::now();
+        elapsed_seconds = end-start;		
+        end_time = std::chrono::system_clock::to_time_t(end);		
+        std::cout << "finished computation at getting get_fan_info info.. " << std::ctime(&end_time)
+              << "elapsed time: " << elapsed_seconds.count() << "s\n";
+		
         int fan_max = sonlp2.get_fan_num();
     	
         for(int i = 1; i <= fan_max; i++)	

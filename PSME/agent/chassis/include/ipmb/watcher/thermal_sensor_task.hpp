@@ -33,13 +33,19 @@ namespace ipmb {
 /*! Watcher namspace */
 namespace watcher {
 
-/*! Task class for reading thermal sensor data from sleds */
-class ThermalSensorTask final : public Task {
+/*! Task class for reading onlp sensor data from onlp api */
+class OnlpSensorTask final : public Task {
 public:
-    ~ThermalSensorTask();
+    ~OnlpSensorTask();
     /*! Executes task */
     void execute() override;
 };
+/*! Task class for reading port oom data */
+class OnlpPortTask final : public Task {
+public:
+    OnlpPortTask();
+};
+
 
 }
 }

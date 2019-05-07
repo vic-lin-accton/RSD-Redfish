@@ -143,7 +143,7 @@ int main(int argc, const char* argv[]) {
     server.start();
 
     watcher::Watcher onlp_watcher{};
-    onlp_watcher.add_task(std::make_shared<watcher::ThermalSensorTask>());
+    onlp_watcher.add_task(std::make_shared<watcher::OnlpSensorTask>());
     onlp_watcher.start();
 
     ::agent::chassis::loader::ChassisLoader::wait_for_complete();
