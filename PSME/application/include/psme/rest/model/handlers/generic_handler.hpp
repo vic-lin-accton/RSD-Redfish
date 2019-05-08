@@ -638,7 +638,7 @@ typename GenericHandler<Request, Model, IdPolicy>::UpdateStatus GenericHandler<R
 
     auto status = agent_framework::module::get_manager<Model>().add_or_update_entry(entry);
     if (UpdateStatus::StatusChanged == status) {
-        ctx.add_event(get_component(), eventing::EventType::StatusChange, uuid);
+        //ctx.add_event(get_component(), eventing::EventType::StatusChange, uuid);
         ctx.num_status_changed++;
         log_debug(GET_LOGGER("rest"), ctx.indent << "[" << char(ctx.mode) << "] "
                                                  << "Status changed [" << component_s() << " " << uuid
@@ -646,7 +646,7 @@ typename GenericHandler<Request, Model, IdPolicy>::UpdateStatus GenericHandler<R
                                                  << ", id: " << entry.get_id() << "]");
     }
     if (UpdateStatus::StatusChanged == status || UpdateStatus::Updated == status) {
-        ctx.add_event(get_component(), eventing::EventType::ResourceUpdated, uuid);
+        //ctx.add_event(get_component(), eventing::EventType::ResourceUpdated, uuid);
         ctx.num_updated++;
         log_debug(GET_LOGGER("rest"), ctx.indent << "[" << char(ctx.mode) << "] "
                                                  << "Updated [" << component_s() << " " << uuid
@@ -655,7 +655,7 @@ typename GenericHandler<Request, Model, IdPolicy>::UpdateStatus GenericHandler<R
     }
     if (UpdateStatus::Added == status) {
         if (!ctx.do_not_emit_from_descendants) {
-            ctx.add_event(get_component(), eventing::EventType::ResourceAdded, uuid);
+            ;//ctx.add_event(get_component(), eventing::EventType::ResourceAdded, uuid);
         }
         ctx.num_added++;
         log_info(GET_LOGGER("rest"), ctx.indent << "[" << char(ctx.mode) << "] "
