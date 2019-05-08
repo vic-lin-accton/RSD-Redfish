@@ -1,0 +1,25 @@
+[Information]
+Updated = April 24, 2017
+Description = Redfish Event Listener Tool
+
+[SystemInformation]
+ListenerIP = 0.0.0.0 
+ListenerPort = 80 
+UseSSL = off 
+
+[CertificateDetails]
+certfile = cert.pem
+keyfile = server.key
+
+[SubsciptionDetails]
+Destination = https://172.17.10.7:8888 
+EventTypes = ResourceAdded 
+Context = "THIS IS TEST FROM LISTENER SUBS" 
+Protocol = Redfish 
+SubscriptionURI = /redfish/v1/EventService/Subscriptions 
+
+[ServerInformation]
+ServerIPs = 
+UserNames = 
+Passwords = 
+certcheck = off
