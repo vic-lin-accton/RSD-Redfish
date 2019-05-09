@@ -172,7 +172,7 @@ namespace acc_onlp_helper {
 
 
     void e_oom::refresh_vendor_info()
-{
+    {
         /*vendor_info Begin:*/
         std::string ff ;
         /* get SFP Vendor Name */
@@ -204,6 +204,18 @@ namespace acc_onlp_helper {
         }				
         /*vendor_info End  :*/
     }
+
+
+    void e_oom::default_vendor_info()
+    {
+        /*vendor_info Begin:*/
+        m_current_status["SFP Vendor Name"] = json::Value::Type::NIL;
+        m_current_status["Part Number"]         = json::Value::Type::NIL;
+        m_current_status["Serial Number"]       = json::Value::Type::NIL;	     
+        m_current_status["Manufacture Date"]  = json::Value::Type::NIL;	     
+        /*vendor_info End  :*/
+    }
+
 
     void e_oom::refresh_temp()
     {
@@ -279,6 +291,18 @@ namespace acc_onlp_helper {
         }
         /*Temperature End  :*/
     }
+
+    void e_oom::default_temp()
+    {
+        /*Temperature Begin:*/
+        m_current_status["Temperature"] ["UpperThresholdFatal"] = 0;
+        m_current_status["Temperature"] ["LowerThresholdFatal"] = 0;
+        m_current_status["Temperature"] ["UpperThresholdCritical"] = 0;
+        m_current_status["Temperature"] ["LowerThresholdCritical"] = 0;			
+        m_current_status["Temperature"]["Reading"]  = 0;
+        /*Temperature End  :*/
+    }
+
 
     void e_oom::refresh_voltage()
     {
@@ -357,6 +381,18 @@ namespace acc_onlp_helper {
         /*Voltage End  :*/    
     }
 
+    void e_oom::default_voltage()
+    {
+        /*Voltage Begin:*/
+        m_current_status["Voltage"] ["UpperThresholdFatal"]  = 0;
+        m_current_status["Voltage"] ["LowerThresholdFatal"]   = 0;
+        m_current_status["Voltage"] ["UpperThresholdCritical"]  = 0;
+        m_current_status["Voltage"] ["LowerThresholdCritical"]  = 0;
+        m_current_status["Voltage"]["Reading"]   = 0;
+        /*Voltage End  :*/    
+    }
+
+
     void e_oom::refresh_bias()
     {
         float ff; 
@@ -430,6 +466,18 @@ namespace acc_onlp_helper {
         }
         /*Bias Current End    :*/			    
     }
+
+    void e_oom::default_bias()
+    {
+        /*Bias Current Begin  :*/
+        m_current_status["Bias Current"] ["UpperThresholdFatal"] =0;
+        m_current_status["Bias Current"] ["LowerThresholdFatal"] =0;
+        m_current_status["Bias Current"] ["UpperThresholdCritical"] =0;
+        m_current_status["Bias Current"] ["LowerThresholdCritical"] =0;
+        m_current_status["Bias Current"]["Reading"] =0;
+        /*Bias Current End    :*/			    
+    }
+
 
     void e_oom::refresh_tx_pwr()
     {
@@ -508,6 +556,18 @@ namespace acc_onlp_helper {
         /*Tx Power Current End      :*/   
     }
 
+    void e_oom::default_tx_pwr()
+    {
+        /*Tx Power Current Begin    :*/
+        m_current_status["Tx Power"] ["UpperThresholdFatal"] = 0;
+        m_current_status["Tx Power"] ["LowerThresholdFatal"] = 0;
+        m_current_status["Tx Power"] ["UpperThresholdCritical"] = 0;
+        m_current_status["Tx Power"] ["LowerThresholdCritical"] = 0;
+        m_current_status["Tx Power"]["Reading"] = 0;
+        /*Tx Power Current End      :*/   
+    }
+
+
     void e_oom::refresh_rx_pwr()
     {
         /*Rx Power Current Begin      :*/
@@ -584,6 +644,18 @@ namespace acc_onlp_helper {
         /*Rx Power Current End      :*/	   
     }
 
+    void e_oom::default_rx_pwr()
+    {
+        /*Rx Power Current Begin      :*/
+        m_current_status["Rx Power"] ["UpperThresholdFatal"] = 0;
+        m_current_status["Rx Power"] ["LowerThresholdFatal"] = 0;
+        m_current_status["Rx Power"] ["UpperThresholdCritical"] = 0;
+        m_current_status["Rx Power"] ["LowerThresholdCritical"] = 0;
+        m_current_status["Rx Power"]["Reading"] = 0;
+        /*Rx Power Current End      :*/	   
+    }
+
+
     bool e_oom::refresh_status()
     {
         if(get_support())
@@ -596,6 +668,17 @@ namespace acc_onlp_helper {
             refresh_tx_pwr();			
             //refresh_rx_pwr();			
         }
+        return true; 
+    }
+
+    bool e_oom::status_default()
+    {
+        default_vendor_info();		
+        default_temp();
+        default_voltage();			
+        default_bias();
+        default_tx_pwr();			
+        //default_rx_pwr();			
         return true; 
     }
 
@@ -1620,7 +1703,9 @@ Area : 5
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);	
                 gADbg.acc_printf("set_info-----SYSTEM_Sensor-----Warning--\r\n");					    
 
-                std::string message_event = std::string("SYSTEM Thermal : ") + std::to_string( ID) +  std::string("Over warning temperature.");
+                std::string message_event = std::string("SYSTEM Thermal ") + std::to_string( ID) + std::string(" is ") +std::to_string(m_Current_Temperature/1000) + 
+	         std::string(" degrees. Over warning temperature.");
+
                 m_Event_Resouce_Alert.push_back(message_event);						
             }
             else if(((m_Current_Temperature >= m_Error))  && (m_Current_Temperature < m_Shutdown))
@@ -1638,7 +1723,8 @@ Area : 5
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);				
                 gADbg.acc_printf("set_info-----SYSTEM_Sensor-----Warning--\r\n");					    
 
-                std::string message_event = std::string("SYSTEM Thermal : ") + std::to_string( ID) +  std::string("Over error temperature.");
+                std::string message_event = std::string("SYSTEM Thermal ") + std::to_string( ID) + std::string(" is ") +std::to_string(m_Current_Temperature/1000) + 
+	         std::string(" degrees. Over error temperature.");
                 m_Event_Resouce_Alert.push_back(message_event);					
 
             }
@@ -1656,7 +1742,8 @@ Area : 5
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);		
                 gADbg.acc_printf("set_info-----SYSTEM_Sensor-----Critical--\r\n");					    			
 
-                std::string message_event = std::string("SYSTEM Thermal : ") + std::to_string( ID) +  std::string("Over fatal temperature.");
+                std::string message_event = std::string("SYSTEM Thermal ") + std::to_string( ID) + std::string(" is ") +std::to_string(m_Current_Temperature/1000) + 
+	         std::string(" degrees. Over fatal temperature.");
                 m_Event_Resouce_Alert.push_back(message_event);				
             }
             else

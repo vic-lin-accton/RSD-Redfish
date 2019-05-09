@@ -76,12 +76,20 @@ namespace acc_onlp_helper
         void refresh_tx_pwr();	
         void refresh_rx_pwr();	
 
+        void default_vendor_info();		
+        void default_temp();		
+        void default_voltage();		
+        void default_bias();	
+        void default_tx_pwr();	
+        void default_rx_pwr();	
+
         public:
 		
         e_oom()
         {
             get_conf();
             set_proto();
+            status_default();			
         };
         ~e_oom(){};
 
@@ -110,6 +118,7 @@ namespace acc_onlp_helper
 		
         bool store_eeprom(char * in_eeprom);
         bool refresh_status();
+        bool status_default();
 
         json::Value get_current_status(){return m_current_status;}; 
 
