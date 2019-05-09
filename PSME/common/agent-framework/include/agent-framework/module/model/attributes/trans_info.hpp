@@ -36,14 +36,6 @@ public:
 
     explicit TransInfo();
 
-    TransInfo(const std::string& switch_identifier,
-                 const std::string& port_identifier,
-                 const std::string& cable_id):
-                 m_switch_identifier(switch_identifier),
-                 m_port_identifier(port_identifier),
-                 m_cable_id(cable_id)
-                 {}
-
     ~TransInfo();
 
     /*! Enable copy */
@@ -51,52 +43,6 @@ public:
     TransInfo& operator=(const TransInfo&) = default;
     TransInfo(TransInfo&&) = default;
     TransInfo& operator=(TransInfo&&) = default;
-
-    /*!
-     * @brief Set switch identifier
-     * @param[in] switch_identifier Switch identifier
-     * */
-    void set_switch_identifier(const OptionalField<std::string>& switch_identifier) {
-        m_switch_identifier = switch_identifier;
-    }
-
-    /*!
-     * Gets switch identifier.
-     * */
-    const OptionalField<std::string>& get_switch_identifier() const {
-        return m_switch_identifier;
-    }
-
-    /*!
-     * @brief Set port identifier
-     * @param[in] port_identifier Port identifier
-     * */
-    void set_port_identifier(const OptionalField<std::string>& port_identifier) {
-        m_port_identifier = port_identifier;
-    }
-
-    /*!
-     * Gets port identifier.
-     * */
-    const OptionalField<std::string>& get_port_identifier() const {
-        return m_port_identifier;
-    }
-
-    /*!
-     * @brief Set cable id
-     * @param[in] cable_id Cable ID
-     * */
-    void set_cable_id(const OptionalField<std::string>& cable_id) {
-        m_cable_id = cable_id;
-    }
-
-    /*!
-     * Gets cable ID.
-     * */
-    const OptionalField<std::string>& get_cable_id() const {
-        return m_cable_id;
-    }
-
 
     /*!
      * Gets SFP Vendor Name
@@ -1010,10 +956,6 @@ public:
     static TransInfo from_json(const Json::Value& json);
 
 private:
-
-    OptionalField<std::string> m_switch_identifier{""};
-    OptionalField<std::string> m_port_identifier{""};
-    OptionalField<std::string> m_cable_id{""};
 
     OptionalField<std::string> m_sfp_vendor_name{""};
     OptionalField<std::string> m_part_number{""};

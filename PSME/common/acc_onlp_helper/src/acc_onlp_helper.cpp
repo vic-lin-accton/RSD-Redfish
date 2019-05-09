@@ -37,11 +37,8 @@ namespace acc_onlp_helper {
     signed long  get_value_from_pointer(signed char *ptr, int size);
     unsigned long  get_value_from_pointer_u(unsigned char *ptr, int size);
 
-
-
-    static constexpr const char STD_SEC_PATH[] = "/usr/local/bin/mod_conf/";
+    static constexpr const char STD_SEC_PATH[]        = "/usr/local/bin/mod_conf/";
     static constexpr const char EEPROM_MAP_PATH[] = "/usr/local/bin/mod_conf/map/";
-
 
     signed long  get_value_from_pointer(signed char *ptr, int size)
     {
@@ -222,28 +219,28 @@ namespace acc_onlp_helper {
         /*Temperature Begin:*/
         float ff ;
         /* get Temp_High_Alarm */
-        if(m_current_status["Temperature"] ["UpperThresholdFatal"] == json::Value::Type::NIL)
+        if(m_current_status["Temperature"] ["UpperThresholdFatal"] == 0)
         {
             ff = get_value("Temp_High_Alarm");
             m_current_status["Temperature"] ["UpperThresholdFatal"] =FF3(ff);
         }
 
         /* get Temp_Low_Alarm */
-        if(m_current_status["Temperature"] ["LowerThresholdFatal"] == json::Value::Type::NIL)
+        if(m_current_status["Temperature"] ["LowerThresholdFatal"] == 0)
         {
             ff = get_value("Temp_Low_Alarm");
             m_current_status["Temperature"] ["LowerThresholdFatal"] =FF3(ff);
         }			
 
         /* get Temp_High_Warning */
-        if(m_current_status["Temperature"] ["UpperThresholdCritical"] == json::Value::Type::NIL)
+        if(m_current_status["Temperature"] ["UpperThresholdCritical"] == 0)
         {
             ff =  get_value("Temp_High_Warning");
             m_current_status["Temperature"] ["UpperThresholdCritical"] =FF3(ff);
         }				     
 
         /* get Temp_Low_Warning */
-        if(m_current_status["Temperature"] ["LowerThresholdCritical"] == json::Value::Type::NIL)
+        if(m_current_status["Temperature"] ["LowerThresholdCritical"] == 0)
         {
             ff =  get_value("Temp_Low_Warning");
             m_current_status["Temperature"] ["LowerThresholdCritical"] = FF3(ff);
@@ -298,8 +295,8 @@ namespace acc_onlp_helper {
         m_current_status["Temperature"] ["UpperThresholdFatal"] = 0;
         m_current_status["Temperature"] ["LowerThresholdFatal"] = 0;
         m_current_status["Temperature"] ["UpperThresholdCritical"] = 0;
-        m_current_status["Temperature"] ["LowerThresholdCritical"] = 0;			
-        m_current_status["Temperature"]["Reading"]  = 0;
+        m_current_status["Temperature"] ["LowerThresholdCritical"] = 0;
+        m_current_status["Temperature"]["Reading"]  =0;
         /*Temperature End  :*/
     }
 
@@ -310,28 +307,28 @@ namespace acc_onlp_helper {
         /*Voltage Begin:*/
         double ff ;
         /* get Voltage_High_Alarm */
-        if(m_current_status["Voltage"] ["UpperThresholdFatal"] == json::Value::Type::NIL)
+        if(m_current_status["Voltage"] ["UpperThresholdFatal"] == 0)
         {
             ff = get_value_u("Voltage_High_Alarm");
             m_current_status["Voltage"] ["UpperThresholdFatal"] =FF3(ff);
         }
 
         /* get Voltage_Low_Alarm */
-        if(m_current_status["Voltage"] ["LowerThresholdFatal"] == json::Value::Type::NIL)
+        if(m_current_status["Voltage"] ["LowerThresholdFatal"] == 0)
         {
             ff = get_value_u("Voltage_Low_Alarm");
             m_current_status["Voltage"] ["LowerThresholdFatal"] =FF3(ff);
         }
 
         /* get Voltage_High_Warning */
-        if(m_current_status["Voltage"] ["UpperThresholdCritical"] == json::Value::Type::NIL)
+        if(m_current_status["Voltage"] ["UpperThresholdCritical"] == 0)
         {
             ff =  get_value_u("Voltage_High_Warning");
             m_current_status["Voltage"] ["UpperThresholdCritical"] =FF3(ff);
         }					
 
         /* get Voltage_Low_Warning */
-        if(m_current_status["Voltage"] ["LowerThresholdCritical"] == json::Value::Type::NIL)
+        if(m_current_status["Voltage"] ["LowerThresholdCritical"] == 0)
         {
             ff =  get_value_u("Voltage_Low_Warning");
             m_current_status["Voltage"] ["LowerThresholdCritical"] =FF3(ff);
@@ -384,11 +381,11 @@ namespace acc_onlp_helper {
     void e_oom::default_voltage()
     {
         /*Voltage Begin:*/
-        m_current_status["Voltage"] ["UpperThresholdFatal"]  = 0;
-        m_current_status["Voltage"] ["LowerThresholdFatal"]   = 0;
-        m_current_status["Voltage"] ["UpperThresholdCritical"]  = 0;
-        m_current_status["Voltage"] ["LowerThresholdCritical"]  = 0;
-        m_current_status["Voltage"]["Reading"]   = 0;
+        m_current_status["Voltage"] ["UpperThresholdFatal"] = 0;
+        m_current_status["Voltage"] ["LowerThresholdFatal"] = 0;
+        m_current_status["Voltage"] ["UpperThresholdCritical"] = 0;
+        m_current_status["Voltage"] ["LowerThresholdCritical"] = 0;
+        m_current_status["Voltage"]["Reading"] = 0;
         /*Voltage End  :*/    
     }
 
@@ -398,28 +395,28 @@ namespace acc_onlp_helper {
         float ff; 
         /*Bias Current Begin  :*/
         /* get Bias_High_Alarm */
-        if(m_current_status["Bias Current"] ["UpperThresholdFatal"] == json::Value::Type::NIL)
+        if(m_current_status["Bias Current"] ["UpperThresholdFatal"] == 0)
         {
             ff = get_value_u("Bias_High_Alarm");
             m_current_status["Bias Current"] ["UpperThresholdFatal"] =FF3(ff);
         }			
 
         /* get Bias_Low_Alarm */
-        if(m_current_status["Bias Current"] ["LowerThresholdFatal"] == json::Value::Type::NIL)
+        if(m_current_status["Bias Current"] ["LowerThresholdFatal"] == 0)
         {
             ff = get_value_u("Bias_Low_Alarm");
             m_current_status["Bias Current"] ["LowerThresholdFatal"] =FF3(ff);
         }				        
 
         /* get Bias_High_Warning */
-        if(m_current_status["Bias Current"] ["UpperThresholdCritical"] == json::Value::Type::NIL)
+        if(m_current_status["Bias Current"] ["UpperThresholdCritical"] == 0)
         {
             ff =  get_value_u("Bias_High_Warning");
             m_current_status["Bias Current"] ["UpperThresholdCritical"] =FF3(ff);
         }					
 
         /* get Bias_Low_Warning */
-        if(m_current_status["Bias Current"] ["LowerThresholdCritical"] == json::Value::Type::NIL)
+        if(m_current_status["Bias Current"] ["LowerThresholdCritical"] == 0)
         {
             ff = get_value_u("Bias_Low_Warning");
             m_current_status["Bias Current"] ["LowerThresholdCritical"] = FF3(ff);
@@ -470,11 +467,11 @@ namespace acc_onlp_helper {
     void e_oom::default_bias()
     {
         /*Bias Current Begin  :*/
-        m_current_status["Bias Current"] ["UpperThresholdFatal"] =0;
-        m_current_status["Bias Current"] ["LowerThresholdFatal"] =0;
-        m_current_status["Bias Current"] ["UpperThresholdCritical"] =0;
-        m_current_status["Bias Current"] ["LowerThresholdCritical"] =0;
-        m_current_status["Bias Current"]["Reading"] =0;
+        m_current_status["Bias Current"] ["UpperThresholdFatal"] = 0;
+        m_current_status["Bias Current"] ["LowerThresholdFatal"] = 0;
+        m_current_status["Bias Current"] ["UpperThresholdCritical"] = 0;
+        m_current_status["Bias Current"] ["LowerThresholdCritical"] = 0;
+        m_current_status["Bias Current"]["Reading"] = 0;
         /*Bias Current End    :*/			    
     }
 
@@ -485,28 +482,28 @@ namespace acc_onlp_helper {
         float ff ;
         /* get TX_Power_High_Alarm */
 
-        if(m_current_status["Tx Power"] ["UpperThresholdFatal"] == json::Value::Type::NIL)
+        if(m_current_status["Tx Power"] ["UpperThresholdFatal"] == 0)
         {
             ff = get_value_u("TX_Power_High_Alarm");
             m_current_status["Tx Power"] ["UpperThresholdFatal"] =FF3(ff);
         }				
 
         /* get TX_Power_Low_Alarm */
-        if(m_current_status["Tx Power"] ["LowerThresholdFatal"] == json::Value::Type::NIL)
+        if(m_current_status["Tx Power"] ["LowerThresholdFatal"] == 0)
         {
             ff = get_value_u("TX_Power_Low_Alarm");
             m_current_status["Tx Power"] ["LowerThresholdFatal"] =FF3(ff);
         }				    
 
         /* get TX_Power_High_Warning */
-        if(m_current_status["Tx Power"] ["UpperThresholdCritical"] == json::Value::Type::NIL)
+        if(m_current_status["Tx Power"] ["UpperThresholdCritical"] == 0)
         {
             ff =  get_value_u("TX_Power_High_Warning");
             m_current_status["Tx Power"] ["UpperThresholdCritical"] =FF3(ff);
         }				
 
         /* get TX_Power_Low_Warning */
-        if(m_current_status["Tx Power"] ["LowerThresholdCritical"] == json::Value::Type::NIL)
+        if(m_current_status["Tx Power"] ["LowerThresholdCritical"] == 0)
         {
             ff = get_value_u("TX_Power_Low_Warning");
             m_current_status["Tx Power"] ["LowerThresholdCritical"] =FF3(ff);
@@ -573,28 +570,28 @@ namespace acc_onlp_helper {
         /*Rx Power Current Begin      :*/
         float ff;		
         /* get RX_Power_High_Alarm */
-        if(m_current_status["Rx Power"] ["UpperThresholdFatal"] == json::Value::Type::NIL)
+        if(m_current_status["Rx Power"] ["UpperThresholdFatal"] == 0)
         {
             ff = get_value("RX_Power_High_Alarm");
             m_current_status["Rx Power"] ["UpperThresholdFatal"] =FF3(ff);
         }				
 
         /* get RX_Power_Low_Alarm */
-        if(m_current_status["Rx Power"] ["LowerThresholdFatal"] == json::Value::Type::NIL)
+        if(m_current_status["Rx Power"] ["LowerThresholdFatal"] == 0)
         {
             ff =  get_value("RX_Power_Low_Alarm");
             m_current_status["Rx Power"] ["LowerThresholdFatal"] =FF3(ff);
         }				
 
         /* get RX_Power_High_Warning */
-        if(m_current_status["Rx Power"] ["UpperThresholdCritical"] == json::Value::Type::NIL)
+        if(m_current_status["Rx Power"] ["UpperThresholdCritical"] == 0)
         {
             ff = get_value("RX_Power_High_Warning");
             m_current_status["Rx Power"] ["UpperThresholdCritical"] =FF3(ff);
         }				
 
         /* get RX_Power_Low_Warning */
-        if(m_current_status["Rx Power"] ["LowerThresholdCritical"] == json::Value::Type::NIL)
+        if(m_current_status["Rx Power"] ["LowerThresholdCritical"] == 0)
         {
             ff = get_value("RX_Power_Low_Warning");
             m_current_status["Rx Power"] ["LowerThresholdCritical"] =FF3(ff);
@@ -1084,13 +1081,10 @@ namespace acc_onlp_helper {
         return true;	
     }
 
-
-
     static Switch* g_Switch = NULL;
 
     //For print debug //
     auto& gADbg = ADbg::get_instance();
-
 
     void Switch::get_board_info()
     {

@@ -34,9 +34,6 @@ TransInfo::~TransInfo() { }
 
 Json::Value TransInfo::to_json() const {
     Json::Value result;
-    result[literals::TransInfo::SWITCH_IDENTIFIER] = get_switch_identifier();
-    result[literals::TransInfo::PORT_IDENTIFIER] = get_port_identifier();
-    result[literals::TransInfo::CABLE_ID] = get_cable_id();
 
     result[literals::TransInfo::SFP_VENDOR_NAME] = get_spf_vendor_name();
     result[literals::TransInfo::PART_NUMBER] = get_part_number();
@@ -100,12 +97,9 @@ Json::Value TransInfo::to_json() const {
 
 TransInfo TransInfo::from_json(const Json::Value& json) {
     attribute::TransInfo trnas_info;
-    trnas_info.set_switch_identifier(json[literals::TransInfo::SWITCH_IDENTIFIER]);
-    trnas_info.set_port_identifier(json[literals::TransInfo::PORT_IDENTIFIER]);
-    trnas_info.set_cable_id(json[literals::TransInfo::CABLE_ID]);
+
 
     trnas_info.set_spf_vendor_name(json[literals::TransInfo::SFP_VENDOR_NAME]);
-	
     trnas_info.set_part_number(json[literals::TransInfo::PART_NUMBER]);
     trnas_info.set_serial_number(json[literals::TransInfo::SERIAL_NUMBER]);
     trnas_info.set_manufacture_date(json[literals::TransInfo::MANUFACTURE_DATE]);
