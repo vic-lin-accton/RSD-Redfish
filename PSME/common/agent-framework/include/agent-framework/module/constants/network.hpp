@@ -129,7 +129,7 @@ class EthernetSwitchPort {
 public:
     static constexpr const char PORT[] = "port";
     static constexpr const char SWITCH[] = "switch";
-    static constexpr const char STATUS[] = "status";
+    static constexpr const char STATUS[] = "Status";
     static constexpr const char PORT_IDENTIFIER[] = "portIdentifier";
     static constexpr const char PORT_ID[] = "portId";	
     static constexpr const char MODE[] = "mode";
@@ -169,9 +169,9 @@ public:
 
     static constexpr const char TEMPERATURE[] = "Temperature";
     static constexpr const char VOLTAGE[] = "Voltage";
-    static constexpr const char BIAS_CURRENT[] ="Bias Current";
-    static constexpr const char TX_POWER[] =  "Tx Power";
-    static constexpr const char RX_POWER[] = "Rx Power";
+    static constexpr const char BIAS_CURRENT[] ="BiasCurrent";
+    static constexpr const char TX_POWER[] =  "TxPower";
+    static constexpr const char RX_POWER[] = "RxPower";
 
     static constexpr const char READING[] = "Reading";
     static constexpr const char UPPER_THRESHOLD_FATAL[] = "UpperThresholdFatal";

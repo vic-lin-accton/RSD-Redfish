@@ -393,38 +393,38 @@ namespace acc_onlp_helper {
     void e_oom::refresh_bias()
     {
         float ff; 
-        /*Bias Current Begin  :*/
+        /*BiasCurrent Begin  :*/
         /* get Bias_High_Alarm */
-        if(m_current_status["Bias Current"] ["UpperThresholdFatal"] == 0)
+        if(m_current_status["BiasCurrent"] ["UpperThresholdFatal"] == 0)
         {
             ff = get_value_u("Bias_High_Alarm");
-            m_current_status["Bias Current"] ["UpperThresholdFatal"] =FF3(ff);
+            m_current_status["BiasCurrent"] ["UpperThresholdFatal"] =FF3(ff);
         }			
 
         /* get Bias_Low_Alarm */
-        if(m_current_status["Bias Current"] ["LowerThresholdFatal"] == 0)
+        if(m_current_status["BiasCurrent"] ["LowerThresholdFatal"] == 0)
         {
             ff = get_value_u("Bias_Low_Alarm");
-            m_current_status["Bias Current"] ["LowerThresholdFatal"] =FF3(ff);
+            m_current_status["BiasCurrent"] ["LowerThresholdFatal"] =FF3(ff);
         }				        
 
         /* get Bias_High_Warning */
-        if(m_current_status["Bias Current"] ["UpperThresholdCritical"] == 0)
+        if(m_current_status["BiasCurrent"] ["UpperThresholdCritical"] == 0)
         {
             ff =  get_value_u("Bias_High_Warning");
-            m_current_status["Bias Current"] ["UpperThresholdCritical"] =FF3(ff);
+            m_current_status["BiasCurrent"] ["UpperThresholdCritical"] =FF3(ff);
         }					
 
         /* get Bias_Low_Warning */
-        if(m_current_status["Bias Current"] ["LowerThresholdCritical"] == 0)
+        if(m_current_status["BiasCurrent"] ["LowerThresholdCritical"] == 0)
         {
             ff = get_value_u("Bias_Low_Warning");
-            m_current_status["Bias Current"] ["LowerThresholdCritical"] = FF3(ff);
+            m_current_status["BiasCurrent"] ["LowerThresholdCritical"] = FF3(ff);
         }				
 
         /* get Bias */
         ff = get_value_u("Tx_Bias");
-        m_current_status["Bias Current"]["Reading"] =FF3(ff);
+        m_current_status["BiasCurrent"]["Reading"] =FF3(ff);
 /*
 
            Critical
@@ -445,73 +445,73 @@ namespace acc_onlp_helper {
 
            Critical
 */
-        if(((FF3(ff) >= m_current_status["Bias Current"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["Bias Current"] ["UpperThresholdFatal"]))
-                ||((FF3(ff) >= m_current_status["Bias Current"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["Bias Current"] ["LowerThresholdCritical"])))		
+        if(((FF3(ff) >= m_current_status["BiasCurrent"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["BiasCurrent"] ["UpperThresholdFatal"]))
+                ||((FF3(ff) >= m_current_status["BiasCurrent"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["BiasCurrent"] ["LowerThresholdCritical"])))		
         {
-            m_current_status ["Bias Current"] ["Status"]["Health"] = "Warning";
-            m_current_status ["Bias Current"] ["Status"]["State"] = "Enabled";
+            m_current_status ["BiasCurrent"] ["Status"]["Health"] = "Warning";
+            m_current_status ["BiasCurrent"] ["Status"]["State"] = "Enabled";
         }
-        else if ((FF3(ff) >= m_current_status["Bias Current"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["Bias Current"] ["LowerThresholdFatal"]))
+        else if ((FF3(ff) >= m_current_status["BiasCurrent"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["BiasCurrent"] ["LowerThresholdFatal"]))
         {
-            m_current_status ["Bias Current"] ["Status"]["Health"] = "Critical";
-            m_current_status ["Bias Current"] ["Status"]["State"] = "Enabled";
+            m_current_status ["BiasCurrent"] ["Status"]["Health"] = "Critical";
+            m_current_status ["BiasCurrent"] ["Status"]["State"] = "Enabled";
         }			
         else
         {
-            m_current_status ["Bias Current"] ["Status"]["Health"] = "OK";
-            m_current_status ["Bias Current"] ["Status"]["State"] = "Enabled";    
+            m_current_status ["BiasCurrent"] ["Status"]["Health"] = "OK";
+            m_current_status ["BiasCurrent"] ["Status"]["State"] = "Enabled";    
         }
-        /*Bias Current End    :*/			    
+        /*BiasCurrent End    :*/			    
     }
 
     void e_oom::default_bias()
     {
-        /*Bias Current Begin  :*/
-        m_current_status["Bias Current"] ["UpperThresholdFatal"] = 0;
-        m_current_status["Bias Current"] ["LowerThresholdFatal"] = 0;
-        m_current_status["Bias Current"] ["UpperThresholdCritical"] = 0;
-        m_current_status["Bias Current"] ["LowerThresholdCritical"] = 0;
-        m_current_status["Bias Current"]["Reading"] = 0;
-        /*Bias Current End    :*/			    
+        /*BiasCurrent Begin  :*/
+        m_current_status["BiasCurrent"] ["UpperThresholdFatal"] = 0;
+        m_current_status["BiasCurrent"] ["LowerThresholdFatal"] = 0;
+        m_current_status["BiasCurrent"] ["UpperThresholdCritical"] = 0;
+        m_current_status["BiasCurrent"] ["LowerThresholdCritical"] = 0;
+        m_current_status["BiasCurrent"]["Reading"] = 0;
+        /*BiasCurrent End    :*/			    
     }
 
 
     void e_oom::refresh_tx_pwr()
     {
-        /*Tx Power Current Begin    :*/
+        /*TxPower Current Begin    :*/
         float ff ;
         /* get TX_Power_High_Alarm */
 
-        if(m_current_status["Tx Power"] ["UpperThresholdFatal"] == 0)
+        if(m_current_status["TxPower"] ["UpperThresholdFatal"] == 0)
         {
             ff = get_value_u("TX_Power_High_Alarm");
-            m_current_status["Tx Power"] ["UpperThresholdFatal"] =FF3(ff);
+            m_current_status["TxPower"] ["UpperThresholdFatal"] =FF3(ff);
         }				
 
         /* get TX_Power_Low_Alarm */
-        if(m_current_status["Tx Power"] ["LowerThresholdFatal"] == 0)
+        if(m_current_status["TxPower"] ["LowerThresholdFatal"] == 0)
         {
             ff = get_value_u("TX_Power_Low_Alarm");
-            m_current_status["Tx Power"] ["LowerThresholdFatal"] =FF3(ff);
+            m_current_status["TxPower"] ["LowerThresholdFatal"] =FF3(ff);
         }				    
 
         /* get TX_Power_High_Warning */
-        if(m_current_status["Tx Power"] ["UpperThresholdCritical"] == 0)
+        if(m_current_status["TxPower"] ["UpperThresholdCritical"] == 0)
         {
             ff =  get_value_u("TX_Power_High_Warning");
-            m_current_status["Tx Power"] ["UpperThresholdCritical"] =FF3(ff);
+            m_current_status["TxPower"] ["UpperThresholdCritical"] =FF3(ff);
         }				
 
         /* get TX_Power_Low_Warning */
-        if(m_current_status["Tx Power"] ["LowerThresholdCritical"] == 0)
+        if(m_current_status["TxPower"] ["LowerThresholdCritical"] == 0)
         {
             ff = get_value_u("TX_Power_Low_Warning");
-            m_current_status["Tx Power"] ["LowerThresholdCritical"] =FF3(ff);
+            m_current_status["TxPower"] ["LowerThresholdCritical"] =FF3(ff);
         }				
 
         /* get Tx_Power */
         ff = get_value_u("Tx_Power");            
-        m_current_status["Tx Power"]["Reading"] =FF3(ff);
+        m_current_status["TxPower"]["Reading"] =FF3(ff);
 
 /*
 
@@ -534,72 +534,72 @@ namespace acc_onlp_helper {
            Critical
 */
 
-        if(((FF3(ff) >= m_current_status["Tx Power"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["Tx Power"] ["UpperThresholdFatal"]))
-                ||((FF3(ff) >= m_current_status["Tx Power"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["Tx Power"] ["LowerThresholdCritical"])))		
+        if(((FF3(ff) >= m_current_status["TxPower"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["TxPower"] ["UpperThresholdFatal"]))
+                ||((FF3(ff) >= m_current_status["TxPower"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["TxPower"] ["LowerThresholdCritical"])))		
         {
-            m_current_status ["Tx Power"] ["Status"]["Health"] = "Warning";
-            m_current_status ["Tx Power"] ["Status"]["State"] = "Enabled";
+            m_current_status ["TxPower"] ["Status"]["Health"] = "Warning";
+            m_current_status ["TxPower"] ["Status"]["State"] = "Enabled";
         }
-        else if ((FF3(ff) >= m_current_status["Tx Power"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["Tx Power"] ["LowerThresholdFatal"]))
+        else if ((FF3(ff) >= m_current_status["TxPower"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["TxPower"] ["LowerThresholdFatal"]))
         {
-            m_current_status ["Tx Power"] ["Status"]["Health"] = "Critical";
-            m_current_status ["Tx Power"] ["Status"]["State"] = "Enabled";
+            m_current_status ["TxPower"] ["Status"]["Health"] = "Critical";
+            m_current_status ["TxPower"] ["Status"]["State"] = "Enabled";
         }			
         else
         {
-            m_current_status ["Tx Power"] ["Status"]["Health"] = "OK";
-            m_current_status ["Tx Power"] ["Status"]["State"] = "Enabled";    
+            m_current_status ["TxPower"] ["Status"]["Health"] = "OK";
+            m_current_status ["TxPower"] ["Status"]["State"] = "Enabled";    
         }
-        /*Tx Power Current End      :*/   
+        /*TxPower Current End      :*/   
     }
 
     void e_oom::default_tx_pwr()
     {
-        /*Tx Power Current Begin    :*/
-        m_current_status["Tx Power"] ["UpperThresholdFatal"] = 0;
-        m_current_status["Tx Power"] ["LowerThresholdFatal"] = 0;
-        m_current_status["Tx Power"] ["UpperThresholdCritical"] = 0;
-        m_current_status["Tx Power"] ["LowerThresholdCritical"] = 0;
-        m_current_status["Tx Power"]["Reading"] = 0;
-        /*Tx Power Current End      :*/   
+        /*TxPower Current Begin    :*/
+        m_current_status["TxPower"] ["UpperThresholdFatal"] = 0;
+        m_current_status["TxPower"] ["LowerThresholdFatal"] = 0;
+        m_current_status["TxPower"] ["UpperThresholdCritical"] = 0;
+        m_current_status["TxPower"] ["LowerThresholdCritical"] = 0;
+        m_current_status["TxPower"]["Reading"] = 0;
+        /*TxPower Current End      :*/   
     }
 
 
     void e_oom::refresh_rx_pwr()
     {
-        /*Rx Power Current Begin      :*/
+        /*RxPower Current Begin      :*/
         float ff;		
         /* get RX_Power_High_Alarm */
-        if(m_current_status["Rx Power"] ["UpperThresholdFatal"] == 0)
+        if(m_current_status["RxPower"] ["UpperThresholdFatal"] == 0)
         {
             ff = get_value("RX_Power_High_Alarm");
-            m_current_status["Rx Power"] ["UpperThresholdFatal"] =FF3(ff);
+            m_current_status["RxPower"] ["UpperThresholdFatal"] =FF3(ff);
         }				
 
         /* get RX_Power_Low_Alarm */
-        if(m_current_status["Rx Power"] ["LowerThresholdFatal"] == 0)
+        if(m_current_status["RxPower"] ["LowerThresholdFatal"] == 0)
         {
             ff =  get_value("RX_Power_Low_Alarm");
-            m_current_status["Rx Power"] ["LowerThresholdFatal"] =FF3(ff);
+            m_current_status["RxPower"] ["LowerThresholdFatal"] =FF3(ff);
         }				
 
         /* get RX_Power_High_Warning */
-        if(m_current_status["Rx Power"] ["UpperThresholdCritical"] == 0)
+        if(m_current_status["RxPower"] ["UpperThresholdCritical"] == 0)
         {
             ff = get_value("RX_Power_High_Warning");
-            m_current_status["Rx Power"] ["UpperThresholdCritical"] =FF3(ff);
+            m_current_status["RxPower"] ["UpperThresholdCritical"] =FF3(ff);
         }				
 
         /* get RX_Power_Low_Warning */
-        if(m_current_status["Rx Power"] ["LowerThresholdCritical"] == 0)
+        if(m_current_status["RxPower"] ["LowerThresholdCritical"] == 0)
         {
             ff = get_value("RX_Power_Low_Warning");
-            m_current_status["Rx Power"] ["LowerThresholdCritical"] =FF3(ff);
+            m_current_status["RxPower"] ["LowerThresholdCritical"] =FF3(ff);
         }					
 
         /* get Rx_Power */
         ff = get_value("Rx_Power");     
-        m_current_status["Rx Power"]["Reading"] =FF3(ff);
+        m_current_status["RxPower"]["Reading"] =FF3(ff);
 
 /*
 
@@ -622,34 +622,34 @@ namespace acc_onlp_helper {
            Critical
 */
 
-        if(((FF3(ff) >= m_current_status["Rx Power"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["Rx Power"] ["UpperThresholdFatal"]))
-                ||((FF3(ff) >= m_current_status["Rx Power"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["Rx Power"] ["LowerThresholdCritical"])))		
+        if(((FF3(ff) >= m_current_status["RxPower"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["RxPower"] ["UpperThresholdFatal"]))
+                ||((FF3(ff) >= m_current_status["RxPower"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["RxPower"] ["LowerThresholdCritical"])))		
         {
-            m_current_status ["Rx Power"] ["Status"]["Health"] = "Warning";
-            m_current_status ["Rx Power"] ["Status"]["State"] = "Enabled";
+            m_current_status ["RxPower"] ["Status"]["Health"] = "Warning";
+            m_current_status ["RxPower"] ["Status"]["State"] = "Enabled";
         }
-        else if ((FF3(ff) >= m_current_status["Rx Power"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["Rx Power"] ["LowerThresholdFatal"]))
+        else if ((FF3(ff) >= m_current_status["RxPower"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["RxPower"] ["LowerThresholdFatal"]))
         {
-            m_current_status ["Rx Power"] ["Status"]["Health"] = "Critical";
-            m_current_status ["Rx Power"] ["Status"]["State"] = "Enabled";
+            m_current_status ["RxPower"] ["Status"]["Health"] = "Critical";
+            m_current_status ["RxPower"] ["Status"]["State"] = "Enabled";
         }			
         else
         {
-            m_current_status ["Rx Power"] ["Status"]["Health"] = "OK";
-            m_current_status ["Rx Power"] ["Status"]["State"] = "Enabled";    
+            m_current_status ["RxPower"] ["Status"]["Health"] = "OK";
+            m_current_status ["RxPower"] ["Status"]["State"] = "Enabled";    
         }
-        /*Rx Power Current End      :*/	   
+        /*RxPower Current End      :*/	   
     }
 
     void e_oom::default_rx_pwr()
     {
-        /*Rx Power Current Begin      :*/
-        m_current_status["Rx Power"] ["UpperThresholdFatal"] = 0;
-        m_current_status["Rx Power"] ["LowerThresholdFatal"] = 0;
-        m_current_status["Rx Power"] ["UpperThresholdCritical"] = 0;
-        m_current_status["Rx Power"] ["LowerThresholdCritical"] = 0;
-        m_current_status["Rx Power"]["Reading"] = 0;
-        /*Rx Power Current End      :*/	   
+        /*RxPower Current Begin      :*/
+        m_current_status["RxPower"] ["UpperThresholdFatal"] = 0;
+        m_current_status["RxPower"] ["LowerThresholdFatal"] = 0;
+        m_current_status["RxPower"] ["UpperThresholdCritical"] = 0;
+        m_current_status["RxPower"] ["LowerThresholdCritical"] = 0;
+        m_current_status["RxPower"]["Reading"] = 0;
+        /*RxPower Current End      :*/	   
     }
 
 
@@ -931,7 +931,7 @@ namespace acc_onlp_helper {
         Bias ["Status"]["Health"] = json::Value::Type::NIL;
         Bias ["Status"]["State"] = json::Value::Type::NIL;
 
-        m_current_status["Bias Current"] =std::move(Bias); 
+        m_current_status["BiasCurrent"] =std::move(Bias); 
 
 
         json::Value Voltage(json::Value::Type::OBJECT);
@@ -964,7 +964,7 @@ namespace acc_onlp_helper {
         TxPwr ["Status"]["Health"] = json::Value::Type::NIL;
         TxPwr ["Status"]["State"] = json::Value::Type::NIL;
 
-        m_current_status["Tx Power"]= std::move(TxPwr); 		
+        m_current_status["TxPower"]= std::move(TxPwr); 		
         /*
            json::Value RxPwr(json::Value::Type::OBJECT);
 
@@ -980,7 +980,7 @@ namespace acc_onlp_helper {
            RxPwr["Status"]["Health"] = json::Value::Type::NIL;
            RxPwr["Status"]["State"] = json::Value::Type::NIL;
 
-           m_current_status["Rx Power"] = std::move(RxPwr); 	
+           m_current_status["RxPower"] = std::move(RxPwr); 	
            */
 
     }

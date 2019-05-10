@@ -312,29 +312,29 @@ void GetOnlpInfo::get_onlp_info() {
                tTransInfo.set_voltage_status_state(r["Voltage"]["Status"]["State"]);
                tTransInfo.set_voltage_status_health(r["Voltage"]["Status"]["Health"]);
 
-               tTransInfo.set_bias_current_reading(r["Bias Current"]["Reading"]);
-               tTransInfo.set_bias_current_upper_th_fatal(r["Bias Current"]["UpperThresholdFatal"]);		   
-               tTransInfo.set_bias_current_upper_th_critical(r["Bias Current"]["UpperThresholdCritical"]);
-               tTransInfo.set_bias_current_lower_th_critical(r["Bias Current"]["LowerThresholdCritical"]);
-               tTransInfo.set_bias_current_lower_th_fatal(r["Bias Current"]["LowerThresholdFatal"]);
-               tTransInfo.set_bias_current_status_state(r["Bias Current"]["Status"]["State"]);
-               tTransInfo.set_bias_current_status_health(r["Bias Current"]["Status"]["Health"]);			   
+               tTransInfo.set_bias_current_reading(r["BiasCurrent"]["Reading"]);
+               tTransInfo.set_bias_current_upper_th_fatal(r["BiasCurrent"]["UpperThresholdFatal"]);		   
+               tTransInfo.set_bias_current_upper_th_critical(r["BiasCurrent"]["UpperThresholdCritical"]);
+               tTransInfo.set_bias_current_lower_th_critical(r["BiasCurrent"]["LowerThresholdCritical"]);
+               tTransInfo.set_bias_current_lower_th_fatal(r["BiasCurrent"]["LowerThresholdFatal"]);
+               tTransInfo.set_bias_current_status_state(r["BiasCurrent"]["Status"]["State"]);
+               tTransInfo.set_bias_current_status_health(r["BiasCurrent"]["Status"]["Health"]);			   
 
-               tTransInfo.set_tx_power_reading(r["Tx Power"]["Reading"]);
-               tTransInfo.set_tx_power_upper_th_fatal(r["Tx Power"]["UpperThresholdFatal"]);		   
-               tTransInfo.set_tx_power_upper_th_critical(r["Tx Power"]["UpperThresholdCritical"]);
-               tTransInfo.set_tx_power_lower_th_critical(r["Tx Power"]["LowerThresholdCritical"]);
-               tTransInfo.set_tx_power_lower_th_fatal(r["Tx Power"]["LowerThresholdFatal"]);
-               tTransInfo.set_tx_power_status_state(r["Tx Power"]["Status"]["State"]);
-               tTransInfo.set_tx_power_status_health(r["Tx Power"]["Status"]["Health"]);			   
+               tTransInfo.set_tx_power_reading(r["TxPower"]["Reading"]);
+               tTransInfo.set_tx_power_upper_th_fatal(r["TxPower"]["UpperThresholdFatal"]);		   
+               tTransInfo.set_tx_power_upper_th_critical(r["TxPower"]["UpperThresholdCritical"]);
+               tTransInfo.set_tx_power_lower_th_critical(r["TxPower"]["LowerThresholdCritical"]);
+               tTransInfo.set_tx_power_lower_th_fatal(r["TxPower"]["LowerThresholdFatal"]);
+               tTransInfo.set_tx_power_status_state(r["TxPower"]["Status"]["State"]);
+               tTransInfo.set_tx_power_status_health(r["TxPower"]["Status"]["Health"]);			   
 			   
-               tTransInfo.set_rx_power_reading(r["Rx Power"]["Reading"]);
-               tTransInfo.set_rx_power_upper_th_fatal(r["Rx Power"]["UpperThresholdFatal"]);		   
-               tTransInfo.set_rx_power_upper_th_critical(r["Rx Power"]["UpperThresholdCritical"]);
-               tTransInfo.set_rx_power_lower_th_critical(r["Rx Power"]["LowerThresholdCritical"]);
-               tTransInfo.set_rx_power_lower_th_fatal(r["Rx Power"]["LowerThresholdFatal"]);
-               tTransInfo.set_rx_power_status_state(r["Rx Power"]["Status"]["State"]);
-               tTransInfo.set_rx_power_status_health(r["Rx Power"]["Status"]["Health"]);			   
+               tTransInfo.set_rx_power_reading(r["RxPower"]["Reading"]);
+               tTransInfo.set_rx_power_upper_th_fatal(r["RxPower"]["UpperThresholdFatal"]);		   
+               tTransInfo.set_rx_power_upper_th_critical(r["RxPower"]["UpperThresholdCritical"]);
+               tTransInfo.set_rx_power_lower_th_critical(r["RxPower"]["LowerThresholdCritical"]);
+               tTransInfo.set_rx_power_lower_th_fatal(r["RxPower"]["LowerThresholdFatal"]);
+               tTransInfo.set_rx_power_status_state(r["RxPower"]["Status"]["State"]);
+               tTransInfo.set_rx_power_status_health(r["RxPower"]["Status"]["Health"]);			   
 			   
                port_->set_trans_info(tTransInfo);			   
                

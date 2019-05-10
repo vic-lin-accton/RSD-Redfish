@@ -136,12 +136,12 @@ json::Value EthernetSwitchPort::get_trans_info_json() const
     attribute::TransInfo tTransInfo;	
     
     tTransInfo = m_trans_info;
-    
+
     r[literals::EthernetSwitchPort::SFP_VENDOR_NAME] = tTransInfo.get_spf_vendor_name();
     r[literals::EthernetSwitchPort::PART_NUMBER] = tTransInfo.get_part_number();
     r[literals::EthernetSwitchPort::SERIAL_NUMBER] = tTransInfo.get_serial_number();
     r[literals::EthernetSwitchPort::MANUFACTURE_DATE] = tTransInfo.get_manufacture_date();
-    
+ 
     //Temperature
     signed int rr = tTransInfo.get_temp_reading();
     double tmp = (rr /1000.000);
@@ -192,7 +192,7 @@ json::Value EthernetSwitchPort::get_trans_info_json() const
     r[literals::EthernetSwitchPort::VOLTAGE][literals::EthernetSwitchPort::STATUS][literals::TransInfo::STATUS_HEALTH] =  tTransInfo.get_voltage_status_health();
 
     
-    // Bias current
+    // Biascurrent
     rr = tTransInfo.get_bias_current_reading();
     tmp = (rr /1000.000);
     r[literals::EthernetSwitchPort::BIAS_CURRENT][literals::EthernetSwitchPort::READING] = tmp;
@@ -217,7 +217,7 @@ json::Value EthernetSwitchPort::get_trans_info_json() const
     r[literals::EthernetSwitchPort::BIAS_CURRENT][literals::EthernetSwitchPort::STATUS][literals::TransInfo::STATUS_HEALTH] =  tTransInfo.get_bias_current_status_health();
     
     
-    // Tx Power
+    // TxPower
     rr = tTransInfo.get_tx_power_reading();
     tmp = (rr /1000.000);
     r[literals::EthernetSwitchPort::TX_POWER][literals::EthernetSwitchPort::READING] = tmp;

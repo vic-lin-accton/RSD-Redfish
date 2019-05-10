@@ -98,6 +98,13 @@
 	      String="For port tx/rx statistics information"/>
         </Property>
 
+        <Property Name="TransceiverStatistics" Type="EthernetSwitchPort.v1_0_0.TransceiverStatistics">
+          <Annotation Term="OData.Description"
+	      String="For port transceiver statistics information"/>
+          <Annotation Term="OData.LongDescription"
+	      String="For port transceiver statistics information"/>
+        </Property>
+
         <Property Name="NeighborMAC" Type="EthernetInterface.v1_0_0.MACAddress">
           <Annotation Term="OData.Description"
                       String="For Downstream port type this property provide MAC address of NIC connected to this port."/>
@@ -203,6 +210,69 @@
         <Property Name="SwitchId" Type="Edm.String"/>
         <Property Name="PortId" Type="Edm.String"/>
         <Property Name="CableId" Type="Edm.String"/>
+      </ComplexType>
+
+      <ComplexType Name="TransceiverStatistics">
+        <Annotation Term="OData.AdditionalProperties" Bool="false"/>
+        <Property Name="SFP Vendor Name" Type="Edm.String"/>
+        <Property Name="Part Number" Type="Edm.String"/>
+        <Property Name="Serial Number" Type="Edm.String"/>
+        <Property Name="Manufacture Date" Type="Edm.String"/>
+        <Property Name="Temperature" Type="EthernetSwitchPort.v1_0_0.Temperature"/>    
+        <Property Name="Voltage" Type="EthernetSwitchPort.v1_0_0.Voltage"/>       
+        <Property Name="BiasCurrent" Type="EthernetSwitchPort.v1_0_0.BiasCurrent"/>       
+        <Property Name="TxPower" Type="EthernetSwitchPort.v1_0_0.TxPower"/>       
+        <Property Name="RxPower" Type="EthernetSwitchPort.v1_0_0.RxPower"/>       
+      </ComplexType>
+
+      <ComplexType Name="Temperature">
+        <Annotation Term="OData.AdditionalProperties" Bool="false"/>
+        <Property Name="Reading" Type="Edm.Double"/>
+        <Property Name="UpperThresholdFatal" Type="Edm.Int64"/>
+        <Property Name="UpperThresholdCritical" Type="Edm.Int64"/>
+        <Property Name="LowerThresholdCritical" Type="Edm.Int64"/>
+        <Property Name="LowerThresholdFatal" Type="Edm.Int64"/>     
+        <Property Name="Status" Type="Resource.Status" Nullable="false"/>
+      </ComplexType>
+
+      <ComplexType Name="Voltage">
+        <Annotation Term="OData.AdditionalProperties" Bool="false"/>
+        <Property Name="Reading" Type="Edm.Double"/>
+        <Property Name="UpperThresholdFatal" Type="Edm.Double"/>
+        <Property Name="UpperThresholdCritical" Type="Edm.Double"/>
+        <Property Name="LowerThresholdCritical" Type="Edm.Double"/>
+        <Property Name="LowerThresholdFatal" Type="Edm.Double"/>   
+        <Property Name="Status" Type="Resource.Status" Nullable="false"/>        
+      </ComplexType>
+
+      <ComplexType Name="BiasCurrent">
+        <Annotation Term="OData.AdditionalProperties" Bool="false"/>
+        <Property Name="Reading" Type="Edm.Double"/>
+        <Property Name="UpperThresholdFatal" Type="Edm.Double"/>
+        <Property Name="UpperThresholdCritical" Type="Edm.Double"/>
+        <Property Name="LowerThresholdCritical" Type="Edm.Double"/>
+        <Property Name="LowerThresholdFatal" Type="Edm.Double"/>        
+        <Property Name="Status" Type="Resource.Status" Nullable="false"/>        
+      </ComplexType>
+
+      <ComplexType Name="TxPower">
+        <Annotation Term="OData.AdditionalProperties" Bool="false"/>
+        <Property Name="Reading" Type="Edm.Double"/>
+        <Property Name="UpperThresholdFatal" Type="Edm.Double"/>
+        <Property Name="UpperThresholdCritical" Type="Edm.Double"/>
+        <Property Name="LowerThresholdCritical" Type="Edm.Double"/>
+        <Property Name="LowerThresholdFatal" Type="Edm.Double"/>      
+        <Property Name="Status" Type="Resource.Status" Nullable="false"/>        
+      </ComplexType>
+
+      <ComplexType Name="RxPower">
+        <Annotation Term="OData.AdditionalProperties" Bool="false"/>
+        <Property Name="Reading" Type="Edm.Double"/>
+        <Property Name="UpperThresholdFatal" Type="Edm.Double"/>
+        <Property Name="UpperThresholdCritical" Type="Edm.Double"/>
+        <Property Name="LowerThresholdCritical" Type="Edm.Double"/>
+        <Property Name="LowerThresholdFatal" Type="Edm.Double"/>   
+        <Property Name="Status" Type="Resource.Status" Nullable="false"/>        
       </ComplexType>
 
       <ComplexType Name="Statistics">
