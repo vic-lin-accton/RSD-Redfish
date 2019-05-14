@@ -93,7 +93,7 @@ void RoleConfig::loadPreRoles() {
           APrivTypes.add(PrivilegeType::from_string("ConfigureUsers"));
           APrivTypes.add(PrivilegeType::from_string("ConfigureSelf"));
           APrivTypes.add(PrivilegeType::from_string("ConfigureComponents"));          
-          Aadmin.set_ispredefined(true);Aadmin.set_privilege_types(APrivTypes);Aadmin.set_roleid("Admin");
+          Aadmin.set_ispredefined(true);Aadmin.set_privilege_types(APrivTypes);Aadmin.set_roleid("Administrator");
           AccountManager::get_instance()->addRole(Aadmin);
                     
           PrivilegeTypes OPrivTypes{};

@@ -112,7 +112,7 @@ void endpoint::Account::del(const server::Request& request, server::Response& re
     AccountManager::get_instance()->delAccount(request.params[PathParam::ACCOUNT_ID]);
 #endif
     AccountConfig::get_instance()->saveAccounts();
-    response.set_status(server::status_2XX::NO_CONTENT);
+    response.set_status(server::status_2XX::OK);
 }
 
 

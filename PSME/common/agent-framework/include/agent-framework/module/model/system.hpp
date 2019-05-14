@@ -478,7 +478,7 @@ private:
     OptionalField<enums::SystemType> m_system_type{enums::SystemType::Physical};
     OptionalField<std::string> m_bios_version{};
     enums::BootOverride m_boot_override{enums::BootOverride::Disabled};
-    enums::BootOverrideMode m_boot_override_mode{enums::BootOverrideMode::UEFI};
+    enums::BootOverrideMode m_boot_override_mode{enums::BootOverrideMode::Legacy};
     enums::BootOverrideTarget m_boot_override_target{enums::BootOverrideTarget::None};
     BootOverrideSupported m_boot_override_supported{};
     OptionalField<std::string> m_uefi_target{};

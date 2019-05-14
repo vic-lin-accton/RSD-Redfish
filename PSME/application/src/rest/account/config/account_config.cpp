@@ -78,7 +78,7 @@ void AccountConfig::load_admin() {
        account.set_password("redfish");
        account.set_enabled(true);
        account.set_locked(false);
-       account.set_roleid("Admin");
+       account.set_roleid("Administrator");
        AccountManager::get_instance()->addAccount(account);
 
     }

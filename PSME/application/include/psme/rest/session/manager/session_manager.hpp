@@ -215,10 +215,13 @@ public:
 
     bool chkExceptionUri(const std::string& uri);
 
+    bool checkSession_by_name(const std::string& session_username);
+
 private:
 
 
     Session getSession_by_name(const std::string& session_username);
+
 
     void delSession_by_name(const std::string& session_username);
 

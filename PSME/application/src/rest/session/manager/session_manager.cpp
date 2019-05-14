@@ -237,6 +237,14 @@ Session SessionManager::getSession_by_name(const std::string& session_username) 
     return session->second;
 }
 
+bool SessionManager::checkSession_by_name(const std::string& session_username) {
+    auto session = m_sessions.find(session_username);
+    if (m_sessions.end() == session) {
+        return false;
+    }
+    return true;
+}
+
 Session SessionManager::getSession(uint64_t session_id) {
     std::lock_guard<std::mutex> lock{m_mutex};
     for (const auto& item : m_sessions) {
@@ -252,8 +260,6 @@ void SessionManager::delSession_by_name(const std::string& session_username) {
 
     auto  session = m_sessions.find(session_username);
     if (m_sessions.end() == session) {
-
-		
         throw agent_framework::exceptions::NotFound("Session '" + session_username + "' not found.");
     }
 

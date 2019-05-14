@@ -80,7 +80,9 @@ const char VARIABLE_BEGIN = '{';
 const char VARIABLE_END = '}';
 const char REGEX_MARK = ':';
 const char ID_REGEX[] = "[0-9]+";
-const char USERNAME_REGEX[] = "[a-zA-Z0-9]+";
+//const char USERNAME_REGEX[] = "[a-zA-Z0-9]+";
+const char USERNAME_REGEX[] = "[a-zA-Z0-9_]+";
+
 const char XML_REGEX[] = ".*.xml";
 /*Nick Added Begin: */
 const char FAN_ID[] = "FanId";  

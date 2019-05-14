@@ -591,8 +591,8 @@ System make_system_default(const std::string& parent, const std::string& chassis
 	system.set_uefi_target("/");
 	system.set_bios_version("N/A");
 	system.set_oem(agent_framework::model::attribute::Oem{});
-	system.set_boot_override(enums::BootOverride::Once);
-	system.set_boot_override_target(enums::BootOverrideTarget::Hdd);
+       system.set_boot_override(enums::BootOverride::Disabled);
+       system.set_boot_override_target(enums::BootOverrideTarget::None);
 
 	system.add_boot_override_supported(enums::BootOverrideTarget::Hdd);
 	system.add_boot_override_supported(enums::BootOverrideTarget::Pxe);

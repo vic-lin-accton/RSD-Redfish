@@ -91,7 +91,7 @@ void endpoint::Session::del(const server::Request& req, server::Response& res) {
 
     SessionManager::get_instance()->delSession(deld);
 
-    res.set_status(server::status_2XX::NO_CONTENT);
+    res.set_status(server::status_2XX::OK);
 }
 
 

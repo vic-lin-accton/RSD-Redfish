@@ -187,6 +187,15 @@ void endpoint::SessionCollection::post(const server::Request& request, server::R
            if(res == 0)
            {
                const auto& role = AccountManager::get_instance()->getRole(account.get_roleid());  
+
+               if(SessionManager::get_instance()->checkSession_by_name(username))
+               {
+                   printf("Found exist ID and del first to cerate new one session\r\n");
+                   SessionManager::get_instance()->delSession( SessionManager::get_instance()->getSession(username).get_id());				   
+               }
+               else
+                   printf("Not fund ID\r\n");
+			   	   
                session.set_authen_token(AuthenToken);
                session.set_userrole(role.get_roleid());  
 		   

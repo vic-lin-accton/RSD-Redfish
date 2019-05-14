@@ -1422,7 +1422,7 @@ namespace acc_onlp_helper {
 
                 std::string event("Event");
                 std::string servrity("Warning");					   
-                std::string sensor_type("PSU ");		   
+                std::string sensor_type("Power Supply / Converter");
                 std::string message("PSU UnavailableOffline");    
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);
 
@@ -1444,7 +1444,7 @@ namespace acc_onlp_helper {
 
                 std::string event("Event");
                 std::string servrity("Warning");					   
-                std::string sensor_type("PSU ");		   
+                std::string sensor_type("Power Supply / Converter");		   
                 std::string message("PSU absent");    
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);
 
@@ -1457,7 +1457,7 @@ namespace acc_onlp_helper {
 
                 std::string event("Event");
                 std::string servrity("Warning");					   
-                std::string sensor_type("PSU ");		   
+                std::string sensor_type("Power Supply / Converter");		   
                 std::string message("PSU absent");    
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);
 
@@ -1556,7 +1556,7 @@ namespace acc_onlp_helper {
 
                 std::string event("Event");
                 std::string servrity("Warning");					   
-                std::string sensor_type("PSU FAN");		   
+                std::string sensor_type("Fan");		   
                 std::string message("PSU fan absent");    
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);
 
@@ -2189,7 +2189,7 @@ Area : 5
             { // PSU unplug  					
                 std::string event("Event");
                 std::string servrity("OK");					   
-                std::string sensor_type("PSU");		   
+                std::string sensor_type("Power Supply / Converter");		   
                 std::string message("PSU unplug.");
                 Entry.set_log_entry(event , sensor_type , servrity, message, id+1);		
 
@@ -2200,7 +2200,7 @@ Area : 5
             { // PSU plug in
                 std::string event("Event");
                 std::string servrity("OK");					   
-                std::string sensor_type("PSU");		   
+                std::string sensor_type("Power Supply / Converter");		   
                 std::string message("PSU plug in.");	
                 Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
 
