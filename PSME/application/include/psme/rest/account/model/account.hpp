@@ -94,21 +94,24 @@ public:
         m_password = password;
     }
     
-  int checkpw(const std::string& password) 
-  {
-    	if (m_password == password)
-    	{
-    	    m_loginf=0;
-    	    
+    int checkpw(const std::string& password) 
+    {
+        /*Check this acount is enable or not */
+        if(!m_enabled)
+		return 1;
+  
+    	 if (m_password == password)
+    	 {
+    	     m_loginf=0;
         }
         else
         {
-           m_loginf++;
-           if ( m_loginf > Accountservice::get_instance()->get_alt() )
-           {
-               m_locked = true;
-            }   
-            m_loginftime=std::chrono::steady_clock::now();  //no matter locked or not  record login fail time to wait reset loginf counter
+            m_loginf++;
+            if ( m_loginf > Accountservice::get_instance()->get_alt() )
+            {
+                m_locked = true;
+             }   
+             m_loginftime=std::chrono::steady_clock::now();  //no matter locked or not  record login fail time to wait reset loginf counter
         }
         
         return m_loginf;

@@ -34,6 +34,7 @@ namespace constants {
 
 class Routes {
 public:
+    static const std::string BASE_ROOT;	
     static const std::string REDFISH_PATH;
     static const std::string ROOT_PATH;
     static const std::string ODATA_SERVICE_DOCUMENT;

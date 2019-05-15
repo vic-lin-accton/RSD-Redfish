@@ -46,6 +46,7 @@ extern const char METADATA_ROOT_FILE[];
  * @brief Constant literals for use with PathBuilder function.
  */
 namespace PathParam {
+extern const char BASE_ROOT[];
 extern const char REDFISH[];
 extern const char METADATA_ROOT[];
 extern const char METADATA[];

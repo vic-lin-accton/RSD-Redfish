@@ -38,6 +38,9 @@ void EndpointBuilder::build_endpoints(psme::rest::server::Multiplexer& mp) {
         res.set_header(ContentType::CONTENT_TYPE, ContentType::JSON);
     });
 
+    // "/
+    mp.register_handler(Redfish::UPtr(new Base_root(constants::Routes::BASE_ROOT)), AccessType::ALL);
+
     // "/redfish
     mp.register_handler(Redfish::UPtr(new Redfish(constants::Routes::REDFISH_PATH)), AccessType::ALL);
 

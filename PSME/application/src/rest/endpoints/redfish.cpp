@@ -28,6 +28,15 @@ using psme::rest::server::Response;
 using namespace psme::rest::endpoint;
 using namespace psme::rest;
 
+Base_root::Base_root(const std::string& path) : EndpointBase(path) {}
+Base_root::~Base_root() {}
+void Base_root::get(const Request&, Response& res) {
+    json::Value r(json::Value::Type::OBJECT);
+    res.set_status(server::status_2XX::OK);    
+    set_response(res, r);
+}
+
+
 Redfish::Redfish(const std::string& path) : EndpointBase(path) {}
 
 Redfish::~Redfish() {}

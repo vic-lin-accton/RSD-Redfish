@@ -26,6 +26,22 @@ namespace rest {
 namespace endpoint {
 
 
+class Base_root : public EndpointBase {
+public:
+
+    /*!
+     * @brief The constructor for Redfish endpoint
+     */
+    explicit Base_root(const std::string& path);
+
+    /*!
+     * @brief Destructor
+     */
+    virtual ~Base_root();
+
+    void get(const server::Request& request, server::Response& response) override;
+};
+
 
 /*!
  * @brief A class representing the rest api redfish resource

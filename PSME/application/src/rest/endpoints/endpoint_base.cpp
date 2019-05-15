@@ -125,10 +125,14 @@ bool EndpointBase::authen_check(const Request& request,const std::string& method
         {   //Use Basic Authen //
             const auto  & account  =AccountManager::get_instance()->getAccount(username);	
 
-            /*Check if this username locked*/
+            /*Check if this account username locked*/
             if(account.get_locked() == true)
                 return false;
 
+            /*Check if this account enabled*/
+            if(account.get_enabled() != true)
+                return false;
+			
             /*Check read/write priviledge */
             /*Todo , Use "Privilege Mappings" to do more specific constrain*/					
              if((account.get_roleid() == "ReadOnlyUser") && (method == "POST" || method == "PATCH" || method == "DELETE") )

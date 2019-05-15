@@ -26,6 +26,12 @@
 using namespace psme::rest::constants;
 using namespace psme::rest::endpoint;
 
+// "/
+
+const std::string Routes::BASE_ROOT =
+    PathBuilder()
+        .append("")
+        .build();
 // "/redfish
 const std::string Routes::REDFISH_PATH =
     PathBuilder()

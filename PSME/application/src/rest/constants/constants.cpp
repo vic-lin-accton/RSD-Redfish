@@ -31,6 +31,7 @@ const char METADATA_ROOT_FILE[] = "metadata_root.xml";
 }
 
 namespace PathParam {
+const char BASE_ROOT[] = "/";
 const char REDFISH[] = "redfish";
 const char METADATA_ROOT[] = "$metadata";
 const char METADATA[] = "metadata";

@@ -186,6 +186,14 @@ void endpoint::SessionCollection::post(const server::Request& request, server::R
 	    int res  = AccountManager::get_instance()->login(username,password) ;
            if(res == 0)
            {
+               /**/
+               const auto  & account_enable_chk  =AccountManager::get_instance()->getAccount(username);
+               if(account_enable_chk.get_enabled() != true)
+               {
+                   response.set_status(server::status_4XX::UNAUTHORIZED);    	
+                   return;
+               }
+			   
                const auto& role = AccountManager::get_instance()->getRole(account.get_roleid());  
 
                if(SessionManager::get_instance()->checkSession_by_name(username))
@@ -207,7 +215,6 @@ void endpoint::SessionCollection::post(const server::Request& request, server::R
 		 
 	        const std::string odata_path="/redfish/v1/SessionService/Sessions/" + id;	 
 		 r[constants::Common::ODATA_ID] = odata_path;
-
 
                /*Set Authen Token in header */
                static const char * loginuri="/redfish/v1/SessionService/Sessions";
