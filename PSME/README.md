@@ -1,24 +1,103 @@
-# Pooled System Management Engine (PSME) Software
+### PSME Redfish Service Architecture Model
 
-PSME Software is a bundle of applications working and communicating with each other to manage and control specific assets in a setup.
+```
+		+-----------------------+      +--------------------------+      
+		|  REST Redfish Client  |      |  Redfish Event Listener  |      
+		+-----------^-----------+      +------^-------------------+      
+		            |                         |  https port defined by Event Listener                 
+		            |                         |                 
+		            |                         |                  
+		            +-------+        +--------+                  
+		                    |        |                           
+		    https port 8888 |        |                           
+		           +--------v--------v---------+                 
+		           |    PSME Redfish Service   |                 
+		           |                           |                 
+		           |  +--------------------+   |                 
+		           |  |                    |   |                 
+		           |  | PSME REST Server   |   |                 
+		           |  |                    |   |                 
+		           |  +---------^----------+   |                 
+		           |            | JSON|RPC     |                 
+		           |  +---------v----------+   |                 
+		           |  |                    |   |                 
+		           |  | PSME Chassis Agent |   |                 
+		           |  |                    |   |                 
+		           |  +---------^----------+   |                 
+		           |            |              |                 
+		           |  +---------v----------+   |                 
+		           |  |                    |   |                 
+		           |  |    ONLP API        |   |                 
+		           |  +--------------------+   |                 
+		           |                           |                 
+		           |                           |                 
+		           |   ONL(OpenNetworkLinux)   |  
+		           |                           |										                          
+		           |   running on X86 CPU      |                 
+		           |   board.                  |                 
+		           +---------------------------+    
+```                        
+### Introduction 
 
-## Agents
-PSME Software consists of:
-- **PSME REST Server** - HTTP server with REST API and JSON data container responsible for gathering and presenting information about assets and available operations on these assets. This application speaks with agents through JSON-RPC as a transport and Generic Asset Management Interface as a payload protocol. It communicates with agents:
-    - **PSME Compute agent**
-    - **PSME Compute agent simulator**
-    - **PSME Network agent**
-    - **PSME Chassis agent**
-    - **PSME Storage agent**
-    - **PSME PNC agent**
-- **PSME Compute Agent** - responsible for gathering detailed information about compute modules and for controlling hosts. Participates in Assemble Procedure.
-- **PSME Compute Agent Simulator** - reads XML file which describes hardware (assets layout and details), validate it with XML schema and sends them to PSME REST server. Imitates PSME Compute agent with data read from XML file. This agent is only used in Deep Discovery feature.
-- **PSME Network Agent** - responsible for configuration and gathering detailed information about network topology in the setup on a Drawer level.
-- **PSME Chassis Agent** - responsible for gathering detailed information about CPP. Communicates with RMM.
-- **PSME Storage Agent** - responsible for preparing, configuring, gathering and connection of storage LVM and tgt. This agent connected with PSME Rest server works as PSME Storage Service.
-- **PSME Pooled NVMe Controller (PNC) agent** - responsible for gathering detailed information about PCIe storage switch and attaching NVMe drives to compute hosts.
+    PSME(Pooled System Management Engine) is a part of whole Intel Rack Scale Design(Intel RSD) application and it 
+    is from Intel RSD 2.1.3 version to support PSME Redfish Service running on specific Accton/Edgecore's white box 
+    SWITCH or OLT devices.
 
-## Getting started
-The PSME Software is designed and developed to support generic hardware. It should compile and run on any Linux* system if the required libraries are available and at the proper version for the specific operating system. The reference operating systems were Fedora 23 and Ubuntu 16.04 LTS.
+    PSME Redfish Service provides PSME RESTful API with support for the Distributed Management Task Force (DMTF) Redfish standard 
+    to get management information or issuing commands to change the configuration or operational state of a server. 
 
-Please refer to the **PSME User Guide** available at [01.org page](https://01.org/group/4562/documentation-list) for detailed list of dependencies and compilation instructions.
+    PSME Redfish Service has been verified by OCPBaselineHardwareManagement OCP-Profiles with DMTF Redfish-Interop-Validator and 
+    Redfish-Service-Validator tools.
+
+## PSME Redfish Service consists of 
+
+- **PSME REST Server**
+
+    HTTPs server with REST API and JSON data container responsible for gathering and presenting information about 
+    assets and available operations on these assets. 
+
+    This application speaks with agents (PSME Chassis Agent) through JSON-RPC as a transport and Generic Asset 
+    Management Interface as a payload protocol. 
+
+    This application also response for answering query from REST RF Client though https security port 8888.
+
+    If any 3 types of events(ResouceAdd, ResouceRemove, Alert) have subscribed to PSME server from Redfish Event Listener, 
+    PSME will send events to Redfish Event Listener while it gets events from PSME Chassis Agent.
+
+- **PSME Chassis Agent**
+
+    Responsible for gathering peripheral information about thermal/fan/PSU/port transceiver Statistics through ONLP API and system 
+    and send back to PSME REST Server.
+
+    While gathering peripheral information, it will also check if any event appear then need to send these events
+    to PSME REST Server.
+
+## PSME Redfish Service related tools 
+          
+- **REST Redfish Client**
+
+    This example Redfish Client python code gets system information about thermal/fan/PSU/port from PSME REST Server 
+    about every 15 seconds. 
+    
+    You can get this souce from https://github.com/edge-core/RSD-Redfish/tree/master/Rest_Client
+
+- **Redfish Event Listener**
+
+    This modified DMTF Redfish Event Listener can subscribe events to PSME REST Server and listen to the events from PSME REST Server.
+    
+    You can get this souce from https://github.com/edge-core/RSD-Redfish/tree/master/Rest_Client/Redfish-Event-Listener                
+               
+
+- **Automation test tool**
+
+    Todo
+
+- **DMTF validator tools**
+
+    [Redfish-Interop-Validator](https://github.com/DMTF/Redfish-Interop-Validator)
+
+    [Redfish-Service-Validator](https://github.com/DMTF/Redfish-Service-Validator)
+    
+    [Redfish-Event-Listener](https://github.com/DMTF/Redfish-Event-Listener)
+
+    [OCP-Profiles](https://github.com/opencomputeproject/OCP-Profiles)
