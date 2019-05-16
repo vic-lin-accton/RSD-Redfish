@@ -2,10 +2,7 @@
 
 Repository source provide Redfish API on Edgecore Networks' Switch/vOLT with a choice of open software of [NOS](https://github.com/opencomputeproject/OpenNetworkLinux).
 Framework modified and based on Intel Rack Scale Design Software. 
-For more details on Intel Rack Scale Design, please visit [Official Intel Rack Scale Design Project Website]
-(http://intel.com/intelRSD).
-**Keep in mind this code is reference software only.** 
-It is expected that developers will take this reference software and make it their own. 
+For more details on Intel Rack Scale Design, please visit [Official Intel Rack Scale Design Project Website](http://intel.com/intelRSD).
 
 # Intel Rack Scale Design Reference Software
 
