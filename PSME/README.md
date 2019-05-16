@@ -1,55 +1,54 @@
 ### PSME Redfish Service Architecture Model
 
 ```
-		+-----------------------+      +--------------------------+      
-		|  REST Redfish Client  |      |  Redfish Event Listener  |      
-		+-----------^-----------+      +------^-------------------+      
-		            |                         |  https port defined by Event Listener                 
-		            |                         |                 
-		            |                         |                  
-		            +-------+        +--------+                  
-		                    |        |                           
-		    https port 8888 |        |                           
-		           +--------v--------v---------+                 
-		           |    PSME Redfish Service   |                 
-		           |                           |                 
-		           |  +--------------------+   |                 
-		           |  |                    |   |                 
-		           |  | PSME REST Server   |   |                 
-		           |  |                    |   |                 
-		           |  +---------^----------+   |                 
-		           |            | JSON|RPC     |                 
-		           |  +---------v----------+   |                 
-		           |  |                    |   |                 
-		           |  | PSME Chassis Agent |   |                 
-		           |  |                    |   |                 
-		           |  +---------^----------+   |                 
-		           |            |              |                 
-		           |  +---------v----------+   |                 
-		           |  |                    |   |                 
-		           |  |    ONLP API        |   |                 
-		           |  +--------------------+   |                 
-		           |                           |                 
-		           |                           |                 
-		           |   ONL(OpenNetworkLinux)   |  
-		           |                           |										                          
-		           |   running on X86 CPU      |                 
-		           |   board.                  |                 
-		           +---------------------------+    
++-----------------------+      +--------------------------+      
+|  REST Redfish Client  |      |  Redfish Event Listener  |      
++-----------^-----------+      +------^-------------------+      
+	    |                         |  https port defined 
+	    |                         |  by Event Listener 
+	    |                         | 
+	    +-------+        +--------+ 
+		    |        |                           
+    https port 8888 |        |                           
+	   +--------v--------v---------+                 
+	   |    PSME Redfish Service   |                 
+	   |                           |                 
+	   |  +--------------------+   |                 
+	   |  |                    |   |                 
+	   |  | PSME REST Server   |   |                 
+	   |  |                    |   |                 
+	   |  +---------^----------+   |                 
+	   |            | JSON|RPC     |                 
+	   |  +---------v----------+   |                 
+	   |  |                    |   |                 
+	   |  | PSME Chassis Agent |   |                 
+	   |  |                    |   |                 
+	   |  +---------^----------+   |                 
+	   |            |              |                 
+	   |  +---------v----------+   |                 
+	   |  |                    |   |                 
+	   |  |    ONLP API        |   |                 
+	   |  +--------------------+   |                             
+	   |   ONL(OpenNetworkLinux)   |
+	   |                           |
+	   |   running on X86 CPU      |                 
+	   |   board.                  |                 
+	   +---------------------------+    
 ```                        
 ### Introduction 
 
-    PSME(Pooled System Management Engine) is a part of whole Intel Rack Scale Design(Intel RSD) application and it 
-    is from Intel RSD 2.1.3 version to support PSME Redfish Service running on specific Accton/Edgecore's white box 
-    SWITCH or OLT devices.
+  PSME(Pooled System Management Engine) is a part of whole Intel Rack Scale Design(Intel RSD) application and it 
+  is from Intel RSD 2.1.3 version to support PSME Redfish Service running on specific Accton/Edgecore's white box 
+  SWITCH or OLT devices.
 
-    PSME Redfish Service provides PSME RESTful API with support for the Distributed Management Task Force (DMTF) Redfish standard 
-    to get management information or issuing commands to change the configuration or operational state of a server. 
+  PSME Redfish Service provides PSME RESTful API with support for the Distributed Management Task Force (DMTF) 
+  Redfish standard to get management information or issuing commands to change the configuration or operational 
+  state of a server. 
 
-    PSME Redfish Service has been verified by OCPBaselineHardwareManagement OCP-Profiles with DMTF Redfish-Interop-Validator and 
-    Redfish-Service-Validator tools.
+  PSME Redfish Service has been verified by OCPBaselineHardwareManagement OCP-Profiles with DMTF Redfish-Interop-Validator and 
+  Redfish-Service-Validator tools.
 
-## PSME Redfish Service consists of 
+### PSME Redfish Service consists of 
 
 - **PSME REST Server**
 
@@ -72,7 +71,7 @@
     While gathering peripheral information, it will also check if any event appear then need to send these events
     to PSME REST Server.
 
-## PSME Redfish Service related tools 
+### PSME Redfish Service related tools 
           
 - **REST Redfish Client**
 
