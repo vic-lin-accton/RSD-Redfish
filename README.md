@@ -86,7 +86,7 @@ $ ./Build_all.sh
 ## Installing
 cp psme-allinone.deb to Switch or vOLT ~/ directory and
 ```
-dpkt -i psme-allinone.deb
+dpkg -i psme-allinone.deb
 ```
 ## Start PSME Redfish service
 
@@ -101,7 +101,7 @@ service psme stop
 
 ## Remvoe psme-allinone.deb package
 ```
-    $ dpkt -r psme-allinone
+    $ dpkg -r psme-allinone
 ```
 
 ## Do basic API query.
