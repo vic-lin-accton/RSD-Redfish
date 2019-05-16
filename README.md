@@ -88,18 +88,15 @@ dpkg -i psme-allinone.deb
 ## Start PSME Redfish service
 
 ```
-service psme start
-```
-## Stop PSME Redfish service
-
-```
-service psme stop
+$ service psme start
 ```
 
-## Remvoe psme-allinone.deb package
+## Start PSME at boot time
+```   
+$ update-rc.d psme defaults    
 ```
-    $ dpkg -r psme-allinone
-```
+And you can start to use PSME Redfish Service now.
+
 
 ## Do basic API query.
 
@@ -162,6 +159,21 @@ Then you can get json data respones like:
 }
 ``` 
 
+If want to stop / remvoe PSME service
+
+## Stop PSME Redfish service
+
+```
+$ service psme stop
+```
+## Remove auto start PSME at boot time
+```   
+$ update-rc.d -f psme remove   
+```
+## Remvoe psme-allinone.deb package
+```
+$ dpkg -r psme-allinone
+```
 
 ## Support on 
 
