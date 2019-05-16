@@ -16,77 +16,94 @@ based on workload-specific demands.
 
 More detailed information can be found at [official Intel Rack Scale Design Site](http://intel.com/intelRSD).
 
-## How to build
+## How To Build PSME Redfish Service for Edgecore bare-metal devices
 
-### Prerequisites
-- ONL(OpenNetworkLinux) docker bulid environment and well built ONLP library.
+### Build NOS OpenNetworkLinux -
 
-  To get peripherals information from hardware device,excution file need link with ONLP library. 
+ Require host PC OS Ubuntu 16.04 TLS with container supported environment.
   
-- OpenOLT adapter bal_api_dist library.(Optional)
-
-  Need pre-build OpenOLT agent library bal_api_dist.
-  
-  vOLT platform need build with bal_api_dist library to support port statistics information.
-  
-## Build For Edgecore bare-metal Switch
-
-Enter ONL build docker environment
-```
+ How To Install Docker on Ubuntu 16.04
+```  
+$ sudo apt-get update
+$ sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+$ sudo apt-add-repository 'deb https://apt.dockerproject.org/repo ubuntu-xenial main'
+$ sudo apt-get update
+$ apt-cache policy docker-engine
+$ sudo apt-get install -y docker-engine
+$ sudo usermod -aG docker $(whoami)
+```  
+ How To Build ONL in Docker on Ubuntu 16.04
+```    
+$ cd ~
+$ git clone https://github.com/opencomputeproject/OpenNetworkLinux.git 
 $ cd OpenNetworkLinux
+$ git checkout 05a8ab5 
+$ sudo docker/tools/onlbuilder -8
+$ apt-cacher-ng
+$ source setup.env
+$ make amd64  2>&1 | tee  onl.log   
+```    
+### Build RSD -
+
+ Git clone RSD source code.
+  
+```   
+$ cd ~/OpenNetworkLinux
 $ git clone https://github.com/edge-core/RSD-Redfish.git
 $ cd RSD-Redfish/PSME/build/
-```
-Install necessary packages only at first time and start build
-```
+```  
+ Install necessary packages only at first time and start build
+```  
 $ ./pre-inst-X86-pkgs.sh
+```  
+ Build all
+  
+```  
 $ ./Build_all.sh
-```
+``` 
+ Output file will be in ~/OpenNetworkLinux/RSD-Redfish/PSME/build/install/allinone-deb/bin/psme-allinone.deb
 
-## Build For Edgecore vOLT
+ If want to partial build for any modification for PSME source.
+``` 
+$ cd ~/OpenNetworkLinux/RSD-Redfish/PSME/build/
+$ make all; psme_release.sh;
+``` 
+ then will create new psme-allinone.deb
 
-Enter ONL build docker environment in openolt 
+ Clean Build
+``` 
+$ ./Build_all.sh C
+$ ./Build_all.sh
+``` 
 
-Currentlly, support OpenOLT agent with [tag voltha-1.4.0](https://github.com/opencord/openolt.git)
-
-Change to openolt built directory that has built out bal_api_dist library.
-```
-$ cd openolt/build/asfvolt16-onl/OpenNetworkLinux
-$ git clone https://github.com/edge-core/RSD-Redfish.git
-$ cd RSD-Redfish/PSME/build/
-```
-Install necessary packages only at first time and start build
-```
-$ ./pre-inst-X86-pkgs.sh
-$ ./Build_all.sh volt
-```
-Output file will be in ~/psme-allinone.deb
+ Or pre-built psme-allinone.deb can be found on edge-core TS web site.
+``` 
+ http://quickconnect.to/edgecore
+ username/password   
+ ec_redfish_user/*wkPtq2Gny
+``` 
 
 ## Installing
 cp psme-allinone.deb to Switch or vOLT ~/ directory and
 ```
 dpkt -i psme-allinone.deb
 ```
-## Starting/Stopping PSME (Redfish) service
-
-For Edgecore bare-metal Switch
-
-```
-service psme start
-
-```
-For Edgecore vOLT
-
-After openolt agent start ...then
+## Start PSME Redfish service
 
 ```
 service psme start
 ```
-If want stop PSME agent
+## Stop PSME Redfish service
 
 ```
 service psme stop
 ```
+
+## Remvoe psme-allinone.deb package
+```
+    $ dpkt -r psme-allinone
+```
+
 ## Do basic API query.
 
 On vOLT side:
@@ -151,20 +168,38 @@ Then you can get json data respones like:
 
 ## Support on 
 
-|            Platform        | ONL kernel 3.x |ONL kernel 4.14.49|
-|----------------------------|----------------|------------------|
-x86-64-accton-as7712-32x-r0  |        O       |        O                 
-x86-64-accton-as5916-54xm-r0 |        O       |        O                  
-x86-64-accton-as5912-54x-r0  |        O       |        O         
-x86-64-accton-as5712-54x-r0  |        O       |        X         
-x86-64-accton-as5812-54t-r0  |        O       |        O         
-x86-64-accton-as5812-54x-r0  |        O       |        O                      
-x86-64-accton-asxvolt16-r0   |        O       |        O        
-x86-64-accton-as7816-64x-r0  |        O       |        X          
-x86-64-accton-as6712-32X-r0  |        O       |        X          
-x86-64-accton-as6812-32X-r0  |        O       |        X  
-x86-64-accton-as7316-26xb-r0 |        X       |        O
-x86-64-accton-as7726-32x-r0  |        X       |        O  
-x86-64-accton-as7326-56x-r0  |        X       |        O  
-x86-64-accton-as7926-80xk-r0 |        X       |        O    
-x86-64-accton-as9716-32d-r0  |        X       |        O 
+PSME current tested on ONL(OpenNetworkLinux) system. 
+   
+	+-----------------------------|----------------|---------------------------|--------------------+
+	|            Platform         | ONL kernel 3.x |ONL kernel 4.14.49(05a8ab5)|ONL kernel 4.14.109 |
+	|-----------------------------|----------------|---------------------------|--------------------|                 
+	|x86-64-accton-asxvolt16-r0   |        O       |            O              |        O           |         
+	|-----------------------------|----------------|---------------------------|--------------------|                 
+	|x86-64-accton-asgvolt64-r0   |        x       |            O              |        x           |         
+	|-----------------------------|----------------|---------------------------|--------------------|                 
+	|x86-64-accton-as7712-32x-r0  |        O       |            O              |        x           |         
+	|-----------------------------|----------------|---------------------------|--------------------|                 
+	|x86-64-accton-as5916-54xm-r0 |        O       |            O              |        x           |         
+	|-----------------------------|----------------|---------------------------|--------------------|                 
+	|x86-64-accton-as5912-54x-r0  |        O       |            O              |        x           |         
+	|-----------------------------|----------------|---------------------------|--------------------|                 
+	|x86-64-accton-as5812-54t-r0  |        O       |            O              |        x           |         
+	|-----------------------------|----------------|---------------------------|--------------------|                 
+	|x86-64-accton-as5812-54x-r0  |        O       |            x              |        x           |         
+	|-----------------------------|----------------|---------------------------|--------------------|                 
+	|x86-64-accton-as7816-64x-r0  |        O       |            x              |        x           |         
+	|-----------------------------|----------------|---------------------------|--------------------|                 
+	|x86-64-accton-as6712-32X-r0  |        O       |            x              |        x           |         
+	|-----------------------------|----------------|---------------------------|--------------------|                 
+	|x86-64-accton-as6812-32X-r0  |        O       |            x              |        x           |         
+	|-----------------------------|----------------|---------------------------|--------------------|                 
+	|x86-64-accton-as7316-26xb-r0 |        x       |            O              |        x           |         
+	|-----------------------------|----------------|---------------------------|--------------------|                 
+	|x86-64-accton-as7726-32x-r0  |        x       |            O              |        x           |         
+	|-----------------------------|----------------|---------------------------|--------------------|                 
+	|x86-64-accton-as7326-56x-r0  |        x       |            O              |        x           |         
+	|-----------------------------|----------------|---------------------------|--------------------|                 
+	|x86-64-accton-as7926-80xk-r0 |        x       |            O              |        x           |         
+	|-----------------------------|----------------|---------------------------|--------------------|                 
+	|x86-64-accton-as9716-32d-r0  |        x       |            O              |        x           |         
+	+------------------------------------------------------------------------------------------------+
