@@ -160,6 +160,7 @@
 
    <edmx:Reference Uri="EventDestination.xml">
     <edmx:Include Namespace="EventDestination"/>
+    <edmx:Include Namespace="EventDestination.v1_0_0"/>    
    </edmx:Reference>   
 
    <edmx:Reference Uri="EventDestinationCollection.xml">
@@ -223,8 +224,11 @@
    <edmx:Reference Uri="EthernetSwitchStaticMACCollection.xml">
     <edmx:Include Namespace="EthernetSwitchStaticMACCollection"/>
    </edmx:Reference>  
-   
-   
+
+   <edmx:Reference Uri="RedfishExtensions.xml">
+     <edmx:Include Namespace="RedfishExtensions.v1_0_0" Alias="Redfish"/>
+   </edmx:Reference>   
+
   <edmx:DataServices>
     <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Service">
       <EntityContainer Name="Service" Extends="ServiceRoot.v1_0_0.ServiceContainer">
