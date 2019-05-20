@@ -38,7 +38,7 @@
 ### Introduction 
 
   PSME(Pooled System Management Engine) is a part of whole Intel Rack Scale Design(Intel RSD) application and it 
-  is from Intel RSD 2.1.3 version to support [PSME RESTful API]( https://github.com/edge-core/RSD-Redfish/PSME/PSME_REDFISH_SERVICE_API) running on specific Accton/Edgecore's white box 
+  is from Intel RSD 2.1.3 version to support [PSME RESTful API]( https://github.com/edge-core/RSD-Redfish/PSME/PSME_REDFISH_API) running on specific Accton/Edgecore's white box 
   SWITCH or OLT devices.
 
   PSME Redfish Service provides PSME RESTful API with support for the Distributed Management Task Force (DMTF) 
