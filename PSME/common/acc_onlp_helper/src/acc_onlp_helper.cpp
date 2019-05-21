@@ -2136,9 +2136,9 @@ Area : 5
                     std::string servrity("OK");					   
                     std::string sensor_type("Port");		   
                     std::string message("Port unplug.");
-                    Entry.set_log_entry(event , sensor_type , servrity, message, A64_id+1);			   
+                    Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
     
-                    std::string message_event = std::string("Port ") + std::to_string( A64_id + 1) +  std::string(" Plug Out.");
+                    std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug Out.");
                     m_Event_Resouce_Remove.push_back(message_event);				
                 } 
                 else if((p_bit == 0) && (c_bit == 1))
@@ -2147,9 +2147,9 @@ Area : 5
                     std::string servrity("OK");					   
                     std::string sensor_type("Port");		   
                     std::string message("Port plug in.");	
-                    Entry.set_log_entry(event , sensor_type , servrity, message, A64_id+1);			   
+                    Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
     
-                    std::string message_event = std::string("Port ") + std::to_string( A64_id + 1) +  std::string(" Plug In.");
+                    std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug In.");
                     m_Event_Resouce_Add.push_back(message_event);					
                 }
             }			
@@ -2159,16 +2159,8 @@ Area : 5
             }
         }
 
-        if(id < 64)
-        {
             m_pre_Port_Present = m_Port_Present;
-        }
-        else if( (id >= 64) && (id < 128))
-        {
             m_pre_Port_Present_A64 = m_Port_Present_A64;
-        }
-        else
-            printf("Port chceking more then 128 port!!!!not enough bits to present\r\n\r\n");	
 		
         return ;
     }
