@@ -248,11 +248,11 @@ HTTP Request Methods used in PSME service.
     "Description": "Events",
     "Events": [
     {
-    "EventType": "ResourceAdded",  < = This can be ¡§ResourceRemoved¡¨  or  ¡§Alert¡¨ 
+    "EventType": "ResourceAdded",  < = This can be Â¡Â§ResourceRemovedÂ¡Â¨  or  Â¡Â§AlertÂ¡Â¨ 
     "EventId": "12f03ec2-714f-11e9-ba1f-ef16238bd344",
     "EventTimestamp": "2019-05-08T05:06:44+00:00",
     "Severity": "OK",
-    "Message": "Port 1 Plug In.",  <= This message content depend on OLT¡¦s peripheral situation. Like port plugin/out ..etc.
+    "Message": "Port 1 Plug In.",  <= This message content depend on OLTÂ¡Â¦s peripheral situation. Like port plugin/out ..etc.
     "MessageId": "Base.1.0.0.Success",
     "MessageArgs": [],
     "OriginOfCondition": "",
@@ -307,9 +307,9 @@ HTTP Request Methods used in PSME service.
         "AssetTag": "N/A",
         "IndicatorLED": null,
         "Status":{"State": "Enabled", "Health": "OK", "HealthRollup": "OK"},
-        "Oem":{"Intel_RackScale":{"@odata.type": "#Intel.Oem.Chassis", "Location":{"Id": null, "ParentId": null¡K},
-        "Links":{"@odata.type": "#Chassis.v1_2_0.Links", "Contains":[], "ComputerSystems":[{"@odata.id": "/redfish/v1/Systems/1"¡K},
-        "Actions":{"#Chassis.Reset":{"target": "/redfish/v1/Chassis/1/Actions/Chassis.Reset", "ResetType@Redfish.AllowableValues":["ForceOff",¡K},
+        "Oem":{"Intel_RackScale":{"@odata.type": "#Intel.Oem.Chassis", "Location":{"Id": null, "ParentId": nullÂ¡K},
+        "Links":{"@odata.type": "#Chassis.v1_2_0.Links", "Contains":[], "ComputerSystems":[{"@odata.id": "/redfish/v1/Systems/1"Â¡K},
+        "Actions":{"#Chassis.Reset":{"target": "/redfish/v1/Chassis/1/Actions/Chassis.Reset", "ResetType@Redfish.AllowableValues":["ForceOff",Â¡K},
         "Thermal":{"@odata.id": "/redfish/v1/Chassis/1/Thermal"},
         "Power":{"@odata.id": "/redfish/v1/Chassis/1/Power"
         }
@@ -341,7 +341,7 @@ HTTP Request Methods used in PSME service.
         "SerialInterfaces":{"@odata.id": "/redfish/v1/Managers/1/SerialInterfaces"},
         "FirmwareVersion": "2.1.3.59.20",
         "Oem":{},
-        "Links":{"@odata.type": "#Manager.v1_0_0.Links", "ManagerForChassis":[{"@odata.id": "/redfish/v1/Chassis/1"¡K},
+        "Links":{"@odata.type": "#Manager.v1_0_0.Links", "ManagerForChassis":[{"@odata.id": "/redfish/v1/Chassis/1"Â¡K},
         "NetworkProtocol":{"@odata.id": "/redfish/v1/Managers/1/NetworkProtocol"},
         "ServiceEntryPointUUID": "5f471f72-146c-11ff-aeff-dfc55209c612",
         "SerialConsole":{"ServiceEnabled": true, "MaxConcurrentSessions": 0, "ConnectTypesSupported":[]},
@@ -368,21 +368,21 @@ HTTP Request Methods used in PSME service.
         "Description": "Collection of Thermal sensors",
         "Redundancy":[],
         "Temperatures":[
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "1", "Name": "System CPU Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "2", "Name": "Chassis Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "3", "Name": "Chassis Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "4", "Name": "Chassis Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "5", "Name": "Chassis Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "6", "Name": "PSU Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "7", "Name": "PSU Thermal Sensor Temperature",¡K}
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "1", "Name": "System CPU Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "2", "Name": "Chassis Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "3", "Name": "Chassis Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "4", "Name": "Chassis Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "5", "Name": "Chassis Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "6", "Name": "PSU Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "7", "Name": "PSU Thermal Sensor Temperature",Â¡K}
         ],
         "Fans":[
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "1", "Name": "System Fan",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "2", "Name": "System Fan",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "3", "Name": "System Fan",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "4", "Name": "System Fan",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "5", "Name": "System Fan",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "6", "Name": "System Fan",¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "1", "Name": "System Fan",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "2", "Name": "System Fan",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "3", "Name": "System Fan",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "4", "Name": "System Fan",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "5", "Name": "System Fan",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "6", "Name": "System Fan",Â¡K},
         {
             "@odata.id": "/redfish/v1/Chassis/1/Thermal",
             "MemberId": "7",
@@ -578,12 +578,12 @@ HTTP Request Methods used in PSME service.
         "Description": "Collection of Thermal sensors",
         "Redundancy":[],
         "Temperatures":[
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "1", "Name": "System CPU Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "2", "Name": "Chassis Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "3", "Name": "Chassis Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "4", "Name": "Chassis Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "5", "Name": "Chassis Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "6", "Name": "PSU Thermal Sensor Temperature",¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "1", "Name": "System CPU Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "2", "Name": "Chassis Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "3", "Name": "Chassis Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "4", "Name": "Chassis Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "5", "Name": "Chassis Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "6", "Name": "PSU Thermal Sensor Temperature",Â¡K},
         {
         "@odata.id": "/redfish/v1/Chassis/1/Thermal",
         "MemberId": "7",
@@ -601,7 +601,7 @@ HTTP Request Methods used in PSME service.
         "RelatedItem":[{"@odata.id": "/redfish/v1/Chassis/1" }]
         }
         ],
-        "Fans":[{"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "1",¡K]
+        "Fans":[{"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "1",Â¡K]
         }
         - Response : 200 OK			
 			
@@ -625,13 +625,13 @@ HTTP Request Methods used in PSME service.
         "Description": "Collection of Thermal sensors",
         "Redundancy":[],
         "Temperatures":[
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "1", "Name": "System CPU Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "2", "Name": "Chassis Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "3", "Name": "Chassis Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "4", "Name": "Chassis Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "5", "Name": "Chassis Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "6", "Name": "PSU Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "7", "Name": "PSU Thermal Sensor Temperature",¡K}
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "1", "Name": "System CPU Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "2", "Name": "Chassis Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "3", "Name": "Chassis Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "4", "Name": "Chassis Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "5", "Name": "Chassis Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "6", "Name": "PSU Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "7", "Name": "PSU Thermal Sensor Temperature",Â¡K}
         ],
         "Fans":[
         {
@@ -650,13 +650,13 @@ HTTP Request Methods used in PSME service.
         "LowerThresholdFatal": null,
         "RelatedItem":[{"@odata.id": "/redfish/v1/Chassis/1" }]
         },
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "2", "Name": "System Fan",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "3", "Name": "System Fan",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "4", "Name": "System Fan",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "5", "Name": "System Fan",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "6", "Name": "System Fan",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "7", "Name": "PSU Fan",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "8", "Name": "PSU Fan",¡K}
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "2", "Name": "System Fan",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "3", "Name": "System Fan",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "4", "Name": "System Fan",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "5", "Name": "System Fan",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "6", "Name": "System Fan",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "7", "Name": "PSU Fan",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "8", "Name": "PSU Fan",Â¡K}
         ]
         }	       	  
         - Response : 200 OK
@@ -695,14 +695,14 @@ HTTP Request Methods used in PSME service.
         "LowerThresholdFatal": null,
         "RelatedItem":[{"@odata.id": "/redfish/v1/Chassis/1" }]
         },
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "2", "Name": "Chassis Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "3", "Name": "Chassis Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "4", "Name": "Chassis Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "5", "Name": "Chassis Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "6", "Name": "PSU Thermal Sensor Temperature",¡K},
-        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "7", "Name": "PSU Thermal Sensor Temperature",¡K}
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "2", "Name": "Chassis Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "3", "Name": "Chassis Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "4", "Name": "Chassis Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "5", "Name": "Chassis Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "6", "Name": "PSU Thermal Sensor Temperature",Â¡K},
+        {"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "7", "Name": "PSU Thermal Sensor Temperature",Â¡K}
         ],
-        "Fans":[{"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "1",¡K]
+        "Fans":[{"@odata.id": "/redfish/v1/Chassis/1/Thermal", "MemberId": "1",Â¡K]
         }      
         - Response : 200 OK
 		        
@@ -785,8 +785,8 @@ HTTP Request Methods used in PSME service.
         "StaticMACs":{
         "@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/1/StaticMACs"
         },
-        "Links":{"PrimaryVLAN": null, "Switch":{"@odata.id": "/redfish/v1/EthernetSwitches/1"¡K},
-        "TransceiverStatistics":{"SFP Vendor Name": "SOURCEPHOTONICS", "Part Number": "XPPXG2N1CDFA", "Serial Number": "H6B2010733", "Manufacture Date": "170510",¡K}
+        "Links":{"PrimaryVLAN": null, "Switch":{"@odata.id": "/redfish/v1/EthernetSwitches/1"Â¡K},
+        "TransceiverStatistics":{"SFP Vendor Name": "SOURCEPHOTONICS", "Part Number": "XPPXG2N1CDFA", "Serial Number": "H6B2010733", "Manufacture Date": "170510",Â¡K}
         }
         - Response : 200 OK
         
@@ -828,7 +828,7 @@ HTTP Request Methods used in PSME service.
         "IPv6Addresses":[],
         "VLANs":{"@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/1/VLANs"},
         "StaticMACs":{"@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/1/StaticMACs"},
-        "Links":{"PrimaryVLAN": null, "Switch":{"@odata.id": "/redfish/v1/EthernetSwitches/1"¡K},
+        "Links":{"PrimaryVLAN": null, "Switch":{"@odata.id": "/redfish/v1/EthernetSwitches/1"Â¡K},
         "TransceiverStatistics":
         {
         "SFP Vendor Name": "SOURCEPHOTONICS",
@@ -870,6 +870,35 @@ HTTP Request Methods used in PSME service.
         }
         }  
         - Response : 200 OK			
+
+  ##  Supported Statistics of Transceivers Hardware Vendor informations 
+  
+	+========+===============+===============+
+	| QSFP28 |               |               |
+	+========+===============+===============+
+	|        |   Vendor Name |   Part Number |
+	+--------+---------------+---------------+
+	|      1 |   Precision   |   QSFP28AOC03 |
+	+--------+---------------+---------------+
+
+	+==============+====================+================+
+	| XFP (XGSPON) |                    |                |
+	+==============+====================+================+
+	|              |   Vendor Name      |   Part Number  |
+	+--------------+--------------------+----------------+
+	|            1 |   Source Photonics |   XPPXG2N1CDFA |
+	+--------------+--------------------+----------------+
+	|            2 |   Hisense          |   LTH7226-PC+  |
+	+--------------+--------------------+----------------+
+
+	+===========+===============+================+
+	| SFP(GPON) |               |                |
+	+===========+===============+================+
+	|           |   Vendor Name |   Part Number  |
+	+-----------+---------------+----------------+
+	|         1 |   Precision   |   LTE3680M-BH+ |
+	+-----------+---------------+----------------+
+
 
   ## Reboot device through PSME
   
@@ -914,9 +943,9 @@ HTTP Request Methods used in PSME service.
     "Description": "Collection of Logs for this System",
     "Members@odata.count": 3,
     "Members":[
-    {"@odata.id": "/redfish/v1/Managers/1/LogServices/1/Entries/0", "Id": "0",¡K},
-    {"@odata.id": "/redfish/v1/Managers/1/LogServices/1/Entries/1", "Id": "1",¡K},
-    {"@odata.id": "/redfish/v1/Managers/1/LogServices/1/Entries/2", "Id": "2",¡K}]
+    {"@odata.id": "/redfish/v1/Managers/1/LogServices/1/Entries/0", "Id": "0",Â¡K},
+    {"@odata.id": "/redfish/v1/Managers/1/LogServices/1/Entries/1", "Id": "1",Â¡K},
+    {"@odata.id": "/redfish/v1/Managers/1/LogServices/1/Entries/2", "Id": "2",Â¡K}]
     }	      	
 
     - Response : 200 OK	
