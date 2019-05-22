@@ -206,10 +206,10 @@ namespace acc_onlp_helper {
     void e_oom::default_vendor_info()
     {
         /*vendor_info Begin:*/
-        m_current_status["SFP Vendor Name"] = json::Value::Type::NIL;
-        m_current_status["Part Number"]         = json::Value::Type::NIL;
-        m_current_status["Serial Number"]       = json::Value::Type::NIL;	     
-        m_current_status["Manufacture Date"]  = json::Value::Type::NIL;	     
+        m_current_status["SFP Vendor Name"] = "NA";
+        m_current_status["Part Number"]         = "NA";
+        m_current_status["Serial Number"]       = "NA";	     
+        m_current_status["Manufacture Date"]  = "NA";	     
         /*vendor_info End  :*/
     }
 
@@ -297,6 +297,8 @@ namespace acc_onlp_helper {
         m_current_status["Temperature"] ["UpperThresholdCritical"] = 0;
         m_current_status["Temperature"] ["LowerThresholdCritical"] = 0;
         m_current_status["Temperature"]["Reading"]  =0;
+        m_current_status ["Temperature"] ["Status"]["Health"] =  json::Value::Type::NIL;
+        m_current_status ["Temperature"] ["Status"]["State"] =  json::Value::Type::NIL;		
         /*Temperature End  :*/
     }
 
@@ -386,6 +388,9 @@ namespace acc_onlp_helper {
         m_current_status["Voltage"] ["UpperThresholdCritical"] = 0;
         m_current_status["Voltage"] ["LowerThresholdCritical"] = 0;
         m_current_status["Voltage"]["Reading"] = 0;
+        m_current_status ["Voltage"] ["Status"]["Health"] =  json::Value::Type::NIL;
+        m_current_status ["Voltage"] ["Status"]["State"] =  json::Value::Type::NIL;
+		
         /*Voltage End  :*/    
     }
 
@@ -472,6 +477,9 @@ namespace acc_onlp_helper {
         m_current_status["BiasCurrent"] ["UpperThresholdCritical"] = 0;
         m_current_status["BiasCurrent"] ["LowerThresholdCritical"] = 0;
         m_current_status["BiasCurrent"]["Reading"] = 0;
+        m_current_status ["BiasCurrent"] ["Status"]["Health"] =  json::Value::Type::NIL;
+        m_current_status ["BiasCurrent"] ["Status"]["State"] =  json::Value::Type::NIL;
+		
         /*BiasCurrent End    :*/			    
     }
 
@@ -561,6 +569,8 @@ namespace acc_onlp_helper {
         m_current_status["TxPower"] ["UpperThresholdCritical"] = 0;
         m_current_status["TxPower"] ["LowerThresholdCritical"] = 0;
         m_current_status["TxPower"]["Reading"] = 0;
+        m_current_status ["TxPower"] ["Status"]["Health"] =  json::Value::Type::NIL;
+        m_current_status ["TxPower"] ["Status"]["State"] =  json::Value::Type::NIL;
         /*TxPower Current End      :*/   
     }
 
@@ -649,6 +659,8 @@ namespace acc_onlp_helper {
         m_current_status["RxPower"] ["UpperThresholdCritical"] = 0;
         m_current_status["RxPower"] ["LowerThresholdCritical"] = 0;
         m_current_status["RxPower"]["Reading"] = 0;
+        m_current_status ["RxPower"] ["Status"]["Health"] =  json::Value::Type::NIL;
+        m_current_status ["RxPower"] ["Status"]["State"] =  json::Value::Type::NIL;
         /*RxPower Current End      :*/	   
     }
 
@@ -710,6 +722,8 @@ namespace acc_onlp_helper {
 #endif				
                 refresh_status();
             } 
+            else
+                status_default();
 
             is.close();
             delete[] buffer;
