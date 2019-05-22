@@ -780,6 +780,8 @@ namespace acc_onlp_helper {
     {
         int id = in_eeprom[0]; 
 
+        //printf("store_eeprom id[0x%02X]\r\n", id);
+
         if(!get_support())
         {
             if(id == 0x6)
@@ -880,6 +882,56 @@ namespace acc_onlp_helper {
 
                 return true;
             }			
+            else if(id == 0x11)
+            { 
+                int size = m_8438i.size();
+                Json::Value tmp_std;
+
+                for(int i = 1; i <= size; i++)
+                {
+                    tmp_std =  m_8438i[std::make_pair(0x11, i)];
+                    std::string C_PN= tmp_std["C_PN"].asString();
+                    std::string STD_PN = "8438";
+
+                    printf("8438 C_PN[%s]\r\n", C_PN.c_str());
+
+                    Json::Value Att_Json = tmp_std["Attributes"];
+
+                    Json::Value PN_Json = get_attri_by_name("Vendor_PN" , Att_Json);
+
+                    int PN_Base = PN_Json["Vendor_PN"]["Byte_Address"].asInt();
+                    printf("PN_Base offset[%d]\r\n", PN_Base);
+
+                    unsigned int PN_Size = PN_Json["Vendor_PN"]["Size"].asInt();
+                    printf("PN_Base Size[%d]\r\n", PN_Size);
+
+                    if(C_PN.size() < PN_Size)
+                    {
+                        char tmp_PN[16] = {0}; 
+                        memcpy(tmp_PN,in_eeprom + PN_Base, C_PN.size());
+                        printf("8438 tmp_PN[%s]\r\n", tmp_PN);
+                        std::string tstring = tmp_PN;
+
+                        if(tstring == C_PN)
+                        {
+                            m_std = tmp_std;
+                            printf("8438 Use C_PN[%s] !!!!\r\n", C_PN.c_str());
+                            set_support(true);
+                            memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
+                            return true;
+                        }
+                    }
+                }
+
+                // Use 8438 as default //
+                std::string STD_PN = "8438";
+                            m_std = tmp_std;
+                            printf("Cannot get customer's define. Use Std[%s] one.\r\n", STD_PN.c_str());
+                            set_support(true);
+                            memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
+
+                return true;
+            }					
             else
             {
                 printf("Not support Std.\r\n");
@@ -995,8 +1047,10 @@ namespace acc_onlp_helper {
 
     bool e_oom::get_conf()
     {
+        //New Transceiver Type need Added here//
         int count_8077i = 0;
         int count_8472 = 0;
+        int count_8438i = 0; 
 		
         std::string ME_S_DIR(STD_SEC_PATH);
         struct dirent *entry;
@@ -1036,10 +1090,10 @@ namespace acc_onlp_helper {
                 Json::Value std_s;
                 Json::Reader reader;
                 bool isJsonOK = (reader.parse(m_source_files, std_s));
-
+                //New Transceiver Type need Added here//
                 if(isJsonOK)
                 {
-                    int id = std::stoi(std_s["Identifer"].asString());
+                    int id = std::stoi(std_s["Identifer"].asString(), 0, 16);
                     if(id == 0x06) 
                     {
                         count_8077i++;
@@ -1054,6 +1108,13 @@ namespace acc_onlp_helper {
                         //printf("Set id[%d] count_std[%d] TRANS_TYPE_8472\r\n", id, count_8472);
                         m_8472[std::make_pair(id, count_8472)]=std_s;
                     }
+                    else if(id == 0x11) 
+                    {
+                        count_8438i ++ ;
+                        //printf("0x0B Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
+                        //printf("Set id[%d] count_std[%d] TRANS_TYPE_8438\r\n", id, count_8438i);
+                        m_8438i[std::make_pair(id, count_8438i)]=std_s;
+                    } 					
                     else if(id == 0x0D)
                     {
                         printf("Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());

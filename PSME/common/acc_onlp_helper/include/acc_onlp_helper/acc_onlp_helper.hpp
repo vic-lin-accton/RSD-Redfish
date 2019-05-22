@@ -43,7 +43,7 @@ namespace acc_onlp_helper
     using namespace std;
     using namespace acc_net_helper;
 
-    static constexpr const int SIZE_EEPROM = 512; 
+    static constexpr const int SIZE_EEPROM = 600; 
 
     class e_oom
     {	
@@ -65,9 +65,10 @@ namespace acc_onlp_helper
 
         Json::Value get_attri_by_name(std::string att_name , Json::Value in);
 
-        // Collection of support Std. //
+        // Collection of support Std. New Transceiver Type need Added here//
         std::map<std::pair<int,int>, Json::Value> m_8077i ={};
         std::map<std::pair<int,int>, Json::Value> m_8472  ={};
+        std::map<std::pair<int,int>, Json::Value> m_8438i ={};
 
         void refresh_vendor_info();		
         void refresh_temp();		
