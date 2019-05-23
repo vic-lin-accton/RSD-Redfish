@@ -98,8 +98,12 @@ namespace acc_onlp_helper
         void set_support(bool support)
       {
           m_support = support;
+		  
           if(!support)
+          {
 		  	set_proto();
+			status_default();
+          }
 	};
 
         void set_belong_to_port (unsigned belong_to_port )

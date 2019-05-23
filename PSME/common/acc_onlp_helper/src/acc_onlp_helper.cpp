@@ -173,28 +173,28 @@ namespace acc_onlp_helper {
         /*vendor_info Begin:*/
         std::string ff ;
         /* get SFP Vendor Name */
-        if(m_current_status["SFP Vendor Name"] == json::Value::Type::NIL)
+        if(m_current_status["SFP Vendor Name"] == "NA")
         {
             ff = get_value_s("Vendor_name");
             m_current_status["SFP Vendor Name"] = ff;
         }
 
         /* get Part Number */
-        if(m_current_status["Part Number"]  == json::Value::Type::NIL)
+        if(m_current_status["Part Number"]  == "NA")
         {
             ff = get_value_s("Vendor_PN");
             m_current_status["Part Number"]= ff;
         }			
 
         /* get Serial Number */
-        if(m_current_status["Serial Number"] == json::Value::Type::NIL)
+        if(m_current_status["Serial Number"] == "NA")
         {
             ff =  get_value_s("Vendor_SN");
             m_current_status["Serial Number"] = ff;
         }				     
 
         /* get Manufacture Date */
-        if(m_current_status["Manufacture Date"] == json::Value::Type::NIL)
+        if(m_current_status["Manufacture Date"] == "NA")
         {
             ff =  get_value_s("Data_Code");
             m_current_status["Manufacture Date"] = ff;
@@ -206,10 +206,10 @@ namespace acc_onlp_helper {
     void e_oom::default_vendor_info()
     {
         /*vendor_info Begin:*/
-        m_current_status["SFP Vendor Name"] = "NA";
-        m_current_status["Part Number"]         = "NA";
-        m_current_status["Serial Number"]       = "NA";	     
-        m_current_status["Manufacture Date"]  = "NA";	     
+        m_current_status["SFP Vendor Name"] =  "NA";
+        m_current_status["Part Number"]         =  "NA";
+        m_current_status["Serial Number"]       =  "NA";
+        m_current_status["Manufacture Date"]  =  "NA";
         /*vendor_info End  :*/
     }
 
@@ -731,6 +731,7 @@ namespace acc_onlp_helper {
         else
         {
             std::cout << "Port["  << m_eeprom_path << "] reading file error!!"<< std::endl;        
+            status_default();	
             return false;
         }
         return true;
