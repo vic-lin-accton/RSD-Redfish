@@ -1215,6 +1215,8 @@ namespace acc_onlp_helper {
                         std::ifstream ifs (m_onl_platinfo_path);
                         getline (ifs, m_onl_platinfo_name, (char) ifs.eof());
                         m_onl_platinfo_name.erase(std::remove(m_onl_platinfo_name.begin(), m_onl_platinfo_name.end(), '\n'), m_onl_platinfo_name.end());						
+                        int str_size = m_onl_platinfo_name.size() -3  ; //Remove "-r0" or "-r1" ...etc
+                        m_onl_platinfo_name.resize(str_size);
                         printf("m_onl_platinfo_name[%s]\r\n",  m_onl_platinfo_name.c_str());
 
                         std::string mapping_file_path = EEPROM_MAP_PATH + m_onl_platinfo_name ;
