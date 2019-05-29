@@ -30,7 +30,11 @@
 #include "psme/rest/server/error/error_factory.hpp"
 #include "psme/rest/model/handlers/generic_handler_deps.hpp"
 #include "psme/rest/model/handlers/generic_handler.hpp"
-
+#include <unistd.h>
+#include <sys/reboot.h>
+#include <chrono>
+#include <thread>
+using namespace std;
 using namespace psme::rest;
 using namespace psme::rest::constants;
 using namespace psme::rest::validators;
@@ -42,11 +46,33 @@ endpoint::SystemReset::SystemReset(const std::string& path) : EndpointBase(path)
 endpoint::SystemReset::~SystemReset() {}
 
 
+static void GracefulRestartAfter2Seconds()
+{
+    std::cout << "wait 5 seconds let OK send out!! " << std::endl;
+    std::this_thread::sleep_for(chrono::seconds(5));
+    sync();
+    reboot(RB_AUTOBOOT);	
+    std::cout << "Shutdown Now!! " << std::endl;
+	
+}
+
+static void GracefulShutdownAfter2Seconds()
+{
+    std::cout << "wait 5 seconds let OK send out!! " << std::endl;
+    std::this_thread::sleep_for(chrono::seconds(5));
+    sync();
+    reboot(RB_POWER_OFF);	
+    std::cout << "Shutdown Now!! " << std::endl;
+	
+}
+
 void endpoint::SystemReset::post(const server::Request& request, server::Response& response) {
 
     std::string agent_id{};
     std::string system_uuid{};
     std::string parent_uuid{};
+
+
 
     char command[256] = {0};
     char resultA[256] = {0};
@@ -77,9 +103,11 @@ void endpoint::SystemReset::post(const server::Request& request, server::Respons
 				break;
 			case agent_framework::model::enums::ResetType::On:
 			case agent_framework::model::enums::ResetType::GracefulRestart:
-				sprintf(command, "%s" ,"psme.sh set restart");	
-				exec_shell(command, resultA);
+                     {
+                            std::thread mThread{GracefulRestartAfter2Seconds};	
+                            mThread.detach();				
 				break;
+                     }
 			case agent_framework::model::enums::ResetType::PushPowerButton:
 			case agent_framework::model::enums::ResetType::ForceRestart:
 				sprintf(command, "%s" ,"psme.sh set force_restart");	
@@ -90,33 +118,13 @@ void endpoint::SystemReset::post(const server::Request& request, server::Respons
 				exec_shell(command, resultA);
 				break;
 			case agent_framework::model::enums::ResetType::GracefulShutdown:
-				sprintf(command, "%s" ,"psme.sh set shutdown");	
-				exec_shell(command, resultA);
+                     {
+                            std::thread mThread{GracefulShutdownAfter2Seconds};	
+                            mThread.detach();				
 				break;
 		}
+		}
     }
-
-/*
-    if (!attributes.empty()) {
-        agent_framework::model::requests::SetComponentAttributes
-            set_component_attributes_request{system_uuid, attributes};
-
-        const auto& gami_agent = psme::core::agent::AgentManager::get_instance()->get_agent(agent_id);
-
-        auto set_system_attributes = [&, gami_agent] {
-            // Call set component attribute method
-            gami_agent->execute<agent_framework::model::responses::SetComponentAttributes>(
-                set_component_attributes_request);
-
-            psme::rest::model::handler::HandlerManager::get_instance()->get_handler(
-                agent_framework::model::enums::Component::System)->
-                load(gami_agent, parent_uuid, agent_framework::model::enums::Component::Manager,
-                     system_uuid, false);
-        };
-
-        gami_agent->execute_in_transaction(set_system_attributes);
-    }
-*/
 
     if(!strncmp(resultA, "NOT support.", 12))
         response.set_status(server::status_5XX::NOT_IMPLEMENTED);
