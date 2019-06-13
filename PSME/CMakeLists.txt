@@ -73,6 +73,7 @@ ELSE()
    set(LIBONLP_PF "${CMAKE_BINARY_DIR}/../../../../OpenNetworkLinux/packages/base/amd64/onlp/builds/onlp-platform/BUILD/jessie/x86_64-linux-gnu/bin/libonlp-platform.so")
    set(LIBONLP_PF_DF "${CMAKE_BINARY_DIR}/../../../../OpenNetworkLinux/packages/base/amd64/onlp/builds/onlp-platform-defaults/BUILD/jessie/x86_64-linux-gnu/bin/libonlp-platform-defaults.so")
    set(LIBBAL_API_DIST "${CMAKE_BINARY_DIR}/../../../../../libbal_api_dist.so")
+   set(LIBBAL30_API_DIST "${CMAKE_BINARY_DIR}/../../../../../libbal_host_api.so")
 ENDIF()
 
 IF(CUSEONLPLIB STREQUAL "TRUE")

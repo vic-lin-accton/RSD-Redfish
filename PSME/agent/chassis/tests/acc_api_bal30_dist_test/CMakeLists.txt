@@ -20,29 +20,20 @@ if (NOT GTEST_FOUND)
     return()
 endif()
 
-add_subdirectory(loader)
-add_subdirectory(session_test)
-
-IF(${CUSEONLPLIB} STREQUAL "TRUE")
-    add_subdirectory(onlp_test)
-ENDIF()
-
-IF("${CUSE_ACC_BAL_DISTLIB}" STREQUAL "TRUE" )
-    add_subdirectory(acc_api_bal_dist_test)
-ENDIF()
-
-IF("${CUSE_ACC_BAL30_DISTLIB}" STREQUAL "TRUE" )
-    add_subdirectory(acc_api_bal30_dist_test)
-ENDIF()
-
-add_subdirectory(md5)
-add_subdirectory(network_utils)
-add_subdirectory(tree_stability)
-add_subdirectory(ipmb)
-
-add_custom_target(unittest_psme-chassis
-                  make
+add_gtest(acc_api_bal30_dist_test psme-chassis
+    acc_api_bal30_dist_test.cpp
+    test_runner.cpp
 )
-add_custom_target(unittest_psme-chassis_run
-                  ctest --output-on-failure
+
+include_directories(
+    ${ACC_BAL30_API_DIST_HELPER_INCLUDE_DIRS}
+    ${JSONCPP_INCLUDE_DIRS}
+)
+
+TARGET_LINK_LIBRARIES(${test_target}
+    ${ACC_BAL30_API_DIST_HELPER_LIBRARIES}
+    ${JSONCXX_LIBRARIES}
+    ${LIBBAL30_API_DIST}
+    jsoncpp
+    dl 
 )

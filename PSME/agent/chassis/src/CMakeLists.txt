@@ -81,3 +81,11 @@ IF("${CUSE_ACC_BAL_DISTLIB}" STREQUAL "TRUE" )
         dl	
 	)
 ENDIF()
+
+IF("${CUSE_ACC_BAL30_DISTLIB}" STREQUAL "TRUE" )
+    target_link_libraries(psme-chassis
+	${ACC_BAL30_API_DIST_HELPER_LIBRARIES}
+        ${LIBBAL30_API_DIST}
+        dl	
+	)
+ENDIF()

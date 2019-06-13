@@ -39,3 +39,7 @@ ENDIF()
 IF("${CUSE_ACC_BAL_DISTLIB}" STREQUAL "TRUE" )
     add_subdirectory(acc_bal_api_dist_helper)
 ENDIF()
+
+IF("${CUSE_ACC_BAL30_DISTLIB}" STREQUAL "TRUE" )
+    add_subdirectory(acc_bal30_api_dist_helper)
+ENDIF()
