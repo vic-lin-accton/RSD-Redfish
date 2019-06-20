@@ -255,6 +255,7 @@ void TestClass1::SetUp()
     for(i = 0; i < pon_if_max ; i++)
     {
         OLT.enable_pon_if(i);
+        usleep(300000);
     }
 
     //Step 3. enable nni port//
@@ -263,6 +264,7 @@ void TestClass1::SetUp()
     for(i = 0; i < nni_if_max ; i++)
     {
         OLT.enable_nni_if(i);
+        usleep(300000);
     }
 
     //Step 4. Enable ONU//
@@ -276,7 +278,8 @@ void TestClass1::SetUp()
         printf("////////////onu_cfg onu vendor_specific id [%s]\r\n", onus[jj]["vendor_specific"].asString().c_str());			  
 
         int onu_id = onus[jj]["onu_id"].asInt(); 	
-        int interface_id = onus[jj]["interface_id"].asInt();
+        int pon_id = onus[jj]["interface_id"].asInt();
+        int nni_id = onus[jj]["nni_id"].asInt();
         std::string s_vendor_id = onus[jj]["vendor_id"].asString();
         std::string s_vendor_spec = onus[jj]["vendor_specific"].asString();
 
@@ -299,7 +302,7 @@ void TestClass1::SetUp()
         printf("////////////Active ONU[%s][0x%02X][0x%02X][0x%02X][0x%02X] !!////////////\r\n", 
                 s_vendor_id.c_str(), cs_vendor_spec[0],cs_vendor_spec[1],cs_vendor_spec[2],cs_vendor_spec[3]);
 
-        OLT.activate_onu(interface_id, onu_id, s_vendor_id.c_str(), cs_vendor_spec);
+        OLT.activate_onu(pon_id, onu_id, s_vendor_id.c_str(), cs_vendor_spec);
 
         { 
             int aFlow_size = (sizeof (a_Flow) / sizeof (a_Flow[0]));
@@ -310,8 +313,8 @@ void TestClass1::SetUp()
                 std::string sptt(a_Flow[ii].packet_tag_type); //pack tag type //
 
                 OLT.flow_add(
-                        onu_id, a_Flow[ii].flow_id, sft  , sptt, interface_id , 
-                        a_Flow[ii].network_interface_id, a_Flow[ii].gemport_id, a_Flow[ii].classifier, 
+                        onu_id, a_Flow[ii].flow_id, sft  , sptt, pon_id , 
+                        nni_id, a_Flow[ii].gemport_id, a_Flow[ii].classifier, 
                         a_Flow[ii].action , a_Flow[ii].acton_cmd , a_Flow[ii].action_val_a_val, a_Flow[ii].class_val_c_val);                    
             }
         }
@@ -322,7 +325,7 @@ void TestClass1::SetUp()
         for (ij = 0 ; ij < aOMCI_size ; ij++)
         {
             printf("[%d] ", ij);
-            OLT.omci_msg_out(interface_id, onu_id, a_OMCI[ij].raw_omci);
+            OLT.omci_msg_out(pon_id, onu_id, a_OMCI[ij].raw_omci);
             usleep(300000);
         }
     }

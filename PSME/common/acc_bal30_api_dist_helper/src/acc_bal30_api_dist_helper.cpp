@@ -24,8 +24,8 @@ extern "C"
 
 bcmolt_oltid dev_id = 0;
 
-const uint32_t tm_upstream_sched_id_start   = 201;
-const uint32_t tm_downstream_sched_id_start = 101;
+const uint32_t tm_upstream_sched_id_start   = 1020;
+const uint32_t tm_downstream_sched_id_start = 1004;
 const std::string upstream     = "upstream";
 const std::string downstream   = "downstream";
 
@@ -1277,7 +1277,6 @@ bool CreateDefaultSchedQueue(uint32_t intf_id, const std::string direction)
     printf("CreateDefaultSchedQueue for %s tm_sched id %d intf_id %d ", direction.c_str(), tm_sched_key.id, intf_id);
 
     BCMOLT_CFG_INIT(&tm_sched_cfg, tm_sched, tm_sched_key);
-
     BCMOLT_MSG_FIELD_SET(&tm_sched_cfg, attachment_point.type, BCMOLT_TM_SCHED_OUTPUT_TYPE_INTERFACE);
 
     if (direction.compare(upstream) == 0) 
@@ -1290,21 +1289,19 @@ bool CreateDefaultSchedQueue(uint32_t intf_id, const std::string direction)
     }
 
     BCMOLT_MSG_FIELD_SET(&tm_sched_cfg, attachment_point.u.interface.interface_ref.intf_id, intf_id);
-
     BCMOLT_MSG_FIELD_SET(&tm_sched_cfg, sched_type, BCMOLT_TM_SCHED_TYPE_SP);
-
     BCMOLT_MSG_FIELD_SET(&tm_sched_cfg, num_priorities, 4);
 
-    //        uint32_t cir = 1000000;
-    //        uint32_t pir = 1000000;
-    //        uint32_t burst = 65536;
-    //
-    //        printf("applying traffic shaping in %s pir=%u, burst=%u\n", direction.c_str(), pir, burst);
-    //
-    //        BCMOLT_FIELD_SET_PRESENT(&tm_sched_cfg.data.rate, tm_shaping, pir);
-    //        BCMOLT_FIELD_SET_PRESENT(&tm_sched_cfg.data.rate, tm_shaping, burst);
-    //        BCMOLT_MSG_FIELD_SET(&tm_sched_cfg, rate.pir, pir);
-    //        BCMOLT_MSG_FIELD_SET(&tm_sched_cfg, rate.burst, burst);
+    uint32_t cir = 1000000;
+    uint32_t pir = 1000000;
+    uint32_t burst = 65536;
+
+    printf("applying traffic shaping in %s pir=%u, burst=%u\n", direction.c_str(), pir, burst);
+
+    BCMOLT_FIELD_SET_PRESENT(&tm_sched_cfg.data.rate, tm_shaping, pir);
+    BCMOLT_FIELD_SET_PRESENT(&tm_sched_cfg.data.rate, tm_shaping, burst);
+    BCMOLT_MSG_FIELD_SET(&tm_sched_cfg, rate.pir, pir);
+    BCMOLT_MSG_FIELD_SET(&tm_sched_cfg, rate.burst, burst);
 
     err = bcmolt_cfg_set(dev_id, &tm_sched_cfg.hdr);
     if (err) 
@@ -1315,7 +1312,7 @@ bool CreateDefaultSchedQueue(uint32_t intf_id, const std::string direction)
     else
         printf("OK!!\r\n");
 
-    for (int queue_id = 1; queue_id < 2; queue_id++) 
+    for (int queue_id = 1; queue_id < 4; queue_id++) 
     {
         bcmolt_tm_queue_cfg tm_queue_cfg;
         bcmolt_tm_queue_key tm_queue_key = {};

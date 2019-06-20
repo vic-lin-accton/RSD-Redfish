@@ -3,6 +3,7 @@
     {
 	    "onu_id"          : 1,
 	    "interface_id"    : 0,
+	    "nni_id"          : 0,
 	    "vendor_id"       : "ISKT",
 	    "vendor_specific" : "71E80110"
     }
