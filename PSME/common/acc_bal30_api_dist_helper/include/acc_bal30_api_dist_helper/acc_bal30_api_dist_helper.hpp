@@ -139,13 +139,16 @@ namespace acc_bal30_api_dist_helper
             void register_callback();
             void set_olt_state(bool state);
             void set_olt_status(bool status);
+            void set_bal_status(bool status);
             bool get_olt_status();
+            bool get_bal_status();
             void set_intf_type(int port,int type);
             bool enable_bal();
-            bool enable_pon_if_(int intf_id);
+            bool enable_pon_if(int intf_id);
+            bool enable_nni_if(int intf_id);
             bool activate_onu(int intf_id, int onu_id, const char *vendor_id, const char *vendor_specific); 
             bool deactivate_onu(int intf_id, int onu_id); 
-            bool sched_add(int intf_id, int onu_id, int agg_port_id);
+            bool alloc_id_add(int intf_id, int onu_id, int alloc_id);
             bool omci_msg_out(int intf_id, int onu_id, const std::string pkt); 
             bool flow_add(int onu_id, int flow_id, const std::string flow_type, const std::string pkt_tag_type, int access_intf_id, 
                     int network_intf_id, int gemport_id, int classifier, int action, int action_cmd, struct action_val a_val, struct class_val c_val);
@@ -156,6 +159,7 @@ namespace acc_bal30_api_dist_helper
             void virtual set_nni_status(int port,int status)  = 0;
             //json::Value virtual get_port_statistic(int port)  = 0;
             int virtual get_max_pon_num() = 0;
+            int virtual get_max_nni_num() = 0;
 			
             void *fHandle = 0;
 
@@ -179,6 +183,7 @@ namespace acc_bal30_api_dist_helper
 
             bool m_bal_enable               = {false};
             bool m_bal_status               = {false};
+            bool m_olt_status               = {false};
             bool m_bcmbal_init              = {false};
             bool m_bal_lib_init             = {false};
             bool m_subscribed               = {false};
@@ -196,6 +201,7 @@ namespace acc_bal30_api_dist_helper
             void set_pon_status(int port,int status);
             void set_nni_status(int port,int status);
             int    get_max_pon_num(){return XGS_PON_MAX_PON_PORT_NUM;};
+            int    get_max_nni_num(){return XGS_PON_MAX_NNI_PORT_NUM;};
 
             //json::Value get_port_statistic(int port);
 
@@ -215,6 +221,7 @@ namespace acc_bal30_api_dist_helper
             void set_pon_status(int port,int status);
             void set_nni_status(int port,int status);
             int    get_max_pon_num(){return G_PON_MAX_PON_PORT_NUM;};
+            int    get_max_nni_num(){return G_PON_MAX_NNI_PORT_NUM;};
 
             //json::Value get_port_statistic(int port);
 

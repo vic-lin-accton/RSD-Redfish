@@ -23,7 +23,7 @@ int main(int argc, char** argv)
     for(i = 0; i < pon_if_max ; i++)
     {
         printf("////////////Enable PON interface [%d] to UP !!////////////\r\n", i);
-        OLT.enable_pon_if_(i);
+        OLT.enable_pon_if(i);
     }
 
     char cs_vendor_id[4] = {0x49,0x53,0x4B,0x54};//"ISKT"

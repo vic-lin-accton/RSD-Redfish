@@ -2,10 +2,18 @@
 
 #####
 # Put 3 files "Build_All_OpenOLT.sh" "Build_OpenOLT.sh" "softlink.sh"
-# in Jenkins workspace directory.
+# in Jenkins/workspace directory.
 ####
 
 TAG=$1
+
+if [ "$TAG" == "" ];then
+  TAG=$E_TAG
+  VER=$E_VER
+fi
+
+echo TAG[$TAG]
+echo VER[$VER]
 
 ContainerName="BAL30_RSD_213"
 

@@ -32,6 +32,149 @@ using namespace std;
 #include <iostream>
 #include <fstream>
 #include <istream>
+#include "omci_exam.hpp"
+
+typedef enum
+{
+    BCMOLT_ACTION_CMD_ID_NONE = 0,
+    BCMOLT_ACTION_CMD_ID_ADD_OUTER_TAG = 0x0001,
+    BCMOLT_ACTION_CMD_ID_REMOVE_OUTER_TAG = 0x0002,
+    BCMOLT_ACTION_CMD_ID_XLATE_OUTER_TAG = 0x0004,
+    BCMOLT_ACTION_CMD_ID_ADD_INNER_TAG = 0x0010,
+    BCMOLT_ACTION_CMD_ID_REMOVE_INNER_TAG = 0x0020,
+    BCMOLT_ACTION_CMD_ID_XLATE_INNER_TAG = 0x0040,
+    BCMOLT_ACTION_CMD_ID_REMARK_OUTER_PBITS = 0x0100,
+    BCMOLT_ACTION_CMD_ID_REMARK_INNER_PBITS = 0x0200,
+} bcmolt_action_cmd_id;
+
+typedef enum
+{
+    BCMOLT_ACTION_ID__BEGIN = 0,
+    BCMOLT_ACTION_ID_CMDS_BITMASK = 0,
+    BCMOLT_ACTION_ID_O_VID = 1,
+    BCMOLT_ACTION_ID_O_PBITS = 2,
+    BCMOLT_ACTION_ID_I_VID = 3,
+    BCMOLT_ACTION_ID_I_PBITS = 4,
+    BCMOLT_ACTION_ID__NUM_OF,
+
+} bcmolt_action_id;
+
+typedef enum
+{
+    BCMOLT_CLASSIFIER_ID__BEGIN = 0,
+    BCMOLT_CLASSIFIER_ID_O_VID = 0,
+    BCMOLT_CLASSIFIER_ID_I_VID = 1,
+    BCMOLT_CLASSIFIER_ID_O_PBITS = 2,
+    BCMOLT_CLASSIFIER_ID_I_PBITS = 3,
+    BCMOLT_CLASSIFIER_ID_ETHER_TYPE = 4,
+    BCMOLT_CLASSIFIER_ID_DST_MAC = 5,
+    BCMOLT_CLASSIFIER_ID_SRC_MAC = 6,
+    BCMOLT_CLASSIFIER_ID_IP_PROTO = 7,
+    BCMOLT_CLASSIFIER_ID_DST_IP = 8,
+    BCMOLT_CLASSIFIER_ID_SRC_IP = 9,
+    BCMOLT_CLASSIFIER_ID_SRC_PORT = 10,
+    BCMOLT_CLASSIFIER_ID_DST_PORT = 11,
+    BCMOLT_CLASSIFIER_ID_PKT_TAG_TYPE = 12,
+    BCMOLT_CLASSIFIER_ID_CLASSIFIER_BITMAP = 13,
+    BCMOLT_CLASSIFIER_ID__NUM_OF,
+} bcmolt_classifier_id;
+
+struct sFLOW
+{
+    int interface_id;
+    int onu_id; 
+    int flow_id;
+    char * flow_type;
+    char * packet_tag_type;	
+    int gemport_id;	
+    int network_interface_id;
+
+    bcmolt_action_cmd_id acton_cmd;
+    bcmolt_action_id         action; 
+    action_val                  action_val_a_val;
+
+    bcmolt_classifier_id classifier;
+    class_val class_val_c_val;	
+
+};
+
+struct sFLOW a_Flow[] =
+{
+    {
+        .interface_id         = 0,
+        .onu_id               = 1,
+        .flow_id              = 16,
+        .flow_type            = "upstream",
+        .packet_tag_type      = "single_tag",
+        .gemport_id           = 1032,
+        .network_interface_id = 0,
+        .acton_cmd            = BCMOLT_ACTION_CMD_ID_ADD_OUTER_TAG,    
+        .action               = BCMOLT_ACTION_ID_O_VID, 
+        {
+            .o_vid      = 10,
+            .o_pbits    = 0,
+            .o_tpid     = 0,
+            .i_vid      = 0,
+            .i_pbits    = 0,
+            .i_tpid     = 0,
+            .ether_type = 0,
+            .ip_proto   = 0,
+            .src_port   = 0,
+            .dst_port   = 0,
+        },
+        .classifier= BCMOLT_CLASSIFIER_ID_O_VID,
+        {
+            .o_vid      = 20,
+            .o_pbits    = 0,
+            .o_tpid     = 0,
+            .i_vid      = 0,
+            .i_pbits    = 0,
+            .i_tpid     = 0,
+            .ether_type = 0,
+            .ip_proto   = 0,
+            .src_port   = 0,
+            .dst_port   = 0,
+        }
+    }
+    ,
+        {
+            .interface_id         = 0,
+            .onu_id               = 1,
+            .flow_id              = 16,
+            .flow_type            = "downstream",
+            .packet_tag_type      = "double_tag",
+            .gemport_id           = 1032,
+            .network_interface_id = 0,
+            .acton_cmd            = BCMOLT_ACTION_CMD_ID_REMOVE_OUTER_TAG,    
+            .action               = BCMOLT_ACTION_ID_O_VID, 
+            {
+                .o_vid      = 10,
+                .o_pbits    = 0,
+                .o_tpid     = 0,
+                .i_vid      = 0,
+                .i_pbits    = 0,
+                .i_tpid     = 0,
+                .ether_type = 0,
+                .ip_proto   = 0,
+                .src_port   = 0,
+                .dst_port   = 0,
+            },
+            .classifier= BCMOLT_CLASSIFIER_ID_O_VID,
+            {
+                .o_vid      = 20,
+                .o_pbits    = 0,
+                .o_tpid     = 0,
+                .i_vid      = 10,
+                .i_pbits    = 0,
+                .i_tpid     = 0,
+                .ether_type = 0,
+                .ip_proto   = 0,
+                .src_port   = 0,
+                .dst_port   = 0,
+            }
+        }	
+};
+
 
 class TestClass1 : public ::testing::Test 
 {
@@ -51,7 +194,7 @@ TestClass1::~TestClass1()
 
 void TestClass1::SetUp() 
 {
-    printf("acc_bal30_api_dist_helper TESTING BEGIN /////////////////////\r\n");
+    printf("////////////acc_bal30_api_dist_helper TESTING BEGIN \n");
 
     static constexpr char ONU_CFG_NAME[] = "onu_cfg";
     ifstream    m_source_files= {};
@@ -71,18 +214,16 @@ void TestClass1::SetUp()
         {
             onus = onu_cfg["ONUs"];
             Onu_count = onus.size(); 
-            printf("Get onu_cfg OK \r\n");
-
         }
         else
         {
-            printf("Get onu_cfg NG, Check JSON format !!!\r\n");
+            printf("////////////Get onu_cfg NG, Check JSON format !!!\r\n");
             return;			  
         }
     }
     else
     {
-        printf("Open onu_cfg NG\r\n" );
+        printf("////////////Open onu_cfg NG\r\n" );
         return;		  
     }
 
@@ -93,29 +234,46 @@ void TestClass1::SetUp()
     int i = 0,count=0;
 
     printf("//////////// PON interface num[%d]  !!////////////\r\n", pon_if_max);
+
+    //Wait BAL Ready !! 
+    while(!OLT.get_bal_status())
+    {
+        sleep(1);
+        printf("////////////Wait BAL Ready[%d] seconds\r\n",count);
+        count++;
+    }
+
+    //Wait OLT Ready !! 
     while(!OLT.get_olt_status())
     {
         sleep(1);
-        printf("[%d]\r\n",count);
+        printf("////////////Wait OLT Ready[%d] seconds\r\n",count);
         count++;
     }
-    sleep(5);
 
     //Step 2. enable pon port//
     for(i = 0; i < pon_if_max ; i++)
     {
-        printf("////////////Enable PON interface [%d] to UP !!////////////\r\n", i);
-        OLT.enable_pon_if_(i);
+        OLT.enable_pon_if(i);
     }
 
+    //Step 3. enable nni port//
+    int nni_if_max = OLT.get_max_nni_num();
+    printf("//////////// NNI interface num[%d]  !!////////////\r\n", nni_if_max);
+    for(i = 0; i < nni_if_max ; i++)
+    {
+        OLT.enable_nni_if(i);
+    }
+
+    //Step 4. Enable ONU//
     int jj=0;
 
     for(jj = 0 ; jj< Onu_count; jj++)
     { 
-        printf("onu_cfg onu_id                        [%d]\r\n", onus[jj]["onu_id"].asInt());
-        printf("onu_cfg olt pon interface_id      [%d]\r\n", onus[jj]["interface_id"].asInt());
-        printf("onu_cfg onu vendor_id             [%s]\r\n", onus[jj]["vendor_id"].asString().c_str());
-        printf("onu_cfg onu vendor_specific id [%s]\r\n", onus[jj]["vendor_specific"].asString().c_str());			  
+        printf("////////////onu_cfg onu_id                 [%d]\r\n", onus[jj]["onu_id"].asInt());
+        printf("////////////onu_cfg olt pon interface_id   [%d]\r\n", onus[jj]["interface_id"].asInt());
+        printf("////////////onu_cfg onu vendor_id          [%s]\r\n", onus[jj]["vendor_id"].asString().c_str());
+        printf("////////////onu_cfg onu vendor_specific id [%s]\r\n", onus[jj]["vendor_specific"].asString().c_str());			  
 
         int onu_id = onus[jj]["onu_id"].asInt(); 	
         int interface_id = onus[jj]["interface_id"].asInt();
@@ -139,18 +297,38 @@ void TestClass1::SetUp()
         }
 
         printf("////////////Active ONU[%s][0x%02X][0x%02X][0x%02X][0x%02X] !!////////////\r\n", 
-        s_vendor_id.c_str(), cs_vendor_spec[0],cs_vendor_spec[1],cs_vendor_spec[2],cs_vendor_spec[3]);
+                s_vendor_id.c_str(), cs_vendor_spec[0],cs_vendor_spec[1],cs_vendor_spec[2],cs_vendor_spec[3]);
 
         OLT.activate_onu(interface_id, onu_id, s_vendor_id.c_str(), cs_vendor_spec);
-    }
- 
 
+        { 
+            int aFlow_size = (sizeof (a_Flow) / sizeof (a_Flow[0]));
+            int ii = 0;
+            for (ii = 0 ; ii < aFlow_size ; ii++)
+            {
+                std::string sft(a_Flow[ii].flow_type); //Flow type //
+                std::string sptt(a_Flow[ii].packet_tag_type); //pack tag type //
+
+                OLT.flow_add(
+                        onu_id, a_Flow[ii].flow_id, sft  , sptt, interface_id , 
+                        a_Flow[ii].network_interface_id, a_Flow[ii].gemport_id, a_Flow[ii].classifier, 
+                        a_Flow[ii].action , a_Flow[ii].acton_cmd , a_Flow[ii].action_val_a_val, a_Flow[ii].class_val_c_val);                    
+            }
+        }
+        sleep(5);
+
+        int aOMCI_size = (sizeof (a_OMCI) / sizeof (a_OMCI[0]));
+        int ij = 0;
+        for (ij = 0 ; ij < aOMCI_size ; ij++)
+        {
+            printf("[%d] ", ij);
+            OLT.omci_msg_out(interface_id, onu_id, a_OMCI[ij].raw_omci);
+            usleep(300000);
+        }
+    }
     //char cs_vendor_id[4] = {0x49,0x53,0x4B,0x54};//"ISKT"
     //char cs_vendor_spec[4] = {0x71,0xE8,0x01,0x10};
-    //sleep(5);
-
     OLT.enter_cmd_shell();
-    return 1;
 }
 void TestClass1::TearDown() 
 {
