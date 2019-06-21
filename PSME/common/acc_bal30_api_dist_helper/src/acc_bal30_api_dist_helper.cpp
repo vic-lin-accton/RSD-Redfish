@@ -547,13 +547,33 @@ namespace acc_bal30_api_dist_helper
         return 1;
     }
 
+    bool Olt_Device::enable_cli() 
+    {
+        /* Create CLI session */
+        bcmcli_session_parm mon_session_parm;
+        memset(&mon_session_parm, 0, sizeof(mon_session_parm));
+        mon_session_parm.get_prompt = openolt_cli_get_prompt_cb;
+        mon_session_parm.access_right = BCMCLI_ACCESS_ADMIN;
+        bcmos_errno rc = bcmcli_session_open(&mon_session_parm, &current_session);
+        bcm_openolt_api_cli_init(NULL, current_session);
+
+        BCMCLI_MAKE_CMD_NOPARM(NULL, "quit", "Quit", bcm_cli_quit);
+
+        if (BCM_ERR_OK !=bcmolt_apiend_cli_init()) 
+        {
+            printf("Failed to add apiend init\n");
+            return false; 
+        }
+        else
+            return true;
+    }
+
     bool Olt_Device::connect_bal(int argc, char *argv[]) 
     {
 
         bcmos_errno err;
         bcmolt_host_init_parms init_parms = {};
         init_parms.transport.type = BCM_HOST_API_CONN_LOCAL;
-        bcmcli_session_parm mon_session_parm;
 
         if (BCM_ERR_OK != bcmolt_host_init(&init_parms)) 
         {
@@ -563,21 +583,6 @@ namespace acc_bal30_api_dist_helper
         }
         else
         {
-            /* Create CLI session */
-            memset(&mon_session_parm, 0, sizeof(mon_session_parm));
-            mon_session_parm.get_prompt = openolt_cli_get_prompt_cb;
-            mon_session_parm.access_right = BCMCLI_ACCESS_ADMIN;
-            bcmos_errno rc = bcmcli_session_open(&mon_session_parm, &current_session);
-            bcm_openolt_api_cli_init(NULL, current_session);
-
-            BCMCLI_MAKE_CMD_NOPARM(NULL, "quit", "Quit", bcm_cli_quit);
-
-            if (BCM_ERR_OK !=bcmolt_apiend_cli_init()) 
-            {
-                printf("Failed to add apiend init\n");
-                return false; 
-            }
-
             if(bcmolt_api_conn_mgr_is_connected(dev_id))
             {
                 //Need wait bal ready then register other callback indicator//
@@ -1275,6 +1280,7 @@ bool CreateDefaultSchedQueue(uint32_t intf_id, const std::string direction)
     tm_sched_key.id = get_default_tm_sched_id(intf_id, direction);
 
     printf("CreateDefaultSchedQueue for %s tm_sched id %d intf_id %d ", direction.c_str(), tm_sched_key.id, intf_id);
+    bcmos_usleep(200000);
 
     BCMOLT_CFG_INIT(&tm_sched_cfg, tm_sched, tm_sched_key);
     BCMOLT_MSG_FIELD_SET(&tm_sched_cfg, attachment_point.type, BCMOLT_TM_SCHED_OUTPUT_TYPE_INTERFACE);
@@ -1681,6 +1687,45 @@ bool Olt_Device::omci_msg_out(int intf_id, int onu_id, const std::string pkt)
 
     return true;
 }
+
+
+bool Olt_Device::flow_remove(uint32_t flow_id, const std::string flow_type) 
+{
+    bcmolt_flow_cfg cfg;
+    bcmolt_flow_key key = {};
+
+    printf("flow_remove flow_id[%d] flow_type[%s]", flow_id, flow_type.c_str());
+
+    key.flow_id = (bcmolt_flow_id) flow_id;
+    key.flow_id = flow_id;
+    if (flow_type.compare(upstream) == 0 ) 
+    {
+        key.flow_type = BCMOLT_FLOW_TYPE_UPSTREAM;
+    } 
+    else if (flow_type.compare(downstream) == 0) 
+    {
+        key.flow_type = BCMOLT_FLOW_TYPE_DOWNSTREAM;
+    } else 
+    {
+        printf("Invalid flow type %s\n");
+        return false; 
+    }
+
+    BCMOLT_CFG_INIT(&cfg, flow, key);
+
+    bcmos_errno err = bcmolt_cfg_clear(dev_id, &cfg.hdr);
+
+    if (err) 
+    {
+        printf( " Error\n");
+        return false;
+    }
+    else
+        printf( " OK\n");
+
+    return true; 
+}
+
 
 // access_intf_id  : PON ID
 // network_intf_id : NNI ID

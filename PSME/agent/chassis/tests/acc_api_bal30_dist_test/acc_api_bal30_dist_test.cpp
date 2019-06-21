@@ -98,7 +98,7 @@ struct sFLOW
 
 };
 
-struct sFLOW a_Flow[] =
+static struct sFLOW a_Flow[] =
 {
     {
         .interface_id         = 0,
@@ -214,6 +214,7 @@ void TestClass1::SetUp()
         {
             onus = onu_cfg["ONUs"];
             Onu_count = onus.size(); 
+            printf("////////////num[%d]\r\n", Onu_count);
         }
         else
         {
@@ -328,9 +329,31 @@ void TestClass1::SetUp()
             OLT.omci_msg_out(pon_id, onu_id, a_OMCI[ij].raw_omci);
             usleep(300000);
         }
+
+        if(Onu_count > 1 )
+        {
+            do 
+            {
+                printf("PRESS ANY KEY to NEXT ONU TEST\r\n");
+            } while (cin.get() != '\n');
+            printf("Go...\r\n");
+
+            int Flow_size = (sizeof (a_Flow) / sizeof (a_Flow[0]));
+            printf("Flow size[%d]\r\n", Flow_size);
+            int i = 0;
+
+            for (i = 0 ; i< Flow_size ; i++)
+            {
+                std::string sft(a_Flow[i].flow_type); //Flow type //
+                printf("Remove flow %d id %s\r\n", a_Flow[i].flow_id , sft.c_str());
+                OLT.flow_remove(a_Flow[i].flow_id, sft);
+                usleep(300000);
+            }
+        }
     }
     //char cs_vendor_id[4] = {0x49,0x53,0x4B,0x54};//"ISKT"
     //char cs_vendor_spec[4] = {0x71,0xE8,0x01,0x10};
+    OLT.enable_cli();
     OLT.enter_cmd_shell();
 }
 void TestClass1::TearDown() 

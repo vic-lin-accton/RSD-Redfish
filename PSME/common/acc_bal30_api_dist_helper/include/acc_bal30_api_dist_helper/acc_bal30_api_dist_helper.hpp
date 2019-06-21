@@ -144,14 +144,15 @@ namespace acc_bal30_api_dist_helper
             bool get_bal_status();
             void set_intf_type(int port,int type);
             bool enable_bal();
+            bool enable_cli();
             bool enable_pon_if(int intf_id);
             bool enable_nni_if(int intf_id);
             bool activate_onu(int intf_id, int onu_id, const char *vendor_id, const char *vendor_specific); 
             bool deactivate_onu(int intf_id, int onu_id); 
             bool alloc_id_add(int intf_id, int onu_id, int alloc_id);
             bool omci_msg_out(int intf_id, int onu_id, const std::string pkt); 
-            bool flow_add(int onu_id, int flow_id, const std::string flow_type, const std::string pkt_tag_type, int access_intf_id, 
-                    int network_intf_id, int gemport_id, int classifier, int action, int action_cmd, struct action_val a_val, struct class_val c_val);
+            bool flow_add(int onu_id, int flow_id, const std::string flow_type, const std::string pkt_tag_type, int access_intf_id, int network_intf_id, int gemport_id, int classifier, int action, int action_cmd, struct action_val a_val, struct class_val c_val);
+            bool flow_remove(uint32_t flow_id, const std::string flow_type); 
 
 
             void virtual get_pon_port_type()= 0;			
