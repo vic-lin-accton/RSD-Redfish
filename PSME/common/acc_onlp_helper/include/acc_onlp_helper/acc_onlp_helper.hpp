@@ -143,6 +143,11 @@ namespace acc_onlp_helper
             int m_ID = 0;
             int m_Type = 0;
             RFLogEntry    Entry = {};	
+            bool m_fan_alert = false;	
+
+            int m_cpu_thermal_alert = 0;				
+            int m_sys_thermal_alert = 0;	
+            int m_psu_thermal_alert = 0;				
 			
             static std::vector<std::string> m_Event_Resouce_Alert;		
             static std::vector<std::string> get_Event_Resouce_Alert();	

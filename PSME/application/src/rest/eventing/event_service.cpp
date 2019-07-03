@@ -125,8 +125,9 @@ namespace {
                 log_warning(GET_LOGGER("rest"), "EventId: " << event.get_event_id()
                         << " could not be delivered: "
                         << destination << " is unreachable");
-                SubscriptionManager::get_instance()->del(subscription.get_name());
-                SubscriptionConfig::get_instance()->save();
+                // Do not remove subscribe if no response from listener //
+                //SubscriptionManager::get_instance()->del(subscription.get_name());
+                // SubscriptionConfig::get_instance()->save();
             }
         }
     }

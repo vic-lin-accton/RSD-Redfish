@@ -333,6 +333,17 @@ static void OltOnuActivationFailureIndication(short unsigned int olt , bcmolt_ms
     return ;
 }
 
+static void OltOnuAllIndication(short unsigned int olt , bcmolt_msg *msg)
+{
+    switch (msg->obj_type) 
+    {
+        case BCMOLT_OBJ_ID_ONU:
+            printf("BCMOLT_ONU_AUTO_SUBGROUP_ALL sub ID[%d]\r\n", msg->subgroup);
+    }
+    bcmolt_msg_free(msg);
+    return ;
+}
+
 const char* serial_number_to_str(bcmolt_serial_number* serial_number) 
 {
     static char buff[SERIAL_NUMBER_SIZE+1];
@@ -416,6 +427,31 @@ static void OltOnuOperIndication(short unsigned int olt , bcmolt_msg *msg)
     bcmolt_msg_free(msg);
     return ;
 }
+
+
+static void OltOnuO5(short unsigned int olt , bcmolt_msg *msg) 
+{
+    switch (msg->obj_type) 
+    {
+        case BCMOLT_OBJ_ID_ONU:
+            switch (msg->subgroup) 
+            {
+                case BCMOLT_ONU_AUTO_SUBGROUP_RANGING_COMPLETED:
+                    {
+                        bcmolt_onu_key *key = &((bcmolt_onu_ranging_completed*)msg)->key;
+                        bcmolt_onu_ranging_completed_data *data = &((bcmolt_onu_ranging_completed*)msg)->data;
+
+                        if (data->status == BCMOLT_RESULT_SUCCESS)
+                            printf("onu indication, intf_id %d, onu_id %d UP!, \n", key->pon_ni, key->onu_id, data->status);
+                        else
+                            printf("onu indications O5 fail\r\n");
+                    }
+            }
+    }
+    bcmolt_msg_free(msg);
+    return ;
+}
+
 
 namespace acc_bal30_api_dist_helper
 {
@@ -816,6 +852,31 @@ namespace acc_bal30_api_dist_helper
         else
             printf("Register_callback bcmolt_onu_auto_subgroup_onu_deactivation_completed ok!!!\r\n");
 
+        cb_cfg.obj_type = BCMOLT_OBJ_ID_ONU;
+        cb_cfg.rx_cb = OltOnuAllIndication;
+        cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
+        cb_cfg.subgroup = BCMOLT_ONU_AUTO_SUBGROUP_ALL;
+
+        if (bcmolt_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
+        {
+            printf("Register_callback BCMOLT_OBJ_ID_ONU BCMOLT_ONU_AUTO_SUBGROUP_ALL error!!!\r\n");
+            return;
+        }
+        else
+            printf("Register_callback BCMOLT_OBJ_ID_ONU BCMOLT_ONU_AUTO_SUBGROUP_ALL ok!!!\r\n");
+
+        cb_cfg.obj_type = BCMOLT_OBJ_ID_ONU;
+        cb_cfg.rx_cb    = OltOnuO5;
+        cb_cfg.flags    = BCMOLT_AUTO_FLAGS_NONE;
+        cb_cfg.subgroup = bcmolt_onu_auto_subgroup_ranging_completed;
+
+        if (bcmolt_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK) 
+        {
+            printf("Register_callback BCMOLT_OBJ_ID_ONU error!!!\r\n");
+            return;
+        }
+        else
+            printf("Register_callback bcmolt_onu_auto_subgroup_ranging_completed ok!!!\r\n");			 
 
         m_subscribed = true;
         return ; 

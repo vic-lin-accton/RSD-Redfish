@@ -103,7 +103,7 @@ void AccountRoleCollection::post(const server::Request& request, server::Respons
 #if 0	
     const auto& json = JsonValidator::validate_request_body<schema::SubscriptionCollectionPostSchema>(request);
     Subscription subscription = to_model(json);
-    uint64_t id = SubscriptionManager::get_instance()->add(subscription);
+    uint64_t id = AccountManager::get_instance()->add(subscription);
     SubscriptionConfig::get_instance()->save();
     endpoint::utils::set_location_header(response, PathBuilder(request).append(id).build());
 #endif

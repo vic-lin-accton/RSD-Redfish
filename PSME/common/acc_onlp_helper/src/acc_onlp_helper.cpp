@@ -1570,7 +1570,11 @@ namespace acc_onlp_helper {
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);	
 
                 std::string message_event = std::string("Fan : ") + std::to_string( ID) +  std::string("not SPIN.");
+                if(!m_fan_alert)
+                {  //Only send alert once //
                 m_Event_Resouce_Alert.push_back(message_event);				
+                    m_fan_alert = true;
+                }
             }
             else if (present && (RPM > 0))
             {
@@ -1578,7 +1582,7 @@ namespace acc_onlp_helper {
                 m_Status_Health = "OK";
                 m_Status_State ="Enabled";
                 gADbg.acc_printf("-----Fan_Info-----Fan working normal---\r\n");
-
+                m_fan_alert = false;
             }
             else if(!present)
             {
@@ -1715,7 +1719,11 @@ Area : 5
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
                 gADbg.acc_printf("set_info-----CPU_Sensor-----Warning--\r\n");					    
 
+                if(m_cpu_thermal_alert != 1)
+                {
                 m_Event_Resouce_Alert.push_back(message);				
+                    m_cpu_thermal_alert = 1;
+                }
 
             }
             else if(((m_Current_Temperature >= m_Error))  && (m_Current_Temperature < m_Shutdown))
@@ -1733,7 +1741,11 @@ Area : 5
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);		
                 gADbg.acc_printf("set_info-----CPU_Sensor-----Warning--\r\n");					    
 
+                if(m_cpu_thermal_alert != 4)
+                {
                 m_Event_Resouce_Alert.push_back(message);						
+                    m_cpu_thermal_alert = 4;
+                }				
             }
             else if((m_Current_Temperature >= m_Shutdown))
             {
@@ -1749,7 +1761,11 @@ Area : 5
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);				
                 gADbg.acc_printf("set_info-----CPU_Sensor-----Critical--\r\n");					    
 
+                if(m_cpu_thermal_alert != 5)
+                {
                 m_Event_Resouce_Alert.push_back(message);		
+                    m_cpu_thermal_alert = 5;					
+                }
             }
             else
             {
@@ -1757,6 +1773,7 @@ Area : 5
 
                 m_Status_Health = "OK";					
                 m_Status_State = "Enabled";
+                m_cpu_thermal_alert = 0;				
             }                     
         }
         else if (m_Type == SYSTEM_Sensor && present )
@@ -1778,7 +1795,11 @@ Area : 5
                 std::string message_event = std::string("SYSTEM Thermal ") + std::to_string( ID) + std::string(" is ") +std::to_string(m_Current_Temperature/1000) + 
 	         std::string(" degrees. Over warning temperature.");
 
+                if(m_sys_thermal_alert != 1)
+                {
                 m_Event_Resouce_Alert.push_back(message_event);						
+                    m_sys_thermal_alert = 1;
+                }					
             }
             else if(((m_Current_Temperature >= m_Error))  && (m_Current_Temperature < m_Shutdown))
             {
@@ -1797,7 +1818,12 @@ Area : 5
 
                 std::string message_event = std::string("SYSTEM Thermal ") + std::to_string( ID) + std::string(" is ") +std::to_string(m_Current_Temperature/1000) + 
 	         std::string(" degrees. Over error temperature.");
+
+                if(m_sys_thermal_alert != 4)
+                {				
                 m_Event_Resouce_Alert.push_back(message_event);					
+                    m_sys_thermal_alert = 4;
+                }				
 
             }
             else if((m_Current_Temperature >= m_Shutdown))
@@ -1816,7 +1842,12 @@ Area : 5
 
                 std::string message_event = std::string("SYSTEM Thermal ") + std::to_string( ID) + std::string(" is ") +std::to_string(m_Current_Temperature/1000) + 
 	         std::string(" degrees. Over fatal temperature.");
+
+                if(m_sys_thermal_alert != 5)
+                {				
                 m_Event_Resouce_Alert.push_back(message_event);				
+                    m_sys_thermal_alert = 5;
+                }					
             }
             else
             {
@@ -1824,6 +1855,7 @@ Area : 5
 
                 m_Status_Health = "OK";					
                 m_Status_State = "Enabled";
+                m_sys_thermal_alert = 0;
             }   
         }
         else if (m_Type == PSU_Sensor && present )
@@ -1848,7 +1880,12 @@ Area : 5
                 gADbg.acc_printf("set_info-----PSU_Sensor-----Warning--\r\n");					    			
 
                 std::string  message_event = std::string("PSU Thermal ") + std::to_string( ID) + std::string(" is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.  Over warning temperature.");    		
+
+                if(m_psu_thermal_alert != 1)
+                {
                 m_Event_Resouce_Alert.push_back(message_event);				
+                    m_psu_thermal_alert = 1; 					
+                }
             }
             else if(((m_Current_Temperature >= m_Error))  && (m_Current_Temperature < m_Shutdown))
             {
@@ -1866,7 +1903,12 @@ Area : 5
                 gADbg.acc_printf("set_info-----PSU_Sensor-----Warning--\r\n");					    			
 
                 std::string  message_event = std::string("PSU Thermal ") + std::to_string( ID) + std::string(" is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.  Over error temperature.");    		
+
+                if(m_psu_thermal_alert != 4)
+                {
                 m_Event_Resouce_Alert.push_back(message_event);				
+                    m_psu_thermal_alert = 4;					
+                }
             }
             else if((m_Current_Temperature >= m_Shutdown))
             {
@@ -1883,7 +1925,12 @@ Area : 5
                 gADbg.acc_printf("set_info-----PSU_Sensor-----Critical--\r\n");					    			
 
                 std::string  message_event = std::string("PSU Thermal ") + std::to_string( ID) + std::string(" is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.  Over fatal temperature.");    		
+
+                if(m_psu_thermal_alert != 5)
+                {
                 m_Event_Resouce_Alert.push_back(message_event);				
+                    m_psu_thermal_alert = 5;					
+                }					
             }
             else
             {
@@ -1891,6 +1938,7 @@ Area : 5
 
                 m_Status_Health = "OK";					
                 m_Status_State = "Enabled";
+                m_psu_thermal_alert = 0;					
             }   
         }
         else

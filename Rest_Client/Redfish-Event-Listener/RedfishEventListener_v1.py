@@ -272,10 +272,12 @@ def process_data(newsocketconn, fromaddr):
                 #if outdata.get('Context', None) != ContextDetail:
                 #    print("Context ({}) does not match with the server ({})."
                 #          .format(outdata.get('Context', None), ContextDetail))
-                StatusCode = """HTTP/1.1 200 OK\r\n\r\n"""
+                print("SEND OK BACK!!")
+                StatusCode = "HTTP/1.1 200 OK\n Content-Type: application/json\n {}"
 
-                #connstreamout.send(bytes(StatusCode, 'UTF-8'))
-                connstreamout.send(StatusCode.encode())
+                connstreamout.send(StatusCode)
+                connstreamout.shutdown(socket.SHUT_RDWR)
+                connstreamout.close()
 
                 with open(logfile, 'a') as f:
                     if 'EventTimestamp' in outdata:
@@ -298,6 +300,7 @@ def process_data(newsocketconn, fromaddr):
                     fd.write("Time:%s Count:%s\nHost IP:%s\nEvent Details:%s\n" % (
                         time.ctime(), event_count[str(fromaddr[0])], str(fromaddr), json.dumps(outdata)))
                     fd.close()
+
                 except Exception as err:
                     print(traceback.print_exc())
 
@@ -307,18 +310,15 @@ def process_data(newsocketconn, fromaddr):
                 res = "HTTP/1.1 200 OK\n" \
                       "Content-Type: application/json\n" \
                       "\n" + json.dumps(data_buffer)
-                connstreamout.send(res.encode())
-                data_buffer.clear()
-
-
+                connstreamout.send(res)
+                connstreamout.shutdown(socket.SHUT_RDWR)
+                connstreamout.close()
+                #data_buffer.clear()
         except Exception as err:
-            outdata = connstreamout.read()
             print("Data needs to read in normal Text format.")
-            print(outdata)
 
     finally:
-        connstreamout.shutdown(socket.SHUT_RDWR)
-        connstreamout.close()
+        print("CLOSE")
 
 
 ### Script starts here

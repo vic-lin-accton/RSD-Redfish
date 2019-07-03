@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @section Declaration of SubscriptionManager class
+ * @section Declaration of AccountManager class
  * @file account_manager.hpp
  * */
 
@@ -41,7 +41,7 @@ using namespace psme::rest::account::model;
 using AccountMap = std::map<std::string, Account>;  //username, Account
 using RoleMap = std::map<std::string, Role>;        //roleid, Role
 /*!
- * SubscriptionManager implementation
+ * AccountManager implementation
  */
 class AccountManager : public agent_framework::generic::Singleton<AccountManager> {
 public:
