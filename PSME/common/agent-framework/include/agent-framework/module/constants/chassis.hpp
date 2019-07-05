@@ -126,6 +126,13 @@ public:
     static constexpr const char THERMAL_ID[] = "thermal_id";
     static constexpr const char STATUS_HEALTH[]= "status_health";
     static constexpr const char STATUS_STATE[]= "status_state"; 	
+    static constexpr const char CURRENT_INPUT[] = "CurrentInput";
+    static constexpr const char CURRENT_OUTPUT[] = "CurrentOutput";
+    static constexpr const char VOLTAGE_INPUT[] = "LineInputVoltage";
+    static constexpr const char VOLTAGE_OUTPUT[] = "LineOutputVoltage";	
+    static constexpr const char PSU_TYPE[] = "PowerSupplyType";	
+    static constexpr const char PSU_MODULE[] = "Model";	
+    static constexpr const char PSU_SN[] = "SerialNumber";	
 /*Nick Added End  : */	
 };
 

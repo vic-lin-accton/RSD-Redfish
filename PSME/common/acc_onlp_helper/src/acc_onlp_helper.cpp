@@ -1187,21 +1187,32 @@ namespace acc_onlp_helper {
                     if(m_fan_max_num > 0)			
                     {
                         int i = 0;
+						
                         for(i = 1 ; i <= m_fan_max_num ; i++)
                         { 
                             Fan_Info* p = NULL;
-                            p = new Fan_Info();
-                            p->m_ID = i;
                             std::string findex("fan") ;
 
                             if(s[0]["onlp"]["fans"][findex  +  std::to_string(i)  ].asString() == "System" )
+                            {
+                                p = new SYS_Fan();
+                                p->m_ID = i;
                                 p->m_Type = Fan_Info::SYSTEM_Fan;
+                            }
                             else if (s[0]["onlp"]["fans"][findex +  std::to_string(i) ].asString() == "Psu" )
+                            {
+                                p = new SYS_Fan();
+                                p->m_ID = i;
                                 p->m_Type = Fan_Info::PSU_Fan;
+                            }
                             else
+                            {
+                                p = new SYS_Fan();
+                                p->m_ID = i;
                                 p->m_Type = Fan_Info::SYSTEM_Fan;
-
+                            }
                             m_vec_Fan_Info.push_back(p);                    
+
                         }
                     }
 
@@ -1265,21 +1276,38 @@ namespace acc_onlp_helper {
                         for(i = 1 ; i <= m_thermal_sen_max_num ; i++)
                         { 
                             Thermal_Info* p = NULL;
-                            p = new Thermal_Info();
-                            p->m_ID = i;	
 
                             std::string findex("thermal") ;
 
                             if(s[0]["onlp"]["thermals"][findex  +  std::to_string(i)  ].asString() == "CPU" )
+                            {
+                                printf("C  CPU_Thermal  \r\n");
+                            
+                                p = new CPU_Thermal();
+                                p->m_ID = i;	                            
                                 p->m_Type = Thermal_Info::CPU_Sensor;
+                                m_vec_Thermal_Info.push_back(p);                    							
+                            }
                             else if (s[0]["onlp"]["thermals"][findex +  std::to_string(i) ].asString() == "System" )
+                            {
+                                printf("C  SYS_Thermal  \r\n");
+                            
+                                p = new SYS_Thermal();
+                                p->m_ID = i;	  								
                                 p->m_Type = Thermal_Info::SYSTEM_Sensor;
+                                m_vec_Thermal_Info.push_back(p);   								
+                            }								
                             else if (s[0]["onlp"]["thermals"][findex +  std::to_string(i) ].asString() == "Psu" )
+                            {
+                                printf("C  PSU_Thermal  \r\n");
+                                p = new PSU_Thermal();
+                                p->m_ID = i;									
                                 p->m_Type = Thermal_Info::PSU_Sensor;						
+                                m_vec_Thermal_Info.push_back(p);   								
+                            }									
                             else
-                                p->m_Type = Thermal_Info::CPU_Sensor;
+                                printf("THERMLA create ERROR\r\n!!");
 
-                            m_vec_Thermal_Info.push_back(p);                    
                         }
                     }
 
@@ -1476,7 +1504,7 @@ namespace acc_onlp_helper {
     }
 
 
-    void Psu_Info::set_info(int ID, std::string Model , std::string SN,  int Vin,  int Vout ,int Iin , int Iout,int Pin , int Pout, bool present)
+    void Psu_Info::set_info(int ID, std::string Model , std::string SN,  int Vin,  int Vout ,int Iin , int Iout,int Pin , int Pout, onlp_psu_type_t type, bool present)
     {
         m_ID = ID; 
         m_Model = Model; 
@@ -1488,6 +1516,7 @@ namespace acc_onlp_helper {
         m_Pin=Pin; 
         m_Pout = Pout;
         m_Present = present;
+        m_Psu_Type = type;		
 
         if(m_Type == SYSTEM)
         {
@@ -1503,7 +1532,6 @@ namespace acc_onlp_helper {
                 std::string sensor_type("Power Supply / Converter");
                 std::string message("PSU UnavailableOffline");    
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-
             }
             else if (present && (Pout > 0))
             {
@@ -1511,7 +1539,6 @@ namespace acc_onlp_helper {
                 m_Status_Health = "OK";
                 m_Status_State ="Enabled";
                 gADbg.acc_printf("-----Psu_Info-----PSU working normal---\r\n");
-
             }
             else if(!present)
             {
@@ -1525,7 +1552,6 @@ namespace acc_onlp_helper {
                 std::string sensor_type("Power Supply / Converter");		   
                 std::string message("PSU absent");    
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-
             }		
             else
             {
@@ -1538,7 +1564,6 @@ namespace acc_onlp_helper {
                 std::string sensor_type("Power Supply / Converter");		   
                 std::string message("PSU absent");    
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-
             }
         }
 
@@ -1669,15 +1694,44 @@ namespace acc_onlp_helper {
         return;	
     }
 
+    void Thermal_Info::set_thermal_threshold_value(int Warning , int Error, int Shutdown)	
+    {
+        m_Warning = Warning;
+        m_Error = Error;
+        m_Shutdown = Shutdown;
+    }
+
+    void CPU_Thermal::set_thermal_threshold_value(int Warning , int Error, int Shutdown)	
+    {
+        //Todo , get from real time value //
+        if((Warning != 0 && Error != 0 && Shutdown !=0) && (m_Warning == 0 && m_Error == 0 && m_Shutdown == 0))
+        {
+            m_Warning   = 82000;
+            m_Error        = 92000;
+            m_Shutdown = 104000;		
+        }
+    }
+
+    void SYS_Thermal::set_thermal_threshold_value(int Warning , int Error, int Shutdown)	
+    {
+        m_Warning   = Warning;
+        m_Error        = Error;
+        m_Shutdown = Shutdown;		
+    }
+
+    void PSU_Thermal::set_thermal_threshold_value(int Warning , int Error, int Shutdown)	
+    {
+        m_Warning   = Warning;
+        m_Error        = Error;
+        m_Shutdown = Shutdown;		
+    }
+
     void Thermal_Info::set_info(int ID ,int Current_Temperature,int Warning , int Error, int Shutdown, bool present)
     {
         m_ID = ID; 
         m_Current_Temperature = Current_Temperature;
-        m_Warning = Warning;
-        m_Error = Error;
-        m_Shutdown = Shutdown;
         m_Present = present;
-
+        set_thermal_threshold_value(Warning , Error, Shutdown);
         /*
 Area : 1 
 "Warning" "Enabled"
@@ -1985,8 +2039,18 @@ Area : 5
                     {
                         if(fv.status & 1)
                         {
+                            unsigned int caps = fv.caps;
+                            Psu_Info::onlp_psu_type_t psu_type = Psu_Info::ONLP_PSU_TYPE_INVALID; 
+							
+                            if(caps & Psu_Info::ONLP_PSU_CAPS_AC)
+                                psu_type = Psu_Info::ONLP_PSU_TYPE_AC;
+                            else if(caps & Psu_Info::ONLP_PSU_CAPS_DC12)
+                                psu_type = Psu_Info::ONLP_PSU_TYPE_DC12;
+                            else if(caps & Psu_Info::ONLP_PSU_CAPS_DC48)
+                                psu_type = Psu_Info::ONLP_PSU_TYPE_DC48;
+							
                             set_psu_present(ii , true);
-                            (*pObj)->set_info(ii,  fv.model[0] ? fv.model : "NULL", fv.serial[0] ? fv.serial : "NULL", fv.mvin, fv.mvout, fv.miin, fv.miout, fv.mpin, fv.mpout, true);
+                            (*pObj)->set_info(ii,  fv.model[0] ? fv.model : "NULL", fv.serial[0] ? fv.serial : "NULL", fv.mvin, fv.mvout, fv.miin, fv.miout, fv.mpin, fv.mpout, psu_type , true);
                             gADbg.acc_printf("s psu ID:  %d\r\n", (*pObj)->m_ID);					
                             gADbg.acc_printf("s psu Model:  %s\r\n", (*pObj)->m_Model.c_str());
                             gADbg.acc_printf("s psu SN:  %s\r\n", (*pObj)->m_SN.c_str());
@@ -1996,11 +2060,13 @@ Area : 5
                             gADbg.acc_printf("s psu Iout:  %d\r\n", (*pObj)->m_Iout);
                             gADbg.acc_printf("s psu Pin:  %d\r\n", (*pObj)->m_Pin);
                             gADbg.acc_printf("s psu Pout:  %d\r\n", (*pObj)->m_Pout);	
+                            gADbg.acc_printf("s psu Type:  %d\r\n", (*pObj)->m_Psu_Type);	
+							
                         }
                         else
                         {
                             set_psu_present(ii , false); 
-                            (*pObj)->set_info(ii,  "NULL", "NULL", 0, 0, 0, 0, 0, 0 , false);
+                            (*pObj)->set_info(ii,  "NULL", "NULL", 0, 0, 0, 0, 0, 0 , Psu_Info::ONLP_PSU_TYPE_INVALID, false);
                             gADbg.acc_printf("PSU [%d] Not present.\r\n", ii);
                         }
                     }
@@ -2043,6 +2109,9 @@ Area : 5
                         case Pout:
                             return (*pObj)->m_Pout;
                             break;	
+                        case Psu_type:
+                            return (*pObj)->m_Psu_Type;
+                            break;
                         case Psu_Present:
                             return (*pObj)->m_Present;
                             break;
@@ -2621,10 +2690,30 @@ Area : 5
 
     Switch& Switch::get_instance() 
     {
+        ifstream ifs ("/etc/onl/platform");
+        std::string s;
+        getline (ifs, s, (char) ifs.eof());
+        printf("Creating Olt_Device on platform [%s] size[%d]\r\n", s.c_str(),(int)s.size());	    
+
         if (NULL == g_Switch) 
         {
+            if(s.find("asxvolt16", 0) != 0)
+            {           
+                printf("x86-64-accton-asxvolt16\r\n");	    
+                g_Switch = new Switch();
+            }
+            else if (s.find("asgvolt64", 0) != 0)
+            {
+                printf("x86-64-accton-asgvolt64\r\n");	    
             g_Switch = new Switch();
         }
+            else
+            {
+                printf("x86-64-accton-generic\r\n");	    
+                g_Switch = new Switch();
+            }
+        }
+
         return *g_Switch;
     }
 

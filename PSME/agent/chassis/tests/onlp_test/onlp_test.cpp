@@ -115,7 +115,16 @@ void TestClass1::SetUp()
     
         for(int i = 1; i <= psu_max; i++)	
         {
+            printf("PSU Model %d [%s] \r\n", i, sonlp.get_psu_info_by_(i, "Model").c_str());
+            printf("PSU S/N     %d [%s] \r\n", i, sonlp.get_psu_info_by_(i, "SN").c_str());
             printf("PSU present %d [%d] \r\n", i, sonlp.get_psu_info_by_(i, acc_onlp_helper::Switch::Psu_Present));    
+            printf("PSU Vin %d       [%d] \r\n", i, sonlp.get_psu_info_by_(i, acc_onlp_helper::Switch::Vin));    
+            printf("PSU Vout %d       [%d] \r\n", i, sonlp.get_psu_info_by_(i, acc_onlp_helper::Switch::Vout));    
+            printf("PSU Iin %d       [%d] \r\n", i, sonlp.get_psu_info_by_(i, acc_onlp_helper::Switch::Iin));    
+            printf("PSU Iout %d       [%d] \r\n", i, sonlp.get_psu_info_by_(i, acc_onlp_helper::Switch::Iout));    
+            printf("PSU Pin %d       [%d] \r\n", i, sonlp.get_psu_info_by_(i, acc_onlp_helper::Switch::Pin));    
+            printf("PSU Pout %d       [%d] \r\n", i, sonlp.get_psu_info_by_(i, acc_onlp_helper::Switch::Pout));    
+            printf("PSU Psu_type %d       [%d] \r\n", i, sonlp.get_psu_info_by_(i, acc_onlp_helper::Switch::Psu_type));    
             printf("PSU health %d [%s] \r\n", i, sonlp.get_psu_info_by_(i, "Status_Health").c_str());
             printf("PSU state %d [%s] \r\n", i, sonlp.get_psu_info_by_(i, "Status_State").c_str());
         }	

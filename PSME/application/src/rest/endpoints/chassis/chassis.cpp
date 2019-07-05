@@ -27,7 +27,10 @@
 #include "psme/rest/validators/schemas/chassis.hpp"
 #include "psme/rest/server/error/error_factory.hpp"
 
-
+#ifdef ONLP
+#include "acc_onlp_helper/acc_onlp_helper.hpp"
+using namespace acc_onlp_helper;
+#endif
 
 using namespace psme::rest;
 using namespace psme::rest::constants;
@@ -43,7 +46,13 @@ json::Value make_prototype() {
     r[Common::ID] = json::Value::Type::NIL;
     r[Chassis::CHASSIS_TYPE] = json::Value::Type::NIL;
     r[Common::NAME] = "Chassis";
+#ifdef ONLP
+    auto& sonlp = acc_onlp_helper::Switch::get_instance();
+    std::string CI = "Chassis of " + sonlp.get_product_name();;
+    r[Common::DESCRIPTION] = CI.c_str();
+#else
     r[Common::DESCRIPTION] = "Chassis of switch devices.";
+#endif	
     r[Chassis::POWER_STATE] = "On";
     r[Common::MANUFACTURER] = json::Value::Type::NIL;
     r[Common::MODEL] = json::Value::Type::NIL;
@@ -294,7 +303,7 @@ void endpoint::Chassis::get(const server::Request& req, server::Response& res) {
     r[Common::PART_NUMBER] = chassis.get_fru_info().get_part_number();
     r[Common::ASSET_TAG] = chassis.get_asset_tag();
     r[constants::Chassis::SKU] = chassis.get_sku();
-    r[constants::Chassis::INDICATOR_LED] = chassis.get_indicator_led();
+    r[constants::Chassis::INDICATOR_LED] = "Lit"; //Todo //
 
     set_response(res, r);
 }

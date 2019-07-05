@@ -96,6 +96,14 @@ constexpr const char Psu::PSU_ID[];
 constexpr const char Psu::THERMAL_ID[];
 constexpr const char Psu::STATUS_HEALTH[];
 constexpr const char Psu::STATUS_STATE[];
+constexpr const char Psu::CURRENT_INPUT[];
+constexpr const char Psu::CURRENT_OUTPUT[];
+constexpr const char Psu::VOLTAGE_INPUT[];
+constexpr const char Psu::VOLTAGE_OUTPUT[];
+constexpr const char Psu::PSU_TYPE[];
+constexpr const char Psu::PSU_MODULE[];
+constexpr const char Psu::PSU_SN[];
+
 /*Nick Added End  : */
 
 

@@ -47,7 +47,13 @@ Json::Value Psu::to_json() const {
     result[literals::Psu::PSU_ID]  = get_psu_id();    
     result[literals::Psu::STATUS_HEALTH] = get_status_health();    
     result[literals::Psu::STATUS_STATE]   = get_status_state();    
-	
+    result[literals::Psu::CURRENT_INPUT]     = get_current_input();
+    result[literals::Psu::CURRENT_OUTPUT]    = get_current_output();
+    result[literals::Psu::VOLTAGE_INPUT]     = get_voltage_input();
+    result[literals::Psu::VOLTAGE_OUTPUT]    = get_voltage_output();
+    result[literals::Psu::VOLTAGE_INPUT]     = get_voltage_input();
+    result[literals::Psu::PSU_SN]            = get_psu_sn();
+    result[literals::Psu::PSU_MODULE]        = get_psu_module();
 /*Nick Added End  : */	
     return result;
 }
@@ -67,6 +73,13 @@ Psu Psu::from_json(const Json::Value& json) {
     psu.set_psu_id(json[literals::Psu::PSU_ID]);       
     psu.set_status_health(json[literals::Psu::STATUS_HEALTH]);       
     psu.set_status_state(json[literals::Psu::STATUS_STATE]);       
+    psu.set_current_input(json[literals::Psu::CURRENT_INPUT].asDouble());
+    psu.set_current_output(json[literals::Psu::CURRENT_OUTPUT].asDouble());
+    psu.set_voltage_input(json[literals::Psu::VOLTAGE_INPUT].asDouble());
+    psu.set_voltage_output(json[literals::Psu::VOLTAGE_OUTPUT].asDouble());
+    psu.set_psu_type(json[literals::Psu::PSU_TYPE].asInt());	
+    psu.set_psu_sn(json[literals::Psu::PSU_SN]);       
+    psu.set_psu_module(json[literals::Psu::PSU_MODULE]);       
 /*Nick Added End  : */		
 
     return psu;

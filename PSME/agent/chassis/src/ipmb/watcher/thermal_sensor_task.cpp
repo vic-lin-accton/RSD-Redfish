@@ -193,14 +193,38 @@ void GetOnlpInfo::get_onlp_info() {
 
             if (psu_->get_psu_id() == psuid) 
             {
-                int current_pout = sonlp.get_psu_info_by_(psuid , Switch::Psu_Content::Pout);	
-                psu_->set_power_output(current_pout);
+                int p_in = sonlp.get_psu_info_by_(psuid , Switch::Psu_Content::Pin);	
+                psu_->set_power_input(p_in);	
+			
+                int p_out = sonlp.get_psu_info_by_(psuid , Switch::Psu_Content::Pout);	
+                psu_->set_power_output(p_out);
 
                 std::string  current_health = sonlp.get_psu_info_by_(psuid, "Status_Health");
                 psu_->set_status_health(current_health);						
 
                 std::string  current_state = sonlp.get_psu_info_by_(psuid, "Status_State");
                 psu_->set_status_state(current_state);
+
+                int c_in = sonlp.get_psu_info_by_(psuid , Switch::Psu_Content::Iin);	
+                psu_->set_current_input(c_in);		
+
+                int c_out = sonlp.get_psu_info_by_(psuid , Switch::Psu_Content::Iout);	
+                psu_->set_current_output(c_out);	
+
+                int v_in = sonlp.get_psu_info_by_(psuid , Switch::Psu_Content::Vin);	
+                psu_->set_voltage_input(v_in);		
+
+                int v_out = sonlp.get_psu_info_by_(psuid , Switch::Psu_Content::Vout);	
+                psu_->set_voltage_output(v_out);		
+
+                int psu_type = sonlp.get_psu_info_by_(psuid , Switch::Psu_Content::Psu_type);	
+                psu_->set_psu_type(psu_type);	
+
+                std::string  sn = sonlp.get_psu_info_by_(psuid, "SN");
+                psu_->set_psu_sn(sn);	
+
+                std::string  model = sonlp.get_psu_info_by_(psuid, "Model");
+                psu_->set_psu_module(model);
             }		 
         }
     }

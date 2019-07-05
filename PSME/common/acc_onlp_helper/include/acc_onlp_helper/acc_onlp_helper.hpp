@@ -169,23 +169,68 @@ namespace acc_onlp_helper
             int m_Error = 0;	
             int m_Shutdown = 0;	
             void set_info(int ID ,int Current_Temperature,int Warning , int Error, int Shutdown, bool present);
+            virtual void set_thermal_threshold_value(int Warning , int Error, int Shutdown);
+            virtual ~Thermal_Info(){}; 
+    };
 
+    class CPU_Thermal : public Thermal_Info
+    {
+        public:    
+            void set_thermal_threshold_value(int Warning , int Error, int Shutdown);
+    };
+
+    class SYS_Thermal : public Thermal_Info
+    {
+        public:    
+            void set_thermal_threshold_value(int Warning , int Error, int Shutdown);
+    };
+
+    class PSU_Thermal : public Thermal_Info
+    {
+        public:    
+            void set_thermal_threshold_value(int Warning , int Error, int Shutdown);
     };
 
     class Psu_Info  : public Dev_Info
     {
         public:    
+
+            typedef enum onlp_psu_caps_e 
+            {
+                ONLP_PSU_CAPS_AC = (1 << 0),
+                ONLP_PSU_CAPS_DC12 = (1 << 1),
+                ONLP_PSU_CAPS_DC48 = (1 << 2),
+                ONLP_PSU_CAPS_VIN = (1 << 3),
+                ONLP_PSU_CAPS_VOUT = (1 << 4),
+                ONLP_PSU_CAPS_IIN = (1 << 5),
+                ONLP_PSU_CAPS_IOUT = (1 << 6),
+                ONLP_PSU_CAPS_PIN = (1 << 7),
+                ONLP_PSU_CAPS_POUT = (1 << 8),
+            } onlp_psu_caps_t;
+	
+           typedef enum onlp_psu_type
+            {
+                 ONLP_PSU_TYPE_AC,
+                 ONLP_PSU_TYPE_DC12,
+                 ONLP_PSU_TYPE_DC48,
+                 ONLP_PSU_TYPE_LAST = ONLP_PSU_TYPE_DC48,
+                 ONLP_PSU_TYPE_COUNT,
+                 ONLP_PSU_TYPE_INVALID = -1,
+             }onlp_psu_type_t ;			
+			
             enum Psu_Type
             {
                 SYSTEM = 1
             };	
+			
             int m_Vin = 0;
             int m_Vout = 0;	
             int m_Iin = 0;	
             int m_Iout = 0;		
             int m_Pin = 0;		
             int m_Pout = 0;    
-            void set_info(int ID, std::string Model , std::string SN,  int Vin,  int Vout ,int Iin , int Iout,int Pin , int Pout, bool present);
+            onlp_psu_type_t m_Psu_Type = ONLP_PSU_TYPE_INVALID;   			
+            void set_info(int ID, std::string Model , std::string SN,  int Vin,  int Vout ,int Iin , int Iout,int Pin , int Pout, onlp_psu_type_t type, bool present);
     };
 
     class Fan_Info  : public Dev_Info
@@ -200,6 +245,16 @@ namespace acc_onlp_helper
             int m_Per = 0;	
             void set_info(int ID, std::string Model , std::string SN,  int RPM ,int Per, bool present);
 
+    };
+
+    class SYS_Fan : public Fan_Info
+    {
+        public:    
+    };
+	
+    class PSU_Fan : public Fan_Info
+    {
+        public:    
     };
 
     class Port_Info : public Dev_Info
@@ -273,7 +328,8 @@ namespace acc_onlp_helper
                 Iout = 4,
                 Pin = 5, 
                 Pout = 6,
-                Psu_Present  = 7
+                Psu_Present  = 7,
+                Psu_type = 8              
             };
 
             enum Thermal_Content
@@ -325,6 +381,7 @@ namespace acc_onlp_helper
 
             static Switch& get_instance();
             static void cleanup();
+            std::string get_product_name(){return m_Product_Name;};
 
         private:
 

@@ -164,35 +164,42 @@ void PsuCollection::get(const server::Request& req, server::Response& res) {
         
         json::Value json_PowerSupplies; 
         {
-/*			
-            json_PowerSupplies[Common::ODATA_ID] =  endpoint::PathBuilder(PathParam::BASE_URL).
-            append(Common::CHASSIS).
-            append(chassis.get_id()).
-            append("Power#").
-            append(constants::Root::PSUS).				
-            append(psu_.get_psu_id()).build();
-*/     
             json_PowerSupplies[Common::ODATA_ID] =  endpoint::PathBuilder(PathParam::BASE_URL).
             append(Common::CHASSIS).
             append(chassis.get_id()).
             append("Power").build();
 
             json_PowerSupplies[Common::MEMBER_ID] = std::to_string(psu_.get_psu_id());
-            json_PowerSupplies[Common::NAME] = "System PowerSupplies";
+            json_PowerSupplies[Common::NAME] = "Power Supplies Unit";
             json_PowerSupplies["Oem"]= json::Value::Type::OBJECT;
-            json_PowerSupplies["PowerSupplyType"] = json::Value::Type::NIL;
+
+            switch(psu_.get_psu_type())
+            {
+                case 0:	
+                    json_PowerSupplies["PowerSupplyType"] = "AC";
+                    break;
+                case 1:
+                    json_PowerSupplies["PowerSupplyType"] = "DC";
+                    break;	
+                case 2:
+                    json_PowerSupplies["PowerSupplyType"] = "DC";
+                    break;	
+                default :
+                    json_PowerSupplies["PowerSupplyType"] = "Unknown";
+            }	
+			
             json_PowerSupplies["LineInputVoltageType"] = json::Value::Type::NIL;
             json_PowerSupplies["LineInputVoltage"] = json::Value::Type::NIL;
             json_PowerSupplies["PowerCapacityWatts"] = json::Value::Type::NIL;
-            json_PowerSupplies["LastPowerOutputWatts"] = json::Value::Type::NIL;
-            json_PowerSupplies["Model"] = json::Value::Type::NIL;
-            json_PowerSupplies["Manufacturer"] = "N/A";
+            json_PowerSupplies["LastPowerOutputWatts"] =  (psu_.get_power_output() * 0.001);	
+            json_PowerSupplies["Model"] = psu_.get_psu_module();
+            json_PowerSupplies["Manufacturer"] = json::Value::Type::NIL;
             json_PowerSupplies["FirmwareVersion"] = json::Value::Type::NIL;
-            json_PowerSupplies["SerialNumber"] = json::Value::Type::NIL;
+            json_PowerSupplies["SerialNumber"] = psu_.get_psu_sn();
             json_PowerSupplies["PartNumber"] = json::Value::Type::NIL;
             json_PowerSupplies["SparePartNumber"] = json::Value::Type::NIL;
-            json_PowerSupplies["Status"]["State"]="Enabled";
-            json_PowerSupplies["Status"]["Health"]="OK";
+            json_PowerSupplies["Status"]["State"]=   psu_.get_status_state();
+            json_PowerSupplies["Status"]["Health"]= psu_.get_status_health();
             
             json::Value json_input_range; 
             
