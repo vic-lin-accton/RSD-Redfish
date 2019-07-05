@@ -228,10 +228,10 @@
       <ComplexType Name="Temperature">
         <Annotation Term="OData.AdditionalProperties" Bool="false"/>
         <Property Name="Reading" Type="Edm.Double"/>
-        <Property Name="UpperThresholdFatal" Type="Edm.Int64"/>
-        <Property Name="UpperThresholdCritical" Type="Edm.Int64"/>
-        <Property Name="LowerThresholdCritical" Type="Edm.Int64"/>
-        <Property Name="LowerThresholdFatal" Type="Edm.Int64"/>     
+        <Property Name="UpperThresholdFatal" Type="Edm.Double"/>
+        <Property Name="UpperThresholdCritical" Type="Edm.Double"/>
+        <Property Name="LowerThresholdCritical" Type="Edm.Double"/>
+        <Property Name="LowerThresholdFatal" Type="Edm.Double"/>     
         <Property Name="Status" Type="Resource.Status" Nullable="false"/>
       </ComplexType>
 
