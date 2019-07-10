@@ -161,10 +161,10 @@ static struct sFLOW a_Flow[] =
             },
             .classifier= BCMOLT_CLASSIFIER_ID_O_VID,
             {
-                .o_vid      = 20,
+                .o_vid      = 10,
                 .o_pbits    = 0,
                 .o_tpid     = 0,
-                .i_vid      = 10,
+                .i_vid      = 20,
                 .i_pbits    = 0,
                 .i_tpid     = 0,
                 .ether_type = 0,

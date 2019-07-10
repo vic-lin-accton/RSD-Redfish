@@ -26,6 +26,7 @@ bcmolt_oltid dev_id = 0;
 
 const uint32_t tm_upstream_sched_id_start   = 1020;
 const uint32_t tm_downstream_sched_id_start = 1004;
+#define TM_Q_SET_ID (bcmolt_tm_queue_set_id)32768U
 const std::string upstream     = "upstream";
 const std::string downstream   = "downstream";
 
@@ -248,6 +249,12 @@ static void OltOperIndication (short unsigned int olt, bcmolt_msg *msg)
 {
     if (msg->subgroup == BCMOLT_DEVICE_AUTO_SUBGROUP_CONNECTION_COMPLETE) 
     {
+        static int count=0;
+        auto& rOLT = Olt_Device::Olt_Device::get_instance();
+        count ++;
+
+        if(count = rOLT.get_maple_num()) 
+        {
         bcmolt_rx_cfg cb_cfg = {};
         cb_cfg.obj_type = BCMOLT_OBJ_ID_ONU;
         cb_cfg.rx_cb = OltOmciIndication;
@@ -260,9 +267,10 @@ static void OltOperIndication (short unsigned int olt, bcmolt_msg *msg)
             return;
         }
 
-        auto& rOLT = Olt_Device::Olt_Device::get_instance();
         printf("OLT Ready !!!!!!!!\r\n");
         rOLT.set_olt_status(true);
+            count = 0;
+        }
     } 
     else if (msg->subgroup == BCMOLT_DEVICE_AUTO_SUBGROUP_DISCONNECTION_COMPLETE) 
     {
@@ -631,7 +639,7 @@ namespace acc_bal30_api_dist_helper
                 if (bcmolt_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
                 {
                     printf("Register_callback BCMOLT_OBJ_ID_OLT bcmolt_olt_auto_subgroup_bal_ready error!!!\r\n");
-                    return;
+                    return false;
                 }
                 else
                     printf("Register_callback BCMOLT_OBJ_ID_OLT bcmolt_olt_auto_subgroup_bal_ready ok!!!\r\n");
@@ -859,11 +867,11 @@ namespace acc_bal30_api_dist_helper
 
         if (bcmolt_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
         {
-            printf("Register_callback BCMOLT_OBJ_ID_ONU BCMOLT_ONU_AUTO_SUBGROUP_ALL error!!!\r\n");
+            printf("Register_callback BCMOLT_OBJ_ID_ONU bcmolt_onu_auto_subgroup_all error!!!\r\n");
             return;
         }
         else
-            printf("Register_callback BCMOLT_OBJ_ID_ONU BCMOLT_ONU_AUTO_SUBGROUP_ALL ok!!!\r\n");
+            printf("Register_callback BCMOLT_OBJ_ID_ONU bcmolt_onu_auto_subgroup_all ok!!!\r\n");
 
         cb_cfg.obj_type = BCMOLT_OBJ_ID_ONU;
         cb_cfg.rx_cb    = OltOnuO5;
@@ -1385,6 +1393,7 @@ bool CreateDefaultSchedQueue(uint32_t intf_id, const std::string direction)
         bcmolt_tm_queue_key tm_queue_key = {};
         tm_queue_key.id = queue_id;
         tm_queue_key.sched_id = get_default_tm_sched_id(intf_id, direction);
+        tm_queue_key.tm_q_set_id = TM_Q_SET_ID;
 
         BCMOLT_CFG_INIT(&tm_queue_cfg, tm_queue, tm_queue_key);
         BCMOLT_MSG_FIELD_SET(&tm_queue_cfg, tm_sched_param.type, BCMOLT_TM_SCHED_PARAM_TYPE_PRIORITY);
@@ -1493,6 +1502,14 @@ bool  Olt_Device::enable_pon_if(int intf_id)
     BCMOLT_MSG_FIELD_SET(&interface_obj, discovery.control, BCMOLT_CONTROL_STATE_ENABLE);
     BCMOLT_MSG_FIELD_SET(&interface_obj, discovery.interval, 5000);
     BCMOLT_MSG_FIELD_SET(&interface_obj, discovery.onu_post_discovery_mode, BCMOLT_ONU_POST_DISCOVERY_MODE_ACTIVATE);
+
+    BCMOLT_MSG_FIELD_SET(&interface_obj, itu.automatic_onu_deactivation.los, true);
+    BCMOLT_MSG_FIELD_SET(&interface_obj, itu.automatic_onu_deactivation.onu_alarms, true);
+    BCMOLT_MSG_FIELD_SET(&interface_obj, itu.automatic_onu_deactivation.tiwi, true);
+    BCMOLT_MSG_FIELD_SET(&interface_obj, itu.automatic_onu_deactivation.ack_timeout, true);
+    BCMOLT_MSG_FIELD_SET(&interface_obj, itu.automatic_onu_deactivation.sfi, true);
+    BCMOLT_MSG_FIELD_SET(&interface_obj, itu.automatic_onu_deactivation.loki, true);
+
     BCMOLT_FIELD_SET(&pon_interface_set_state.data, pon_interface_set_pon_interface_state_data, operation, BCMOLT_INTERFACE_OPERATION_ACTIVE_WORKING);
 
     err = bcmolt_cfg_set(dev_id, &interface_obj.hdr);
@@ -1585,10 +1602,11 @@ bool Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendor_id, co
     memcpy(serial_number.vendor_id.arr, vendor_id, 4);
     memcpy(serial_number.vendor_specific.arr, vendor_specific, 4);
     BCMOLT_CFG_INIT(&onu_cfg, onu, onu_key);
-    BCMOLT_MSG_FIELD_SET(&onu_cfg, onu_rate, BCMOLT_ONU_RATE_RATE_10G_DS_10G_US);
+    //For BAL3.0 BCMOLT_MSG_FIELD_SET(&onu_cfg, onu_rate, BCMOLT_ONU_RATE_RATE_10G_DS_10G_US);
     BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.serial_number, serial_number);
     BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.auto_learning, BCMOS_TRUE);
-    BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.xgpon.ranging_burst_profile, 0);
+    //FOR BAL3.0 BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.xgpon.ranging_burst_profile, 0);
+    BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.xgpon.ranging_burst_profile, 2);
     BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.xgpon.data_burst_profile, 1);
     err = bcmolt_cfg_set(dev_id, &onu_cfg.hdr);
 
@@ -1910,7 +1928,8 @@ bool Olt_Device::flow_add(int onu_id, int flow_id, const std::string flow_type, 
             val.o_vid = c_val.o_vid; 
             BCMOLT_FIELD_SET(&val, classifier, pkt_tag_type, BCMOLT_PKT_TAG_TYPE_DOUBLE_TAG);
             BCMOLT_FIELD_SET(&val, classifier, o_vid, val.o_vid);
-            printf(" classifier.pkt_tag_type double_tag o_vid[%d]\r\n",val.o_vid );
+            BCMOLT_FIELD_SET(&val, classifier, i_vid, val.i_vid);
+            printf(" classifier.pkt_tag_type double_tag o_vid[%d] i_vid[%d]\r\n",val.o_vid, val.i_vid );
         }
 
         BCMOLT_MSG_FIELD_SET(&cfg, classifier, val);

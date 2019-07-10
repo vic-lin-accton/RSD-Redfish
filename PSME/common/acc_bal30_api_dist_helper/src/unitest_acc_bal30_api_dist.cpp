@@ -11,10 +11,18 @@ int main(int argc, char** argv)
 
     printf("//////////// PON interface num[%d]  !!////////////\r\n", pon_if_max);
 
+    //Wait BAL Ready !! 
+    while(!OLT.get_bal_status())
+    {
+        sleep(1);
+        printf("////////////Wait BAL Ready[%d] seconds\r\n",count);
+        count++;
+    }
+
     while(!OLT.get_olt_status())
     {
         sleep(1);
-        printf("[%d]\r\n",count);
+        printf("////////////Wait OLT Ready[%d] seconds\r\n",count);
         count++;
     }
     //Wait 16 port into ready states//

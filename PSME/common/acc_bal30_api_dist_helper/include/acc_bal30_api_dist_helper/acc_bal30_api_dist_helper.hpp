@@ -10,7 +10,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <unistd.h>
-#include "json/json.hpp"
+//#include "json/json.hpp"
 #include <string.h>
 
 typedef enum acc_bcmbal_state
@@ -161,6 +161,7 @@ namespace acc_bal30_api_dist_helper
             //json::Value virtual get_port_statistic(int port)  = 0;
             int virtual get_max_pon_num() = 0;
             int virtual get_max_nni_num() = 0;
+            int virtual get_maple_num() = 0;
 			
             void *fHandle = 0;
 
@@ -203,6 +204,8 @@ namespace acc_bal30_api_dist_helper
             void set_nni_status(int port,int status);
             int    get_max_pon_num(){return XGS_PON_MAX_PON_PORT_NUM;};
             int    get_max_nni_num(){return XGS_PON_MAX_NNI_PORT_NUM;};
+            int  get_maple_num(){return maple_num;};
+            int  maple_num = 8;
 
             //json::Value get_port_statistic(int port);
 
@@ -223,6 +226,8 @@ namespace acc_bal30_api_dist_helper
             void set_nni_status(int port,int status);
             int    get_max_pon_num(){return G_PON_MAX_PON_PORT_NUM;};
             int    get_max_nni_num(){return G_PON_MAX_NNI_PORT_NUM;};
+            int  get_maple_num(){return maple_num;};
+            int  maple_num = 4;
 
             //json::Value get_port_statistic(int port);
 
