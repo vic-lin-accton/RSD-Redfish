@@ -26,7 +26,9 @@ bcmolt_oltid dev_id = 0;
 
 const uint32_t tm_upstream_sched_id_start   = 1020;
 const uint32_t tm_downstream_sched_id_start = 1004;
+#ifdef BAL31 
 #define TM_Q_SET_ID (bcmolt_tm_queue_set_id)32768U
+#endif
 const std::string upstream     = "upstream";
 const std::string downstream   = "downstream";
 
@@ -1393,8 +1395,10 @@ bool CreateDefaultSchedQueue(uint32_t intf_id, const std::string direction)
         bcmolt_tm_queue_key tm_queue_key = {};
         tm_queue_key.id = queue_id;
         tm_queue_key.sched_id = get_default_tm_sched_id(intf_id, direction);
+        //For BAL3.1
+#ifdef BAL31        
         tm_queue_key.tm_q_set_id = TM_Q_SET_ID;
-
+#endif
         BCMOLT_CFG_INIT(&tm_queue_cfg, tm_queue, tm_queue_key);
         BCMOLT_MSG_FIELD_SET(&tm_queue_cfg, tm_sched_param.type, BCMOLT_TM_SCHED_PARAM_TYPE_PRIORITY);
         BCMOLT_MSG_FIELD_SET(&tm_queue_cfg, tm_sched_param.u.priority.priority, queue_id);
@@ -1602,11 +1606,16 @@ bool Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendor_id, co
     memcpy(serial_number.vendor_id.arr, vendor_id, 4);
     memcpy(serial_number.vendor_specific.arr, vendor_specific, 4);
     BCMOLT_CFG_INIT(&onu_cfg, onu, onu_key);
-    //For BAL3.0 BCMOLT_MSG_FIELD_SET(&onu_cfg, onu_rate, BCMOLT_ONU_RATE_RATE_10G_DS_10G_US);
+#ifndef BAL31 	
+    BCMOLT_MSG_FIELD_SET(&onu_cfg, onu_rate, BCMOLT_ONU_RATE_RATE_10G_DS_10G_US);
+#endif
     BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.serial_number, serial_number);
     BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.auto_learning, BCMOS_TRUE);
-    //FOR BAL3.0 BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.xgpon.ranging_burst_profile, 0);
+#ifdef BAL31 
     BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.xgpon.ranging_burst_profile, 2);
+#else
+    BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.xgpon.ranging_burst_profile, 0);
+#endif    
     BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.xgpon.data_burst_profile, 1);
     err = bcmolt_cfg_set(dev_id, &onu_cfg.hdr);
 
