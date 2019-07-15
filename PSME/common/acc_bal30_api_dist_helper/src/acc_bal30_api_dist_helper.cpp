@@ -211,7 +211,10 @@ static void OltBalReady (short unsigned int olt, bcmolt_msg *msg)
         bcmos_errno err;
         bcmolt_odid dev;
 
-        for (dev = 0; dev < BCM_MAX_DEVS_PER_LINE_CARD; dev++) 
+        auto& rOLT = Olt_Device::Olt_Device::get_instance();
+        int maple_num = rOLT.get_maple_num();
+
+        for (dev = 0; dev < maple_num; dev++) 
         {
             bcmolt_device_cfg dev_cfg = {};
             bcmolt_device_key dev_key = {};
@@ -225,7 +228,7 @@ static void OltBalReady (short unsigned int olt, bcmolt_msg *msg)
                 bcmolt_device_key key = {.device_id = dev};
                 bcmolt_device_connect oper;
                 bcmolt_device_cfg cfg;
-                printf("Enable Maple - %d/%d\n", dev + 1, BCM_MAX_DEVS_PER_LINE_CARD);
+                printf("Enable Maple - %d/%d\n", dev + 1, maple_num);
                 BCMOLT_OPER_INIT(&oper, device, connect, key);
                 BCMOLT_MSG_FIELD_SET(&oper, inni_config.mode, BCMOLT_INNI_MODE_ALL_10_G_XFI);
                 BCMOLT_MSG_FIELD_SET (&oper, system_mode, BCMOLT_SYSTEM_MODE_XGS__2_X);
@@ -239,7 +242,6 @@ static void OltBalReady (short unsigned int olt, bcmolt_msg *msg)
                 printf("Maple deivce %d already connected\n", dev);
             }
         }
-        auto& rOLT = Olt_Device::Olt_Device::get_instance();
         rOLT.register_callback();
         printf("BAL Ready !!!!!!!!\r\n");
         rOLT.set_bal_status(true);
@@ -255,20 +257,14 @@ static void OltOperIndication (short unsigned int olt, bcmolt_msg *msg)
         auto& rOLT = Olt_Device::Olt_Device::get_instance();
         count ++;
 
-        if(count = rOLT.get_maple_num()) 
+        if(count == rOLT.get_maple_num()) 
         {
         bcmolt_rx_cfg cb_cfg = {};
         cb_cfg.obj_type = BCMOLT_OBJ_ID_ONU;
         cb_cfg.rx_cb = OltOmciIndication;
         cb_cfg.subgroup = bcmolt_onu_auto_subgroup_omci_packet;
         cb_cfg.module = BCMOS_MODULE_ID_OMCI_TRANSPORT;
-
-        if(bcmolt_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
-        {
-            printf("Register_callback OltOmciIndication complete error!!!\r\n");
-            return;
-        }
-
+            bcmolt_ind_subscribe(dev_id, &cb_cfg);
         printf("OLT Ready !!!!!!!!\r\n");
         rOLT.set_olt_status(true);
             count = 0;
@@ -579,7 +575,7 @@ namespace acc_bal30_api_dist_helper
                 case BCMOLT_CHIP_FAMILY_CHIP_FAMILY_6865_X_: m_chip_family = "Aspen"; break;
             }
 
-            printf("topology nni:%d pon:%d dev:%d ppd:%d family: %s\n",
+            printf("topology nni:%d pon:%d maple dev number :%d pon number per device :%d family: %s\n",
                     m_nni_ports_num,
                     m_pon_ports_num,
                     BCM_MAX_DEVS_PER_LINE_CARD,
@@ -1367,7 +1363,7 @@ bool CreateDefaultSchedQueue(uint32_t intf_id, const std::string direction)
 
     BCMOLT_MSG_FIELD_SET(&tm_sched_cfg, attachment_point.u.interface.interface_ref.intf_id, intf_id);
     BCMOLT_MSG_FIELD_SET(&tm_sched_cfg, sched_type, BCMOLT_TM_SCHED_TYPE_SP);
-    BCMOLT_MSG_FIELD_SET(&tm_sched_cfg, num_priorities, 4);
+    BCMOLT_MSG_FIELD_SET(&tm_sched_cfg, num_priorities, 8);
 
     uint32_t cir = 1000000;
     uint32_t pir = 1000000;
