@@ -1,0 +1,13 @@
+{
+    "@odata.type": "#ManagerCollection.ManagerCollection",
+    "Members@odata.count": 1,
+    "@odata.id": "/redfish/v1/Managers",
+    "Members": [
+        {
+            "@odata.id": "/redfish/v1/Managers/1"
+        }
+    ],
+    "Name": "Manager Collection",
+    "@odata.context": "/redfish/v1/$metadata#ManagerCollection.ManagerCollection",
+    "Description": "Collection of Managers"
+}

@@ -1,0 +1,54 @@
+{
+    "VLANs": {
+        "@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/11/VLANs"
+    },
+    "NeighborInfo": {
+        "PortId": null,
+        "SwitchId": null,
+        "CableId": null
+    },
+    "@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/11",
+    "PortId": "Port ID",
+    "IPv6Addresses": [],
+    "PortMode": null,
+    "PortClass": null,
+    "@odata.type": "#EthernetSwitchPort.v1_0_0.EthernetSwitchPort",
+    "PortType": null,
+    "Autosense": null,
+    "MACAddress": null,
+    "OperationalState": null,
+    "LinkSpeedMbps": null,
+    "Status": {
+        "Health": "Warning",
+        "State": "Absent",
+        "HealthRollup": "OK"
+    },
+    "FrameSize": null,
+    "Name": "Port11",
+    "Links": {
+        "PortMembers": [],
+        "ActiveACLs": [],
+        "PrimaryVLAN": null,
+        "MemberOfPort": null,
+        "Oem": {
+            "Intel_RackScale": {
+                "@odata.type": "#Intel.Oem.EthernetSwitchPort"
+            }
+        },
+        "Switch": {
+            "@odata.id": "/redfish/v1/EthernetSwitches/1"
+        }
+    },
+    "IPv4Addresses": [],
+    "Description": "Ethernet Switch Port description",
+    "AdministrativeState": null,
+    "LinkType": null,
+    "Oem": {},
+    "FullDuplex": null,
+    "NeighborMAC": null,
+    "StaticMACs": {
+        "@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/11/StaticMACs"
+    },
+    "Id": "11",
+    "@odata.context": "/redfish/v1/$metadata#EthernetSwitchPort.EthernetSwitchPort"
+}

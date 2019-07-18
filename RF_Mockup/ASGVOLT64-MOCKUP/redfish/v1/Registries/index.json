@@ -1,0 +1,13 @@
+{
+    "Description": "Collection of Message Registry Files",
+    "@odata.id": "/redfish/v1/Registries",
+    "@odata.context": "/redfish/v1/$metadata#MessageRegistryFileCollection.MessageRegistryFileCollection",
+    "Members": [
+        {
+            "@odata.id": "/redfish/v1/Registries/1"
+        }
+    ],
+    "Name": "MessageRegistryFile collection",
+    "Members@odata.count": 1,
+    "@odata.type": "#MessageRegistryFileCollection.MessageRegistryFileCollection"
+}

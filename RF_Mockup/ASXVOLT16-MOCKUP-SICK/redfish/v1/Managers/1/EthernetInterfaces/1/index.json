@@ -1,0 +1,81 @@
+{
+    "@odata.id": "/redfish/v1/Managers/1/EthernetInterfaces/1",
+    "DHCPv4": {
+        "UseGateway": true,
+        "DHCPEnabled": false,
+        "UseNTPServers": false,
+        "UseDNSServers": true,
+        "UseStaticRoutes": false,
+        "UseDomainName": false
+    },
+    "IPv6AddressPolicyTable": [],
+    "AutoNeg": true,
+    "StaticNameServers": [
+        "8.8.8.8"
+    ],
+    "PermanentMACAddress": "b8:6a:97:54:e9:df",
+    "IPv4StaticAddresses": [
+        {
+            "Address": "172.17.10.7"
+        }
+    ],
+    "IPv6StaticDefaultGateways": [],
+    "IPv6Addresses": [
+        {
+            "AddressOrigin": "LinkLocal",
+            "Address": "fe80::ba6a:97ff:fe54:e9df",
+            "AddressState": null,
+            "PrefixLength": 64
+        }
+    ],
+    "@odata.type": "#EthernetInterface.v1_4_0.EthernetInterface",
+    "InterfaceEnabled": true,
+    "HostName": "localhost",
+    "MaxIPv6StaticAddresses": null,
+    "MTUSize": 1500,
+    "Status": {
+        "Health": "OK",
+        "State": "Enabled",
+        "HealthRollup": "OK"
+    },
+    "NameServers": [
+        "8.8.8.8"
+    ],
+    "Name": "Manager NIC",
+    "Links": {
+        "Endpoints": [],
+        "Oem": {
+            "Intel_RackScale": {
+                "@odata.type": "#Intel.Oem.EthernetInterface"
+            }
+        }
+    },
+    "FQDN": "localhost",
+    "IPv4Addresses": [
+        {
+            "SubnetMask": "255.255.252.0",
+            "Address": "172.17.10.7",
+            "AddressOrigin": "Static",
+            "Gateway": "172.17.10.251"
+        }
+    ],
+    "SpeedMbps": 1000,
+    "IPv6DefaultGateway": "fe80::7272:cfff:fe99:c93c",
+    "Description": "Manager NIC description",
+    "MACAddress": "b8:6a:97:54:e9:df",
+    "LinkStatus": "LinkUp",
+    "DHCPv6": {
+        "UseNTPServers": false,
+        "UseRapidCommit": false,
+        "OperatingMode": "Disabled",
+        "UseDNSServers": false
+    },
+    "Oem": {},
+    "FullDuplex": true,
+    "Id": "1",
+    "IPv6StaticAddresses": [],
+    "@odata.context": "/redfish/v1/$metadata#EthernetInterface.EthernetInterface",
+    "StatelessAddressAutoConfig": {
+        "IPv6AutoConfigEnabled": false
+    }
+}

@@ -1,0 +1,163 @@
+{
+    "Description": "Collection of Power",
+    "@odata.id": "/redfish/v1/Chassis/2/Power",
+    "PowerControl": [
+        {
+            "MemberId": "1",
+            "@odata.id": "/redfish/v1/Chassis/2/Power",
+            "PowerLimit": {
+                "CorrectionInMs": null,
+                "LimitInWatts": null,
+                "LimitException": null
+            },
+            "PowerConsumedWatts": 66,
+            "PowerRequestedWatts": null,
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Chassis/2"
+                }
+            ],
+            "PowerAllocatedWatts": null,
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            },
+            "PowerAvailableWatts": null,
+            "PowerCapacityWatts": 0,
+            "Oem": {},
+            "Name": "System Power Control"
+        },
+        {
+            "MemberId": "2",
+            "@odata.id": "/redfish/v1/Chassis/2/Power",
+            "PowerLimit": {
+                "CorrectionInMs": null,
+                "LimitInWatts": null,
+                "LimitException": null
+            },
+            "PowerConsumedWatts": 66,
+            "PowerRequestedWatts": null,
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Chassis/2"
+                }
+            ],
+            "PowerAllocatedWatts": null,
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            },
+            "PowerAvailableWatts": null,
+            "PowerCapacityWatts": 0,
+            "Oem": {},
+            "Name": "System Power Control"
+        }
+    ],
+    "PowerSupplies": [
+        {
+            "PowerSupplyType": "AC",
+            "LineInputVoltage": null,
+            "MemberId": "1",
+            "@odata.id": "/redfish/v1/Chassis/2/Power",
+            "LineInputVoltageType": null,
+            "Model": "FSF019 ",
+            "SerialNumber": "000345           ",
+            "Manufacturer": null,
+            "LastPowerOutputWatts": 66,
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Chassis/2"
+                }
+            ],
+            "SparePartNumber": null,
+            "PartNumber": null,
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            },
+            "FirmwareVersion": null,
+            "PowerCapacityWatts": null,
+            "Oem": {},
+            "Name": "Power Supplies Unit"
+        },
+        {
+            "PowerSupplyType": "AC",
+            "LineInputVoltage": null,
+            "MemberId": "2",
+            "@odata.id": "/redfish/v1/Chassis/2/Power",
+            "LineInputVoltageType": null,
+            "Model": "FSF019 ",
+            "SerialNumber": "000232           ",
+            "Manufacturer": null,
+            "LastPowerOutputWatts": 66,
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Chassis/2"
+                }
+            ],
+            "SparePartNumber": null,
+            "PartNumber": null,
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            },
+            "FirmwareVersion": null,
+            "PowerCapacityWatts": null,
+            "Oem": {},
+            "Name": "Power Supplies Unit"
+        }
+    ],
+    "@odata.context": "/redfish/v1/$metadata#Power.Power",
+    "Voltages": [
+        {
+            "UpperThresholdNonCritical": null,
+            "MemberId": "1",
+            "@odata.id": "/redfish/v1/Chassis/2/Power",
+            "UpperThresholdCritical": null,
+            "LowerThresholdFatal": null,
+            "SensorNumber": 1,
+            "ReadingVolts": null,
+            "LowerThresholdNonCritical": null,
+            "UpperThresholdFatal": null,
+            "PhysicalContext": "VoltageRegulator",
+            "LowerThresholdCritical": null,
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Chassis/2"
+                }
+            ],
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            },
+            "Name": "Voltage"
+        },
+        {
+            "UpperThresholdNonCritical": null,
+            "MemberId": "2",
+            "@odata.id": "/redfish/v1/Chassis/2/Power",
+            "UpperThresholdCritical": null,
+            "LowerThresholdFatal": null,
+            "SensorNumber": 2,
+            "ReadingVolts": null,
+            "LowerThresholdNonCritical": null,
+            "UpperThresholdFatal": null,
+            "PhysicalContext": "VoltageRegulator",
+            "LowerThresholdCritical": null,
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Chassis/2"
+                }
+            ],
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            },
+            "Name": "Voltage"
+        }
+    ],
+    "Id": "Power",
+    "Name": "Power Collection",
+    "Oem": {},
+    "@odata.type": "#Power.v1_1_0.Power"
+}

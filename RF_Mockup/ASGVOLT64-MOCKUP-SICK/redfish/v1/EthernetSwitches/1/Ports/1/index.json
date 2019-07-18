@@ -1,0 +1,104 @@
+{
+    "FrameSize": null,
+    "IPv4Addresses": [],
+    "NeighborInfo": {
+        "CableId": null,
+        "PortId": null,
+        "SwitchId": null
+    },
+    "StaticMACs": {
+        "@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/1/StaticMACs"
+    },
+    "IPv6Addresses": [],
+    "@odata.type": "#EthernetSwitchPort.v1_0_0.EthernetSwitchPort",
+    "LinkSpeedMbps": null,
+    "@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/1",
+    "AdministrativeState": null,
+    "PortMode": null,
+    "FullDuplex": null,
+    "Id": "1",
+    "PortClass": null,
+    "MACAddress": null,
+    "@odata.context": "/redfish/v1/$metadata#EthernetSwitchPort.EthernetSwitchPort",
+    "TransceiverStatistics": {
+        "BiasCurrent": {
+            "LowerThresholdFatal": 0,
+            "Status": {
+                "Health": "OK",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 160,
+            "Reading": 0,
+            "LowerThresholdCritical": 0,
+            "UpperThresholdFatal": 200
+        },
+        "Serial Number": "T1792000035",
+        "Temperature": {
+            "LowerThresholdFatal": -50,
+            "Status": {
+                "Health": "OK",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 90,
+            "Reading": 33.843,
+            "LowerThresholdCritical": -45,
+            "UpperThresholdFatal": 95
+        },
+        "Part Number": "LTE3680M-BH+",
+        "SFP Vendor Name": "Hisense",
+        "Voltage": {
+            "LowerThresholdFatal": 3,
+            "Status": {
+                "Health": "OK",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 3.5,
+            "Reading": 3.339,
+            "LowerThresholdCritical": 3.099,
+            "UpperThresholdFatal": 3.599
+        },
+        "Manufacture Date": "190214",
+        "TxPower": {
+            "LowerThresholdFatal": 2.244,
+            "Status": {
+                "Health": "Critical",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 6.324,
+            "Reading": 0,
+            "LowerThresholdCritical": 2.517,
+            "UpperThresholdFatal": 7.096
+        }
+    },
+    "PortType": null,
+    "Links": {
+        "PrimaryVLAN": null,
+        "Oem": {
+            "Intel_RackScale": {
+                "@odata.type": "#Intel.Oem.EthernetSwitchPort"
+            }
+        },
+        "MemberOfPort": null,
+        "ActiveACLs": [],
+        "Switch": {
+            "@odata.id": "/redfish/v1/EthernetSwitches/1"
+        },
+        "PortMembers": []
+    },
+    "Description": "Ethernet Switch Port description",
+    "VLANs": {
+        "@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/1/VLANs"
+    },
+    "PortId": "Port ID",
+    "Name": "Port1",
+    "Status": {
+        "Health": "OK",
+        "HealthRollup": "OK",
+        "State": "Enabled"
+    },
+    "Oem": {},
+    "NeighborMAC": null,
+    "OperationalState": null,
+    "Autosense": null,
+    "LinkType": "Ethernet"
+}

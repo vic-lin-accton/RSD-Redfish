@@ -1,0 +1,52 @@
+{
+    "Regions": [
+        {
+            "RegionId": "2",
+            "SizeMiB": 7812,
+            "MemoryClassification": null,
+            "OffsetMiB": 0
+        }
+    ],
+    "@odata.id": "/redfish/v1/Systems/1/Memory/2",
+    "BusWidthBits": null,
+    "FirmwareApiVersion": null,
+    "SerialNumber": null,
+    "MemoryMedia": [],
+    "Description": "Memory description",
+    "MemoryLocation": {
+        "Slot": null,
+        "MemoryController": null,
+        "Channel": null,
+        "Socket": null
+    },
+    "OperatingMemoryModes": [],
+    "FirmwareRevision": null,
+    "@odata.context": "/redfish/v1/$metadata#Memory.Memory",
+    "MemoryType": null,
+    "PartNumber": null,
+    "Id": "2",
+    "@odata.type": "#Memory.v1_1_0.Memory",
+    "Status": {
+        "State": "Enabled",
+        "Health": "OK",
+        "HealthRollup": "OK"
+    },
+    "AllowedSpeedsMHz": [],
+    "BaseModuleType": null,
+    "Oem": {
+        "Intel_RackScale": {
+            "VoltageVolt": null,
+            "@odata.type": "#Intel.Oem.Memory"
+        }
+    },
+    "Manufacturer": null,
+    "DataWidthBits": 72,
+    "MemoryDeviceType": "DDR3_SDRAM",
+    "RankCount": null,
+    "DeviceLocator": "DIMM_B1",
+    "ErrorCorrection": null,
+    "OperatingSpeedMhz": 2133,
+    "CapacityMiB": 7812,
+    "FunctionClasses": [],
+    "Name": "Memory"
+}

@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
+  <edmx:Reference Uri="/redfish/v1/metadata/Org.OData.Core.V1.xml">
+    <edmx:Include Namespace="Org.OData.Core.V1" Alias="OData"/>
+  </edmx:Reference>
+
+  <edmx:Reference Uri="/redfish/v1/metadata/ServiceRoot.xml">
+    <edmx:Include Namespace="ServiceRoot"/>
+    <edmx:Include Namespace="ServiceRoot.v1_1_1"/>    
+  </edmx:Reference>
+
+  <edmx:Reference Uri="/redfish/v1/metadata/Resource.xml">
+    <edmx:Include Namespace="Resource"/>
+  </edmx:Reference>
+   
+  <edmx:Reference Uri="/redfish/v1/metadata/IntelRackScaleOem.xml">
+    <edmx:Include Namespace="Intel.Oem"/>
+  </edmx:Reference>
+
+   <edmx:Reference Uri="/redfish/v1/metadata/ChassisCollection.xml">
+    <edmx:Include Namespace="ChassisCollection"/>
+   </edmx:Reference>
+
+   <edmx:Reference Uri="/redfish/v1/metadata/Chassis.xml">
+    <edmx:Include Namespace="Chassis"/>
+    <edmx:Include Namespace="Chassis.v1_2_0"/>
+    <edmx:Include Namespace="Chassis.v1_3_0"/>   
+   </edmx:Reference>
+
+   <edmx:Reference Uri="/redfish/v1/metadata/Thermal.xml">
+    <edmx:Include Namespace="Thermal"/>
+    <edmx:Include Namespace="Thermal.v1_1_0"/>    
+   </edmx:Reference>  
+
+   <edmx:Reference Uri="/redfish/v1/metadata/Power.xml">
+    <edmx:Include Namespace="Power"/>
+    <edmx:Include Namespace="Power.v1_1_0"/>    
+   </edmx:Reference>  
+
+  <edmx:Reference Uri="/redfish/v1/metadata/ManagerCollection.xml">
+    <edmx:Include Namespace="ManagerCollection"/>
+  </edmx:Reference>
+
+  <edmx:Reference Uri="/redfish/v1/metadata/Manager.xml">
+    <edmx:Include Namespace="Manager"/>
+    <edmx:Include Namespace="Manager.v1_0_0"/>    
+  </edmx:Reference>
+
+  <edmx:Reference Uri="/redfish/v1/metadata/ComputerSystem.xml">
+    <edmx:Include Namespace="ComputerSystem"/>
+    <edmx:Include Namespace="ComputerSystem.v1_2_0"/>
+    <edmx:Include Namespace="ComputerSystem.v1_3_0"/>
+  </edmx:Reference>
+
+  <edmx:Reference Uri="/redfish/v1/metadata/ComputerSystemCollection.xml">
+    <edmx:Include Namespace="ComputerSystemCollection"/>
+  </edmx:Reference>
+
+  <edmx:Reference Uri="/redfish/v1/metadata/MessageRegistryFileCollection.xml">
+    <edmx:Include Namespace="MessageRegistryFileCollection"/>
+  </edmx:Reference>
+
+   <edmx:Reference Uri="/redfish/v1/metadata/MessageRegistryFile.xml">
+    <edmx:Include Namespace="MessageRegistryFile"/>
+    <edmx:Include Namespace="MessageRegistryFile.v1_0_0"/>    
+   </edmx:Reference> 
+
+   <edmx:Reference Uri="/redfish/v1/metadata/MemoryCollection.xml">
+    <edmx:Include Namespace="MemoryCollection"/>
+   </edmx:Reference>
+
+   <edmx:Reference Uri="/redfish/v1/metadata/Memory.xml">
+    <edmx:Include Namespace="Memory"/>
+    <edmx:Include Namespace="Memory.v1_1_0"/>    
+   </edmx:Reference>
+ 
+   <edmx:Reference Uri="/redfish/v1/metadata/StorageCollection.xml">
+    <edmx:Include Namespace="StorageCollection"/>
+   </edmx:Reference> 
+
+   <edmx:Reference Uri="/redfish/v1/metadata/Storage.xml">
+    <edmx:Include Namespace="Storage"/>
+    <edmx:Include Namespace="Storage.v1_1_0"/>    
+   </edmx:Reference> 
+
+   <edmx:Reference Uri="/redfish/v1/metadata/Drive.xml">
+    <edmx:Include Namespace="Drive"/>
+    <edmx:Include Namespace="Drive.v1_1_0"/>    
+    <edmx:Include Namespace="Drive.v1_1_1"/>     
+   </edmx:Reference> 
+
+   <edmx:Reference Uri="/redfish/v1/metadata/VolumeCollection.xml">
+    <edmx:Include Namespace="VolumeCollection"/>
+   </edmx:Reference> 
+
+   <edmx:Reference Uri="/redfish/v1/metadata/ProcessorCollection.xml">
+    <edmx:Include Namespace="ProcessorCollection"/>
+   </edmx:Reference> 
+   
+   <edmx:Reference Uri="/redfish/v1/metadata/Processor.xml">
+    <edmx:Include Namespace="Processor"/>
+    <edmx:Include Namespace="Processor.v1_0_0"/>    
+   </edmx:Reference>          
+
+   <edmx:Reference Uri="/redfish/v1/metadata/EthernetInterfaceCollection.xml">
+    <edmx:Include Namespace="EthernetInterfaceCollection"/>
+   </edmx:Reference>   
+
+   <edmx:Reference Uri="/redfish/v1/metadata/EthernetInterface.xml">
+    <edmx:Include Namespace="EthernetInterface"/>
+    <edmx:Include Namespace="EthernetInterface.v1_1_0"/>    
+    <edmx:Include Namespace="EthernetInterface.v1_4_0"/>   
+   </edmx:Reference> 
+
+   <edmx:Reference Uri="/redfish/v1/metadata/SerialInterfaceCollection.xml">
+    <edmx:Include Namespace="SerialInterfaceCollection"/>
+   </edmx:Reference>
+ 
+   <edmx:Reference Uri="/redfish/v1/metadata/SerialInterface.xml">
+    <edmx:Include Namespace="SerialInterface"/>
+    <edmx:Include Namespace="SerialInterface.v1_0_2"/>    
+   </edmx:Reference>
+
+   <edmx:Reference Uri="/redfish/v1/metadata/ManagerNetworkProtocol.xml">
+    <edmx:Include Namespace="ManagerNetworkProtocol"/> 
+    <edmx:Include Namespace="ManagerNetworkProtocol.v1_0_2"/>
+   </edmx:Reference>
+
+   <edmx:Reference Uri="/redfish/v1/metadata/LogServiceCollection.xml">
+    <edmx:Include Namespace="LogServiceCollection"/>
+   </edmx:Reference>
+   
+   <edmx:Reference Uri="/redfish/v1/metadata/LogService.xml">
+    <edmx:Include Namespace="LogService"/>
+    <edmx:Include Namespace="LogService.v1_0_0"/>
+   </edmx:Reference> 
+
+   <edmx:Reference Uri="/redfish/v1/metadata/LogEntryCollection.xml">
+    <edmx:Include Namespace="LogEntryCollection"/>
+   </edmx:Reference> 
+
+   <edmx:Reference Uri="/redfish/v1/metadata/LogEntry.xml">
+    <edmx:Include Namespace="LogEntry"/>
+    <edmx:Include Namespace="LogEntry.v1_0_0"/>
+   </edmx:Reference> 
+
+   <edmx:Reference Uri="/redfish/v1/metadata/SessionCollection.xml">
+    <edmx:Include Namespace="SessionCollection"/>
+   </edmx:Reference> 
+
+   <edmx:Reference Uri="/redfish/v1/metadata/SessionService.xml">
+    <edmx:Include Namespace="SessionService"/>
+    <edmx:Include Namespace="SessionService.v1_0_0"/>
+   </edmx:Reference> 
+
+   <edmx:Reference Uri="/redfish/v1/metadata/EventService.xml">
+    <edmx:Include Namespace="EventService"/>
+    <edmx:Include Namespace="EventService.v1_0_0"/>    
+   </edmx:Reference>   
+
+   <edmx:Reference Uri="/redfish/v1/metadata/EventDestination.xml">
+    <edmx:Include Namespace="EventDestination"/>
+    <edmx:Include Namespace="EventDestination.v1_0_0"/>    
+   </edmx:Reference>   
+
+   <edmx:Reference Uri="/redfish/v1/metadata/EventDestinationCollection.xml">
+    <edmx:Include Namespace="EventDestinationCollection"/>
+   </edmx:Reference>   
+
+   <edmx:Reference Uri="/redfish/v1/metadata/AccountService.xml">
+    <edmx:Include Namespace="AccountService"/>
+    <edmx:Include Namespace="AccountService.v1_0_0"/>    
+   </edmx:Reference>
+
+   <edmx:Reference Uri="/redfish/v1/metadata/ManagerAccountCollection.xml">
+    <edmx:Include Namespace="ManagerAccountCollection"/>
+   </edmx:Reference>
+
+   <edmx:Reference Uri="/redfish/v1/metadata/ManagerAccount.xml">
+    <edmx:Include Namespace="ManagerAccount"/>
+    <edmx:Include Namespace="ManagerAccount.v1_0_0"/>
+   </edmx:Reference>
+
+   <edmx:Reference Uri="/redfish/v1/metadata/RoleCollection.xml">
+    <edmx:Include Namespace="RoleCollection"/>
+   </edmx:Reference>
+
+   <edmx:Reference Uri="/redfish/v1/metadata/Role.xml">
+    <edmx:Include Namespace="Role"/>
+    <edmx:Include Namespace="Role.v1_0_0"/>    
+   </edmx:Reference>
+
+   <edmx:Reference Uri="/redfish/v1/metadata/Session.xml">
+    <edmx:Include Namespace="Session"/>
+    <edmx:Include Namespace="Session.v1_0_0"/>    
+   </edmx:Reference>
+   
+   <edmx:Reference Uri="/redfish/v1/metadata/EthernetSwitchCollection.xml">  
+   <edmx:Include Namespace="EthernetSwitchCollection"/> 
+   </edmx:Reference>
+   
+   <edmx:Reference Uri="/redfish/v1/metadata/EthernetSwitch.xml">  
+   <edmx:Include Namespace="EthernetSwitch"/> 
+   <edmx:Include Namespace="EthernetSwitch.v1_0_0"/> 
+   </edmx:Reference>
+
+   <edmx:Reference Uri="/redfish/v1/metadata/EthernetSwitchPortCollection.xml">
+    <edmx:Include Namespace="EthernetSwitchPortCollection"/>
+   </edmx:Reference>
+
+   <edmx:Reference Uri="/redfish/v1/metadata/EthernetSwitchPort.xml">
+    <edmx:Include Namespace="EthernetSwitchPort"/>  
+    <edmx:Include Namespace="EthernetSwitchPort.v1_0_0"/>
+   </edmx:Reference>
+
+   <edmx:Reference Uri="/redfish/v1/metadata/EthernetSwitchACLCollection.xml">
+    <edmx:Include Namespace="EthernetSwitchACLCollection"/>
+   </edmx:Reference>
+
+   <edmx:Reference Uri="/redfish/v1/metadata/VLanNetworkInterfaceCollection.xml">
+    <edmx:Include Namespace="VLanNetworkInterfaceCollection"/>
+   </edmx:Reference>
+
+   <edmx:Reference Uri="/redfish/v1/metadata/EthernetSwitchStaticMACCollection.xml">
+    <edmx:Include Namespace="EthernetSwitchStaticMACCollection"/>
+   </edmx:Reference>  
+
+   <edmx:Reference Uri="/redfish/v1/metadata/RedfishExtensions.xml">
+     <edmx:Include Namespace="RedfishExtensions.v1_0_0" Alias="Redfish"/>
+   </edmx:Reference>   
+
+  <edmx:DataServices>
+    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Service">
+      <EntityContainer Name="Service" Extends="ServiceRoot.v1_0_0.ServiceContainer">
+        <Annotation Term="OData.Description" String="Default Entity Container"/>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
+

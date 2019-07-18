@@ -1,0 +1,37 @@
+{
+    "TotalCores": 4,
+    "@odata.id": "/redfish/v1/Systems/1/Processors/1",
+    "Status": {
+        "State": "Enabled",
+        "Health": "OK",
+        "HealthRollup": "OK"
+    },
+    "Model": "Intel(R) Pentium(R) CPU D1519 @ 1.50GHz",
+    "Description": "Processor Description",
+    "ProcessorType": "CPU",
+    "Manufacturer": "Intel Corporation",
+    "Socket": "CPU0",
+    "TotalThreads": 2,
+    "ProcessorId": {
+        "MicrocodeInfo": null,
+        "VendorId": "GenuineIntel",
+        "Step": null,
+        "EffectiveModel": null,
+        "EffectiveFamily": null,
+        "IdentificationRegisters": null
+    },
+    "ProcessorArchitecture": "x86",
+    "MaxSpeedMHz": 799,
+    "@odata.context": "/redfish/v1/$metadata#Processor.Processor",
+    "InstructionSet": "x86-64",
+    "Id": "1",
+    "@odata.type": "#Processor.v1_0_0.Processor",
+    "Oem": {
+        "Intel_RackScale": {
+            "Capabilities": [],
+            "Brand": "Unknown",
+            "@odata.type": "#Intel.Oem.Processor"
+        }
+    },
+    "Name": "Processor"
+}

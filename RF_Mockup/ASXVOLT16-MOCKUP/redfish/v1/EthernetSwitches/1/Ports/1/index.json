@@ -1,0 +1,104 @@
+{
+    "@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/1",
+    "NeighborMAC": null,
+    "Id": "1",
+    "LinkSpeedMbps": null,
+    "PortId": "Port ID",
+    "NeighborInfo": {
+        "CableId": null,
+        "PortId": null,
+        "SwitchId": null
+    },
+    "PortMode": null,
+    "VLANs": {
+        "@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/1/VLANs"
+    },
+    "StaticMACs": {
+        "@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/1/StaticMACs"
+    },
+    "TransceiverStatistics": {
+        "Temperature": {
+            "Reading": 31.164,
+            "LowerThresholdFatal": -10,
+            "UpperThresholdCritical": 75,
+            "LowerThresholdCritical": -5,
+            "UpperThresholdFatal": 80,
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            }
+        },
+        "SFP Vendor Name": "SOURCEPHOTONICS",
+        "Part Number": "XPPXG2N1CDFA",
+        "Manufacture Date": "170928",
+        "Voltage": {
+            "Reading": 3.364,
+            "LowerThresholdFatal": 3,
+            "UpperThresholdCritical": 3.549,
+            "LowerThresholdCritical": 3.049,
+            "UpperThresholdFatal": 3.599,
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            }
+        },
+        "BiasCurrent": {
+            "Reading": 75.226,
+            "LowerThresholdFatal": 10,
+            "UpperThresholdCritical": 120,
+            "LowerThresholdCritical": 20,
+            "UpperThresholdFatal": 130,
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            }
+        },
+        "TxPower": {
+            "Reading": 2.457,
+            "LowerThresholdFatal": 1.122,
+            "UpperThresholdCritical": 3.981,
+            "LowerThresholdCritical": 1.412,
+            "UpperThresholdFatal": 5.011,
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            }
+        },
+        "Serial Number": "HAS2013740"
+    },
+    "IPv4Addresses": [],
+    "@odata.context": "/redfish/v1/$metadata#EthernetSwitchPort.EthernetSwitchPort",
+    "Status": {
+        "State": "Enabled",
+        "HealthRollup": "OK",
+        "Health": "OK"
+    },
+    "Oem": {},
+    "@odata.type": "#EthernetSwitchPort.v1_0_0.EthernetSwitchPort",
+    "Links": {
+        "PrimaryVLAN": null,
+        "Oem": {
+            "Intel_RackScale": {
+                "@odata.type": "#Intel.Oem.EthernetSwitchPort"
+            }
+        },
+        "PortMembers": [],
+        "MemberOfPort": null,
+        "Switch": {
+            "@odata.id": "/redfish/v1/EthernetSwitches/1"
+        },
+        "ActiveACLs": []
+    },
+    "PortClass": null,
+    "LinkType": "Ethernet",
+    "Autosense": null,
+    "IPv6Addresses": [],
+    "MACAddress": null,
+    "FullDuplex": null,
+    "AdministrativeState": null,
+    "FrameSize": null,
+    "Description": "Ethernet Switch Port description",
+    "OperationalState": null,
+    "Name": "Port1",
+    "PortType": null
+}

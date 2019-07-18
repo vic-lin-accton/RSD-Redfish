@@ -1,0 +1,104 @@
+{
+    "@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/16",
+    "NeighborMAC": null,
+    "Id": "16",
+    "LinkSpeedMbps": null,
+    "PortId": "Port ID",
+    "NeighborInfo": {
+        "CableId": null,
+        "PortId": null,
+        "SwitchId": null
+    },
+    "PortMode": null,
+    "VLANs": {
+        "@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/16/VLANs"
+    },
+    "StaticMACs": {
+        "@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/16/StaticMACs"
+    },
+    "TransceiverStatistics": {
+        "Temperature": {
+            "Reading": 34.917,
+            "LowerThresholdFatal": -15,
+            "UpperThresholdCritical": 78,
+            "LowerThresholdCritical": -8,
+            "UpperThresholdFatal": 85,
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            }
+        },
+        "SFP Vendor Name": "Hisense",
+        "Part Number": "LTH7226-PC+",
+        "Manufacture Date": "171114",
+        "Voltage": {
+            "Reading": 3.485,
+            "LowerThresholdFatal": 2.97,
+            "UpperThresholdCritical": 3.47,
+            "LowerThresholdCritical": 3.129,
+            "UpperThresholdFatal": 3.629,
+            "Status": {
+                "State": "Enabled",
+                "Health": "Warning"
+            }
+        },
+        "BiasCurrent": {
+            "Reading": 89.72,
+            "LowerThresholdFatal": 0,
+            "UpperThresholdCritical": 130,
+            "LowerThresholdCritical": 1,
+            "UpperThresholdFatal": 140,
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            }
+        },
+        "TxPower": {
+            "Reading": 2.386,
+            "LowerThresholdFatal": 1,
+            "UpperThresholdCritical": 5.011,
+            "LowerThresholdCritical": 1.259,
+            "UpperThresholdFatal": 6.309,
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            }
+        },
+        "Serial Number": "H277BZ00007"
+    },
+    "IPv4Addresses": [],
+    "@odata.context": "/redfish/v1/$metadata#EthernetSwitchPort.EthernetSwitchPort",
+    "Status": {
+        "State": "Enabled",
+        "HealthRollup": "OK",
+        "Health": "OK"
+    },
+    "Oem": {},
+    "@odata.type": "#EthernetSwitchPort.v1_0_0.EthernetSwitchPort",
+    "Links": {
+        "PrimaryVLAN": null,
+        "Oem": {
+            "Intel_RackScale": {
+                "@odata.type": "#Intel.Oem.EthernetSwitchPort"
+            }
+        },
+        "PortMembers": [],
+        "MemberOfPort": null,
+        "Switch": {
+            "@odata.id": "/redfish/v1/EthernetSwitches/1"
+        },
+        "ActiveACLs": []
+    },
+    "PortClass": null,
+    "LinkType": "Ethernet",
+    "Autosense": null,
+    "IPv6Addresses": [],
+    "MACAddress": null,
+    "FullDuplex": null,
+    "AdministrativeState": null,
+    "FrameSize": null,
+    "Description": "Ethernet Switch Port description",
+    "OperationalState": null,
+    "Name": "Port16",
+    "PortType": null
+}
