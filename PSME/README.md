@@ -89,7 +89,7 @@
 
 - **Automation test tool**
 
-    Todo
+    [RSD Redfish PSME Test Automation](https://github.com/edge-core/RSD-Redfish/tree/master/PSME/RF_Auto_Test/README.md)
 
 - **DMTF validator tools**
 

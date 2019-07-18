@@ -1,0 +1,17 @@
+{
+    "StopBits": "1",
+    "@odata.id": "/redfish/v1/Managers/1/SerialInterfaces/1",
+    "ConnectorType": "RJ45",
+    "FlowControl": "None",
+    "Name": "Manager Serial Interface",
+    "Parity": "None",
+    "PinOut": "Cyclades",
+    "Description": "Management for Serial Interface",
+    "DataBits": "8",
+    "@odata.type": "#SerialInterface.v1_0_2.SerialInterface",
+    "InterfaceEnabled": true,
+    "BitRate": "115200",
+    "SignalType": "Rs232",
+    "Id": "1",
+    "@odata.context": "/redfish/v1/$metadata#SerialInterface.SerialInterface"
+}

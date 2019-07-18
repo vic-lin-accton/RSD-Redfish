@@ -1,0 +1,55 @@
+{
+    "HostName": "localhost",
+    "SSH": {
+        "ProtocolEnabled": true,
+        "Port": 22
+    },
+    "HTTP": {
+        "ProtocolEnabled": null,
+        "Port": null
+    },
+    "@odata.id": "/redfish/v1/Managers/1/NetworkProtocol",
+    "Status": {
+        "State": "Enabled",
+        "HealthRollup": "OK",
+        "Health": "OK"
+    },
+    "KVMIP": {
+        "ProtocolEnabled": null,
+        "Port": null
+    },
+    "SNMP": {
+        "ProtocolEnabled": true,
+        "Port": 161
+    },
+    "IPMI": {
+        "ProtocolEnabled": null,
+        "Port": null
+    },
+    "Id": "NetworkProtocol",
+    "@odata.type": "#ManagerNetworkProtocol.v1_0_2.ManagerNetworkProtocol",
+    "HTTPS": {
+        "ProtocolEnabled": true,
+        "Port": 8888
+    },
+    "Telnet": {
+        "ProtocolEnabled": null,
+        "Port": null
+    },
+    "Oem": {},
+    "FQDN": "localhost",
+    "VirtualMedia": {
+        "ProtocolEnabled": null,
+        "Port": null
+    },
+    "@odata.context": "/redfish/v1/$metadata#ManagerNetworkProtocol.ManagerNetworkProtocol",
+    "Description": "Manager Network Protocol description",
+    "Name": "Manager Network Protocol",
+    "SSDP": {
+        "NotifyIPv6Scope": null,
+        "ProtocolEnabled": true,
+        "Port": 1900,
+        "NotifyTTL": 2,
+        "NotifyMulticastIntervalSeconds": 0
+    }
+}

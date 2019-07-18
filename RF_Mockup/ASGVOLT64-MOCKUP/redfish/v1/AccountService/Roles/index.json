@@ -1,0 +1,18 @@
+{
+    "@odata.id": "/redfish/v1/AccountService/Roles",
+    "@odata.context": "/redfish/v1/$metadata#RoleCollection.RoleCollection",
+    "Members": [
+        {
+            "@odata.id": "/redfish/v1/AccountService/Roles/1"
+        },
+        {
+            "@odata.id": "/redfish/v1/AccountService/Roles/2"
+        },
+        {
+            "@odata.id": "/redfish/v1/AccountService/Roles/3"
+        }
+    ],
+    "Name": "Roles Collection",
+    "Members@odata.count": 3,
+    "@odata.type": "#RoleCollection.RoleCollection"
+}

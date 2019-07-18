@@ -1,0 +1,9 @@
+{
+    "Description": "Collection of Static MACs",
+    "Members": [],
+    "@odata.type": "#EthernetSwitchStaticMACCollection.EthernetSwitchStaticMACCollection",
+    "Members@odata.count": 0,
+    "@odata.context": "/redfish/v1/$metadata#EthernetSwitchStaticMACCollection.EthernetSwitchStaticMACCollection",
+    "@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/62/StaticMACs",
+    "Name": "Static MAC Collection"
+}

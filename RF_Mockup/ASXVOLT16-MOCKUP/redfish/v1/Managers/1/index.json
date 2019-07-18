@@ -1,0 +1,62 @@
+{
+    "SerialInterfaces": {
+        "@odata.id": "/redfish/v1/Managers/1/SerialInterfaces"
+    },
+    "UUID": "6aea2cd0-9e2e-11e9-a70f-6be55c10fe03",
+    "ServiceEntryPointUUID": "6aea2cd0-9e2e-11e9-a70f-6be55c10fe03",
+    "EthernetInterfaces": {
+        "@odata.id": "/redfish/v1/Managers/1/EthernetInterfaces"
+    },
+    "@odata.id": "/redfish/v1/Managers/1",
+    "Status": {
+        "State": "Enabled",
+        "HealthRollup": "OK",
+        "Health": "OK"
+    },
+    "DateTimeLocalOffset": "+00:00",
+    "Model": null,
+    "DateTime": "2019-07-10T00:44:44+00:00",
+    "@odata.type": "#Manager.v1_0_0.Manager",
+    "Oem": {},
+    "SerialConsole": {
+        "MaxConcurrentSessions": 0,
+        "ConnectTypesSupported": [],
+        "ServiceEnabled": true
+    },
+    "Links": {
+        "Oem": {
+            "Intel_RackScale": {
+                "ManagerForServices": [],
+                "@odata.type": "#Intel.Oem.ManagerLinks",
+                "ManagerForSwitches": [
+                    {
+                        "@odata.id": "/redfish/v1/EthernetSwitches/1"
+                    }
+                ]
+            }
+        },
+        "@odata.type": "#Manager.v1_0_0.Links",
+        "ManagerForServers": [
+            {
+                "@odata.id": "/redfish/v1/Systems/1"
+            }
+        ],
+        "ManagerForChassis": [
+            {
+                "@odata.id": "/redfish/v1/Chassis/1"
+            }
+        ]
+    },
+    "FirmwareVersion": "2.1.3.59.22",
+    "NetworkProtocol": {
+        "@odata.id": "/redfish/v1/Managers/1/NetworkProtocol"
+    },
+    "Id": "1",
+    "@odata.context": "/redfish/v1/$metadata#Manager.Manager",
+    "ManagerType": "EnclosureManager",
+    "Name": "Manager",
+    "Description": "Manager description",
+    "LogServices": {
+        "@odata.id": "/redfish/v1/Managers/1/LogServices"
+    }
+}

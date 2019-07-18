@@ -1,0 +1,104 @@
+{
+    "FrameSize": null,
+    "IPv4Addresses": [],
+    "NeighborInfo": {
+        "CableId": null,
+        "PortId": null,
+        "SwitchId": null
+    },
+    "StaticMACs": {
+        "@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/74/StaticMACs"
+    },
+    "IPv6Addresses": [],
+    "@odata.type": "#EthernetSwitchPort.v1_0_0.EthernetSwitchPort",
+    "LinkSpeedMbps": null,
+    "@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/74",
+    "AdministrativeState": null,
+    "PortMode": null,
+    "FullDuplex": null,
+    "Id": "74",
+    "PortClass": null,
+    "MACAddress": null,
+    "@odata.context": "/redfish/v1/$metadata#EthernetSwitchPort.EthernetSwitchPort",
+    "TransceiverStatistics": {
+        "BiasCurrent": {
+            "LowerThresholdFatal": 8,
+            "Status": {
+                "Health": "Critical",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 25.2,
+            "Reading": 1.016,
+            "LowerThresholdCritical": 10,
+            "UpperThresholdFatal": 26.4
+        },
+        "Serial Number": "ASC2HB6",
+        "Temperature": {
+            "LowerThresholdFatal": -13,
+            "Status": {
+                "Health": "OK",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 73,
+            "Reading": 40.507,
+            "LowerThresholdCritical": -8,
+            "UpperThresholdFatal": 78
+        },
+        "Part Number": "FTLX8571D3BCL-J1",
+        "SFP Vendor Name": "FINISARCORP.",
+        "Voltage": {
+            "LowerThresholdFatal": 2.899,
+            "Status": {
+                "Health": "OK",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 3.599,
+            "Reading": 3.361,
+            "LowerThresholdCritical": 3,
+            "UpperThresholdFatal": 3.699
+        },
+        "Manufacture Date": "140922",
+        "TxPower": {
+            "LowerThresholdFatal": 0.502,
+            "Status": {
+                "Health": "Critical",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 1.588,
+            "Reading": 0.01,
+            "LowerThresholdCritical": 0.632,
+            "UpperThresholdFatal": 2
+        }
+    },
+    "PortType": null,
+    "Links": {
+        "PrimaryVLAN": null,
+        "Oem": {
+            "Intel_RackScale": {
+                "@odata.type": "#Intel.Oem.EthernetSwitchPort"
+            }
+        },
+        "MemberOfPort": null,
+        "ActiveACLs": [],
+        "Switch": {
+            "@odata.id": "/redfish/v1/EthernetSwitches/1"
+        },
+        "PortMembers": []
+    },
+    "Description": "Ethernet Switch Port description",
+    "VLANs": {
+        "@odata.id": "/redfish/v1/EthernetSwitches/1/Ports/74/VLANs"
+    },
+    "PortId": "Port ID",
+    "Name": "Port74",
+    "Status": {
+        "Health": "OK",
+        "HealthRollup": "OK",
+        "State": "Enabled"
+    },
+    "Oem": {},
+    "NeighborMAC": null,
+    "OperationalState": null,
+    "Autosense": null,
+    "LinkType": "Ethernet"
+}

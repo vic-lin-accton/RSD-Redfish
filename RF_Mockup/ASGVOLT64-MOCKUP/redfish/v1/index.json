@@ -1,0 +1,45 @@
+{
+    "Managers": {
+        "@odata.id": "/redfish/v1/Managers"
+    },
+    "UUID": "420e97cc-7d29-11e9-9434-7b037945f914",
+    "@odata.id": "/redfish/v1",
+    "SessionService": {
+        "@odata.id": "/redfish/v1/SessionService"
+    },
+    "Registries": {
+        "@odata.id": "/redfish/v1/Registries"
+    },
+    "Description": "Service Root description",
+    "Links": {
+        "Sessions": {
+            "@odata.id": "/redfish/v1/SessionService/Sessions"
+        }
+    },
+    "AccountService": {
+        "@odata.id": "/redfish/v1/AccountService"
+    },
+    "Chassis": {
+        "@odata.id": "/redfish/v1/Chassis"
+    },
+    "RedfishVersion": "1.0.2",
+    "Systems": {
+        "@odata.id": "/redfish/v1/Systems"
+    },
+    "@odata.context": "/redfish/v1/$metadata#ServiceRoot.ServiceRoot",
+    "EventService": {
+        "@odata.id": "/redfish/v1/EventService"
+    },
+    "Id": "RootService",
+    "@odata.type": "#ServiceRoot.v1_1_1.ServiceRoot",
+    "Oem": {
+        "Intel_RackScale": {
+            "EthernetSwitches": {
+                "@odata.id": "/redfish/v1/EthernetSwitches"
+            },
+            "ApiVersion": "2.0.0",
+            "@odata.type": "#Intel.Oem.ServiceRoot"
+        }
+    },
+    "Name": "PSME Service Root"
+}

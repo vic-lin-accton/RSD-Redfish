@@ -1,0 +1,30 @@
+{
+    "ServiceEnabled": true,
+    "@odata.id": "/redfish/v1/EventService",
+    "EventTypesForSubscription": [
+        "StatusChange",
+        "ResourceUpdated",
+        "ResourceAdded",
+        "ResourceRemoved",
+        "Alert"
+    ],
+    "DeliveryRetryIntervalSeconds": 60,
+    "Name": "Event Service",
+    "DeliveryRetryAttempts": 3,
+    "Description": "Event Service description",
+    "@odata.type": "#EventService.v1_0_0.EventService",
+    "@odata.context": "/redfish/v1/$metadata#EventService.EventService",
+    "Subscriptions": {
+        "@odata.id": "/redfish/v1/EventService/Subscriptions"
+    },
+    "Id": "EventService",
+    "Actions": {
+        "Oem": {}
+    },
+    "Status": {
+        "Health": "OK",
+        "State": "Enabled",
+        "HealthRollup": "OK"
+    },
+    "Oem": {}
+}

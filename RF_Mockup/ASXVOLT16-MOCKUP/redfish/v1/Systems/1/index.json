@@ -1,0 +1,94 @@
+{
+    "UUID": "6aea2cd0-9e2e-11e9-a70f-6be55c10fe03",
+    "AssetTag": "N/A",
+    "@odata.id": "/redfish/v1/Systems/1",
+    "SerialNumber": "EC1840000200",
+    "HostName": "localhost",
+    "Id": "1",
+    "ProcessorSummary": {
+        "Count": 1,
+        "Status": {
+            "State": "Enabled",
+            "HealthRollup": "OK",
+            "Health": "OK"
+        },
+        "Model": "Intel(R) Xeon(R) CPU D-1518 @ 2.20GHz"
+    },
+    "Processors": {
+        "@odata.id": "/redfish/v1/Systems/1/Processors"
+    },
+    "IndicatorLED": "Lit",
+    "Manufacturer": "Accton",
+    "Actions": {
+        "#ComputerSystem.Reset": {
+            "target": "/redfish/v1/Systems/1/Actions/ComputerSystem.Reset",
+            "ResetType@Redfish.AllowableValues": [
+                "ForceOff",
+                "GracefulShutdown",
+                "GracefulRestart",
+                "ForceRestart"
+            ]
+        }
+    },
+    "Boot": {
+        "BootSourceOverrideEnabled": "Disabled",
+        "BootSourceOverrideTarget": "None",
+        "BootSourceOverrideMode": "Legacy"
+    },
+    "PartNumber": "FN1EC0816400Z",
+    "SKU": null,
+    "Description": "Computer System description",
+    "BiosVersion": "5.11",
+    "PCIeDevices": [],
+    "Model": "FN1EC0816400Z",
+    "Memory": {
+        "@odata.id": "/redfish/v1/Systems/1/Memory"
+    },
+    "@odata.context": "/redfish/v1/$metadata#ComputerSystem.ComputerSystem",
+    "Status": {
+        "State": "Enabled",
+        "HealthRollup": "OK",
+        "Health": "OK"
+    },
+    "MemorySummary": {
+        "TotalSystemMemoryGiB": 15.26,
+        "Status": {
+            "State": "Enabled",
+            "HealthRollup": "OK",
+            "Health": "OK"
+        }
+    },
+    "Oem": {
+        "Intel_RackScale": {
+            "MemorySockets": 2,
+            "DiscoveryState": "Basic",
+            "@odata.type": "#Intel.Oem.ComputerSystem",
+            "PciDevices": [],
+            "PCIeConnectionId": [],
+            "ProcessorSockets": 1
+        }
+    },
+    "@odata.type": "#ComputerSystem.v1_3_0.ComputerSystem",
+    "PCIeFunctions": [],
+    "PowerState": "On",
+    "Storage": {
+        "@odata.id": "/redfish/v1/Systems/1/Storage"
+    },
+    "Links": {
+        "Oem": {},
+        "@odata.type": "#ComputerSystem.v1_2_0.Links",
+        "Endpoints": [],
+        "Chassis": [
+            {
+                "@odata.id": "/redfish/v1/Chassis/1"
+            }
+        ],
+        "ManagedBy": [
+            {
+                "@odata.id": "/redfish/v1/Managers/1"
+            }
+        ]
+    },
+    "SystemType": "Physical",
+    "Name": "Computer System"
+}

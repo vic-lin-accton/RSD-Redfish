@@ -1,0 +1,13 @@
+{
+    "@odata.type": "#ChassisCollection.ChassisCollection",
+    "Members@odata.count": 1,
+    "@odata.id": "/redfish/v1/Chassis",
+    "Members": [
+        {
+            "@odata.id": "/redfish/v1/Chassis/1"
+        }
+    ],
+    "Name": "Chassis Collection",
+    "@odata.context": "/redfish/v1/$metadata#Chassis.Chassis",
+    "Description": "Collection of Chassis"
+}

@@ -1,0 +1,62 @@
+{
+    "FirmwareVersion": "2.1.3.59.22",
+    "UUID": "420e97cc-7d29-11e9-9434-7b037945f914",
+    "@odata.id": "/redfish/v1/Managers/1",
+    "Status": {
+        "State": "Enabled",
+        "Health": "OK",
+        "HealthRollup": "OK"
+    },
+    "SerialInterfaces": {
+        "@odata.id": "/redfish/v1/Managers/1/SerialInterfaces"
+    },
+    "SerialConsole": {
+        "ConnectTypesSupported": [],
+        "ServiceEnabled": true,
+        "MaxConcurrentSessions": 0
+    },
+    "Model": null,
+    "Links": {
+        "ManagerForChassis": [
+            {
+                "@odata.id": "/redfish/v1/Chassis/1"
+            }
+        ],
+        "Oem": {
+            "Intel_RackScale": {
+                "ManagerForSwitches": [
+                    {
+                        "@odata.id": "/redfish/v1/EthernetSwitches/1"
+                    }
+                ],
+                "ManagerForServices": [],
+                "@odata.type": "#Intel.Oem.ManagerLinks"
+            }
+        },
+        "ManagerForServers": [
+            {
+                "@odata.id": "/redfish/v1/Systems/1"
+            }
+        ],
+        "@odata.type": "#Manager.v1_0_0.Links"
+    },
+    "Description": "Manager description",
+    "DateTime": "2019-07-10T00:52:51+00:00",
+    "@odata.type": "#Manager.v1_0_0.Manager",
+    "LogServices": {
+        "@odata.id": "/redfish/v1/Managers/1/LogServices"
+    },
+    "ServiceEntryPointUUID": "420e97cc-7d29-11e9-9434-7b037945f914",
+    "NetworkProtocol": {
+        "@odata.id": "/redfish/v1/Managers/1/NetworkProtocol"
+    },
+    "@odata.context": "/redfish/v1/$metadata#Manager.Manager",
+    "Id": "1",
+    "ManagerType": "EnclosureManager",
+    "DateTimeLocalOffset": "+00:00",
+    "EthernetInterfaces": {
+        "@odata.id": "/redfish/v1/Managers/1/EthernetInterfaces"
+    },
+    "Oem": {},
+    "Name": "Manager"
+}

@@ -1,0 +1,82 @@
+{
+    "Thermal": {
+        "@odata.id": "/redfish/v1/Chassis/1/Thermal"
+    },
+    "Actions": {
+        "#Chassis.Reset": {
+            "ResetType@Redfish.AllowableValues": [
+                "ForceOff",
+                "GracefulShutdown",
+                "GracefulRestart",
+                "ForceRestart"
+            ],
+            "target": "/redfish/v1/Chassis/1/Actions/Chassis.Reset"
+        }
+    },
+    "AssetTag": "N/A",
+    "IndicatorLED": "Lit",
+    "PowerState": "On",
+    "Id": "1",
+    "Model": "",
+    "@odata.context": "/redfish/v1/$metadata#Chassis.Chassis",
+    "Links": {
+        "Contains": [],
+        "ManagedBy": [
+            {
+                "@odata.id": "/redfish/v1/Managers/1"
+            }
+        ],
+        "@odata.type": "#Chassis.v1_2_0.Links",
+        "Oem": {
+            "Intel_RackScale": {
+                "@odata.type": "#Intel.Oem.ChassisLinks",
+                "Switches": [
+                    {
+                        "@odata.id": "/redfish/v1/EthernetSwitches/1"
+                    }
+                ]
+            }
+        },
+        "Storage": [
+            {
+                "@odata.id": "/redfish/v1/Systems/1/Storage/1"
+            }
+        ],
+        "Drives": [
+            {
+                "@odata.id": "/redfish/v1/Chassis/1/Drives/1"
+            }
+        ],
+        "ComputerSystems": [
+            {
+                "@odata.id": "/redfish/v1/Systems/1"
+            }
+        ]
+    },
+    "SerialNumber": "",
+    "Manufacturer": "",
+    "Description": "Chassis of ",
+    "ChassisType": "Drawer",
+    "Oem": {
+        "Intel_RackScale": {
+            "Location": {
+                "ParentId": null,
+                "Id": null
+            },
+            "@odata.type": "#Intel.Oem.Chassis"
+        }
+    },
+    "@odata.type": "#Chassis.v1_3_0.Chassis",
+    "Status": {
+        "Health": "OK",
+        "HealthRollup": "OK",
+        "State": "Enabled"
+    },
+    "Power": {
+        "@odata.id": "/redfish/v1/Chassis/1/Power"
+    },
+    "PartNumber": "",
+    "SKU": null,
+    "@odata.id": "/redfish/v1/Chassis/1",
+    "Name": "Chassis"
+}

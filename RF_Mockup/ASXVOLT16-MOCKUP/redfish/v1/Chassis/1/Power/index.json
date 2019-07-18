@@ -1,0 +1,163 @@
+{
+    "Oem": {},
+    "Voltages": [
+        {
+            "UpperThresholdNonCritical": null,
+            "@odata.id": "/redfish/v1/Chassis/1/Power",
+            "LowerThresholdFatal": null,
+            "SensorNumber": 1,
+            "LowerThresholdCritical": null,
+            "MemberId": "1",
+            "LowerThresholdNonCritical": null,
+            "UpperThresholdCritical": null,
+            "ReadingVolts": null,
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Chassis/1"
+                }
+            ],
+            "Name": "Voltage",
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            },
+            "UpperThresholdFatal": null,
+            "PhysicalContext": "VoltageRegulator"
+        },
+        {
+            "UpperThresholdNonCritical": null,
+            "@odata.id": "/redfish/v1/Chassis/1/Power",
+            "LowerThresholdFatal": null,
+            "SensorNumber": 2,
+            "LowerThresholdCritical": null,
+            "MemberId": "2",
+            "LowerThresholdNonCritical": null,
+            "UpperThresholdCritical": null,
+            "ReadingVolts": null,
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Chassis/1"
+                }
+            ],
+            "Name": "Voltage",
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            },
+            "UpperThresholdFatal": null,
+            "PhysicalContext": "VoltageRegulator"
+        }
+    ],
+    "@odata.id": "/redfish/v1/Chassis/1/Power",
+    "PowerControl": [
+        {
+            "PowerAllocatedWatts": null,
+            "@odata.id": "/redfish/v1/Chassis/1/Power",
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            },
+            "PowerAvailableWatts": null,
+            "MemberId": "1",
+            "PowerConsumedWatts": 118,
+            "PowerLimit": {
+                "LimitInWatts": null,
+                "CorrectionInMs": null,
+                "LimitException": null
+            },
+            "PowerRequestedWatts": null,
+            "Oem": {},
+            "PowerCapacityWatts": 0,
+            "Name": "System Power Control",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Chassis/1"
+                }
+            ]
+        },
+        {
+            "PowerAllocatedWatts": null,
+            "@odata.id": "/redfish/v1/Chassis/1/Power",
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            },
+            "PowerAvailableWatts": null,
+            "MemberId": "2",
+            "PowerConsumedWatts": 106,
+            "PowerLimit": {
+                "LimitInWatts": null,
+                "CorrectionInMs": null,
+                "LimitException": null
+            },
+            "PowerRequestedWatts": null,
+            "Oem": {},
+            "PowerCapacityWatts": 0,
+            "Name": "System Power Control",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Chassis/1"
+                }
+            ]
+        }
+    ],
+    "Id": "Power",
+    "@odata.context": "/redfish/v1/$metadata#Power.Power",
+    "@odata.type": "#Power.v1_1_0.Power",
+    "Name": "Power Collection",
+    "Description": "Collection of Power",
+    "PowerSupplies": [
+        {
+            "Model": "YM-2651Y",
+            "@odata.id": "/redfish/v1/Chassis/1/Power",
+            "SerialNumber": "SA070V581819000860",
+            "LineInputVoltageType": null,
+            "LastPowerOutputWatts": 118,
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Chassis/1"
+                }
+            ],
+            "LineInputVoltage": null,
+            "Manufacturer": null,
+            "PowerCapacityWatts": null,
+            "FirmwareVersion": null,
+            "Oem": {},
+            "PartNumber": null,
+            "PowerSupplyType": "AC",
+            "SparePartNumber": null,
+            "Name": "Power Supplies Unit",
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            },
+            "MemberId": "1"
+        },
+        {
+            "Model": "YM-2651Y",
+            "@odata.id": "/redfish/v1/Chassis/1/Power",
+            "SerialNumber": "SA070V581819000939",
+            "LineInputVoltageType": null,
+            "LastPowerOutputWatts": 106,
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Chassis/1"
+                }
+            ],
+            "LineInputVoltage": null,
+            "Manufacturer": null,
+            "PowerCapacityWatts": null,
+            "FirmwareVersion": null,
+            "Oem": {},
+            "PartNumber": null,
+            "PowerSupplyType": "AC",
+            "SparePartNumber": null,
+            "Name": "Power Supplies Unit",
+            "Status": {
+                "State": "Enabled",
+                "Health": "OK"
+            },
+            "MemberId": "2"
+        }
+    ]
+}
