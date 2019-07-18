@@ -147,9 +147,7 @@ namespace acc_bal30_api_dist_helper
             bool enable_cli();
             bool enable_pon_if(int intf_id);
             bool enable_nni_if(int intf_id);
-            bool activate_onu(int intf_id, int onu_id, const char *vendor_id, const char *vendor_specific); 
             bool deactivate_onu(int intf_id, int onu_id); 
-            bool alloc_id_add(int intf_id, int onu_id, int alloc_id);
             bool omci_msg_out(int intf_id, int onu_id, const std::string pkt); 
             bool flow_add(int onu_id, int flow_id, const std::string flow_type, const std::string pkt_tag_type, int access_intf_id, int network_intf_id, int gemport_id, int classifier, int action, int action_cmd, struct action_val a_val, struct class_val c_val);
             bool flow_remove(uint32_t flow_id, const std::string flow_type); 
@@ -162,6 +160,11 @@ namespace acc_bal30_api_dist_helper
             int virtual get_max_pon_num() = 0;
             int virtual get_max_nni_num() = 0;
             int virtual get_maple_num() = 0;
+            bool virtual activate_onu(int intf_id, int onu_id, const char *vendor_id, const char *vendor_specific) = 0;
+            bool virtual alloc_id_add(int intf_id, int onu_id, int alloc_id) = 0;
+			
+            std::string virtual get_platform() = 0;
+			
 			
             void *fHandle = 0;
 
@@ -205,7 +208,12 @@ namespace acc_bal30_api_dist_helper
             int    get_max_pon_num(){return XGS_PON_MAX_PON_PORT_NUM;};
             int    get_max_nni_num(){return XGS_PON_MAX_NNI_PORT_NUM;};
             int  get_maple_num(){return maple_num;};
+            std::string get_platform(){return platform_type;};
+            bool activate_onu(int intf_id, int onu_id, const char *vendor_id, const char *vendor_specific);
+            bool alloc_id_add(int intf_id, int onu_id, int alloc_id);
+			
             int  maple_num = 8;
+            std::string platform_type = "asxvolt16";
 
             //json::Value get_port_statistic(int port);
 
@@ -227,7 +235,13 @@ namespace acc_bal30_api_dist_helper
             int    get_max_pon_num(){return G_PON_MAX_PON_PORT_NUM;};
             int    get_max_nni_num(){return G_PON_MAX_NNI_PORT_NUM;};
             int  get_maple_num(){return maple_num;};
+            std::string get_platform(){return platform_type;};
+            bool activate_onu(int intf_id, int onu_id, const char *vendor_id, const char *vendor_specific);
+            bool alloc_id_add(int intf_id, int onu_id, int alloc_id);
+			
             int  maple_num = 4;
+            std::string platform_type = "asgvolt64";
+			
 
             //json::Value get_port_statistic(int port);
 

@@ -146,6 +146,68 @@ static inline int get_default_tm_sched_id(int intf_id, std::string direction)
     }
 }
 
+static void OltBalReady (short unsigned int olt, bcmolt_msg *msg)
+{
+    if (msg->subgroup == BCMOLT_OLT_AUTO_SUBGROUP_BAL_READY) 
+    {
+        //After BAL ready, enable OLT maple
+        bcmos_errno err;
+        bcmolt_odid dev;
+
+        auto& rOLT = Olt_Device::Olt_Device::get_instance();
+        int maple_num = rOLT.get_maple_num();
+
+        for (dev = 0; dev < maple_num; dev++) 
+        {
+            bcmolt_device_cfg dev_cfg = {};
+            bcmolt_device_key dev_key = {};
+            dev_key.device_id = dev;
+            BCMOLT_CFG_INIT(&dev_cfg, device, dev_key);
+            BCMOLT_MSG_FIELD_GET(&dev_cfg, system_mode);
+            err = bcmolt_cfg_get(dev_id, &dev_cfg.hdr);
+
+            if (err == BCM_ERR_NOT_CONNECTED) 
+            {
+                bcmolt_device_key key = {.device_id = dev};
+                bcmolt_device_connect oper;
+                bcmolt_device_cfg cfg;
+                BCMOLT_OPER_INIT(&oper, device, connect, key);
+                BCMOLT_MSG_FIELD_SET(&oper, inni_config.mode, BCMOLT_INNI_MODE_ALL_10_G_XFI);
+				
+                if(rOLT.get_platform() == "asxvolt16")
+                {
+                    printf("asxvolt16 Enable Maple - %d/%d\n", dev + 1, maple_num);            
+                    BCMOLT_MSG_FIELD_SET (&oper, system_mode, BCMOLT_SYSTEM_MODE_XGS__2_X);
+                }
+                else if(rOLT.get_platform() == "asgvolt64")
+                {
+                    printf("asgvolt64 Enable Maple - %d/%d\n", dev + 1, maple_num);            
+                    BCMOLT_MSG_FIELD_SET(&oper, inni_config.mux, BCMOLT_INNI_MUX_FOUR_TO_ONE);            
+                    BCMOLT_MSG_FIELD_SET (&oper, system_mode, BCMOLT_SYSTEM_MODE_GPON__16_X);
+                }
+                else
+                {
+                    printf("!!!!!!!Can't identify PLATFORM TYPE!!!!!!!\r\n");     
+                    return;
+                }
+				
+                err = bcmolt_oper_submit(dev_id, &oper.hdr);
+                if (err)
+                    printf("Enable Maple deivce %d failed\n", dev);
+                bcmos_usleep(200000);
+            }
+            else 
+            {
+                printf("Maple deivce %d already connected\n", dev);
+            }
+        }
+        rOLT.register_callback();
+        printf("BAL Ready !!!!!!!!\r\n");
+        rOLT.set_bal_status(true);
+    }
+    bcmolt_msg_free(msg);
+}
+
 static void Olt_itf_change(short unsigned int olt , bcmolt_msg *msg)
 {
     switch (msg->obj_type) {
@@ -203,51 +265,7 @@ static void OltOmciIndication(short unsigned int olt, bcmolt_msg *msg)
     bcmolt_msg_free(msg);
 }
 
-static void OltBalReady (short unsigned int olt, bcmolt_msg *msg)
-{
-    if (msg->subgroup == BCMOLT_OLT_AUTO_SUBGROUP_BAL_READY) 
-    {
-        //After BAL ready, enable OLT maple
-        bcmos_errno err;
-        bcmolt_odid dev;
 
-        auto& rOLT = Olt_Device::Olt_Device::get_instance();
-        int maple_num = rOLT.get_maple_num();
-
-        for (dev = 0; dev < maple_num; dev++) 
-        {
-            bcmolt_device_cfg dev_cfg = {};
-            bcmolt_device_key dev_key = {};
-            dev_key.device_id = dev;
-            BCMOLT_CFG_INIT(&dev_cfg, device, dev_key);
-            BCMOLT_MSG_FIELD_GET(&dev_cfg, system_mode);
-            err = bcmolt_cfg_get(dev_id, &dev_cfg.hdr);
-
-            if (err == BCM_ERR_NOT_CONNECTED) 
-            {
-                bcmolt_device_key key = {.device_id = dev};
-                bcmolt_device_connect oper;
-                bcmolt_device_cfg cfg;
-                printf("Enable Maple - %d/%d\n", dev + 1, maple_num);
-                BCMOLT_OPER_INIT(&oper, device, connect, key);
-                BCMOLT_MSG_FIELD_SET(&oper, inni_config.mode, BCMOLT_INNI_MODE_ALL_10_G_XFI);
-                BCMOLT_MSG_FIELD_SET (&oper, system_mode, BCMOLT_SYSTEM_MODE_XGS__2_X);
-                err = bcmolt_oper_submit(dev_id, &oper.hdr);
-                if (err)
-                    printf("Enable Maple deivce %d failed\n", dev);
-                bcmos_usleep(200000);
-            }
-            else 
-            {
-                printf("Maple deivce %d already connected\n", dev);
-            }
-        }
-        rOLT.register_callback();
-        printf("BAL Ready !!!!!!!!\r\n");
-        rOLT.set_bal_status(true);
-    }
-    bcmolt_msg_free(msg);
-}
 
 static void OltOperIndication (short unsigned int olt, bcmolt_msg *msg)
 {
@@ -1575,7 +1593,7 @@ bool Olt_Device::deactivate_onu(int intf_id, int onu_id)
     return true;
 }
 
-bool Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendor_id, const char *vendor_specific) 
+bool XGS_PON_Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendor_id, const char *vendor_specific) 
 {
     bcmos_errno err = BCM_ERR_OK;
     bcmolt_onu_cfg onu_cfg;
@@ -1598,7 +1616,7 @@ bool Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendor_id, co
             return true; 
     }
 
-    printf("Enabling ONU %d on PON %d : vendor id %s,  vendor specific %s", onu_id, intf_id, vendor_id, vendor_specific_to_str(vendor_specific).c_str());
+    printf("XGSPON Enabling ONU %d on PON %d : vendor id %s,  vendor specific %s", onu_id, intf_id, vendor_id, vendor_specific_to_str(vendor_specific).c_str());
     memcpy(serial_number.vendor_id.arr, vendor_id, 4);
     memcpy(serial_number.vendor_specific.arr, vendor_specific, 4);
     BCMOLT_CFG_INIT(&onu_cfg, onu, onu_key);
@@ -1626,7 +1644,52 @@ bool Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendor_id, co
     return true;
 }
 
-bool Olt_Device::alloc_id_add(int intf_id, int in_onu_id, int alloc_id) 
+bool G_PON_Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendor_id, const char *vendor_specific) 
+{
+    bcmos_errno err = BCM_ERR_OK;
+    bcmolt_onu_cfg onu_cfg;
+    bcmolt_onu_key onu_key;
+    bcmolt_serial_number serial_number; 
+    bcmolt_bin_str_36 registration_id; 
+
+    onu_key.onu_id = onu_id;
+    onu_key.pon_ni = intf_id;
+    BCMOLT_CFG_INIT(&onu_cfg, onu, onu_key);
+    BCMOLT_FIELD_SET_PRESENT(&onu_cfg.data, onu_cfg_data, onu_state);
+    err = bcmolt_cfg_get(dev_id, &onu_cfg.hdr);
+
+    if (err == BCM_ERR_OK) 
+    {
+        if ((onu_cfg.data.onu_state == BCMOLT_ONU_STATE_PROCESSING ||
+                    onu_cfg.data.onu_state == BCMOLT_ONU_STATE_ACTIVE) ||
+                (onu_cfg.data.onu_state == BCMOLT_ONU_STATE_INACTIVE &&
+                 onu_cfg.data.onu_old_state == BCMOLT_ONU_STATE_NOT_CONFIGURED))
+            return true; 
+    }
+
+    printf("GPON Enabling ONU %d on PON %d : vendor id %s,  vendor specific %s", onu_id, intf_id, vendor_id, vendor_specific_to_str(vendor_specific).c_str());
+    memcpy(serial_number.vendor_id.arr, vendor_id, 4);
+    memcpy(serial_number.vendor_specific.arr, vendor_specific, 4);
+    BCMOLT_CFG_INIT(&onu_cfg, onu, onu_key);
+    BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.serial_number, serial_number);
+    BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.auto_learning, BCMOS_TRUE);
+    BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.gpon.ds_ber_reporting_interval, 1000000);
+    BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.gpon.omci_port_id, onu_id);
+	
+    err = bcmolt_cfg_set(dev_id, &onu_cfg.hdr);
+
+    if (err != BCM_ERR_OK) 
+    {
+        printf(" ERROR [%d]\n", err);
+        return false;
+    }
+    printf(" OK!!\r\n");
+
+    alloc_id_add(intf_id, onu_id, (1023+onu_id) );	
+    return true;
+}
+
+bool XGS_PON_Olt_Device::alloc_id_add(int intf_id, int in_onu_id, int alloc_id) 
 {
     bcmos_errno err = BCM_ERR_OK;
     bcmolt_itupon_alloc_cfg cfg; /* declare main API struct */
@@ -1635,7 +1698,7 @@ bool Olt_Device::alloc_id_add(int intf_id, int in_onu_id, int alloc_id)
     key.pon_ni   = intf_id;
     key.alloc_id = alloc_id;
 
-    printf("alloc_id_add pon_id[%d] onu_id[%d] alloc_id[%d]", intf_id, in_onu_id , alloc_id );
+    printf("XGSPON alloc_id_add pon_id[%d] onu_id[%d] alloc_id[%d]", intf_id, in_onu_id , alloc_id );
 
     /* Initialize the API struct. */
     BCMOLT_CFG_INIT(&cfg, itupon_alloc, key);
@@ -1676,6 +1739,82 @@ bool Olt_Device::alloc_id_add(int intf_id, int in_onu_id, int alloc_id)
     bcmolt_alloc_type sla_alloc_type;
     sla_alloc_type = BCMOLT_ALLOC_TYPE_NSR; 
     BCMOLT_FIELD_SET(&sla, pon_alloc_sla, alloc_type, sla_alloc_type);
+
+    uint8_t sla_weight;
+    sla_weight = 0; 
+    BCMOLT_FIELD_SET(&sla, pon_alloc_sla, weight, sla_weight);
+
+    uint8_t sla_priority;
+    sla_priority = 0; 
+    BCMOLT_FIELD_SET(&sla, pon_alloc_sla, priority, sla_priority);
+
+    BCMOLT_FIELD_SET(&cfg.data, itupon_alloc_cfg_data, sla, sla);
+
+    bcmolt_onu_id onu_id;
+    onu_id = in_onu_id; 
+    BCMOLT_FIELD_SET(&cfg.data, itupon_alloc_cfg_data, onu_id, onu_id);
+
+    err = bcmolt_cfg_set(dev_id, &cfg.hdr);
+
+    if (err != BCM_ERR_OK) 
+    {
+        printf(" ERROR!! \n");
+        return false;
+    }
+    printf(" OK!!!\r\n");
+    return true;
+}
+
+bool G_PON_Olt_Device::alloc_id_add(int intf_id, int in_onu_id, int alloc_id) 
+{
+    bcmos_errno err = BCM_ERR_OK;
+    bcmolt_itupon_alloc_cfg cfg; /* declare main API struct */
+    bcmolt_itupon_alloc_key key = {}; /* declare key */
+
+    key.pon_ni   = intf_id;
+    key.alloc_id = alloc_id;
+
+    printf("GPON alloc_id_add pon_id[%d] onu_id[%d] alloc_id[%d]", intf_id, in_onu_id , alloc_id );
+
+    /* Initialize the API struct. */
+    BCMOLT_CFG_INIT(&cfg, itupon_alloc, key);
+
+    bcmolt_pon_alloc_sla sla = {};
+    uint32_t cbr_rt_bw;
+    cbr_rt_bw = 5120000; 
+    BCMOLT_FIELD_SET(&sla, pon_alloc_sla, cbr_rt_bw, cbr_rt_bw);
+
+    uint32_t sla_cbr_nrt_bw;
+    sla_cbr_nrt_bw = 0; 
+    BCMOLT_FIELD_SET(&sla, pon_alloc_sla, cbr_nrt_bw, sla_cbr_nrt_bw);
+
+    bcmolt_alloc_type sla_alloc_type;
+    sla_alloc_type = BCMOLT_ALLOC_TYPE_NONE; 
+    BCMOLT_FIELD_SET(&sla, pon_alloc_sla, alloc_type, sla_alloc_type);
+
+    uint32_t sla_guaranteed_bw;
+    sla_guaranteed_bw = 5120000; 
+    BCMOLT_FIELD_SET(&sla, pon_alloc_sla, guaranteed_bw, sla_guaranteed_bw);
+
+    uint32_t sla_maximum_bw;
+    sla_maximum_bw = 5120000; 
+    BCMOLT_FIELD_SET(&sla, pon_alloc_sla, maximum_bw, sla_maximum_bw);
+
+    bcmolt_additional_bw_eligibility sla_additional_bw_eligibility;
+    sla_additional_bw_eligibility = BCMOLT_ADDITIONAL_BW_ELIGIBILITY_NONE; 
+    BCMOLT_FIELD_SET(&sla, pon_alloc_sla, additional_bw_eligibility, sla_additional_bw_eligibility);
+
+    bcmos_bool sla_cbr_rt_compensation;
+    sla_cbr_rt_compensation = BCMOS_FALSE; 
+    BCMOLT_FIELD_SET(&sla, pon_alloc_sla, cbr_rt_compensation, sla_cbr_rt_compensation);
+
+    uint8_t sla_cbr_rt_ap_index;
+    sla_cbr_rt_ap_index = 0; 
+    BCMOLT_FIELD_SET(&sla, pon_alloc_sla, cbr_rt_ap_index, sla_cbr_rt_ap_index);
+
+    uint8_t sla_cbr_nrt_ap_index;
+    sla_cbr_nrt_ap_index = 0; 
+    BCMOLT_FIELD_SET(&sla, pon_alloc_sla, cbr_nrt_ap_index, sla_cbr_nrt_ap_index);
 
     uint8_t sla_weight;
     sla_weight = 0; 

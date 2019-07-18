@@ -53,8 +53,18 @@ TestEventSubscription::~TestEventSubscription() {}
 void TestEventSubscription::get(const server::Request& req, server::Response& res) {
     auto r = ::make_prototype();
     r[Common::ODATA_ID] = PathBuilder(req).build();
+	
     Event event(EventType::ResourceAdded, "////TEST EVENT SUB ////");
-    event.set_message("RESOURCE CHANGES!!!!!");	
+    event.set_message("RESOURCE ADD TEST!!!!!");	
     SubscriptionManager::get_instance()->notify(event);
+
+    Event event1(EventType::ResourceRemoved, "////TEST EVENT SUB ////");
+    event.set_message("RESOURCE REMOVE  TEST!!!!!");	
+    SubscriptionManager::get_instance()->notify(event1);
+
+    Event event2(EventType::Alert, "////TEST EVENT SUB ////");
+    event.set_message("RESOURCE ALERT  TEST!!!!!");	
+    SubscriptionManager::get_instance()->notify(event2);
+	
     set_response(res, r);
 }

@@ -1,7 +1,6 @@
 # Standalone Rest_Client 
 
 > Install required python modules in virtual env.<br />
-> cd rst_client_venv/ <br />
 > . rst_client_venv/bin/activate <br />
 > (rst_client_venv)  pip install requests <br />
 > (rst_client_venv)  pip install arrow <br />

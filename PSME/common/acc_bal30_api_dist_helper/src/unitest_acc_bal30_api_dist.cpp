@@ -35,11 +35,13 @@ int main(int argc, char** argv)
     }
 
     char cs_vendor_id[4] = {0x49,0x53,0x4B,0x54};//"ISKT"
-    char cs_vendor_spec[4] = {0x71,0xE8,0x01,0x10};
+    //char cs_vendor_spec[4] = {0x71,0xE8,0x01,0x10};
+    char cs_vendor_spec[4] = {0x42,0x8D,0xA0,0x6E};
 
-    sleep(5);
+    sleep(10);
 
     OLT.activate_onu(0 , 1, cs_vendor_id, cs_vendor_spec);
+    //OLT.enable_cli();	
     OLT.enter_cmd_shell();
     return 1;
 }

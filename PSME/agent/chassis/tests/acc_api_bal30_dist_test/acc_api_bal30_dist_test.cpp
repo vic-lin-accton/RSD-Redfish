@@ -340,13 +340,13 @@ void TestClass1::SetUp()
 
             int Flow_size = (sizeof (a_Flow) / sizeof (a_Flow[0]));
             printf("Flow size[%d]\r\n", Flow_size);
-            int i = 0;
+            int j = 0;
 
-            for (i = 0 ; i< Flow_size ; i++)
+            for (j = 0 ; j< Flow_size ; j++)
             {
-                std::string sft(a_Flow[i].flow_type); //Flow type //
-                printf("Remove flow %d id %s\r\n", a_Flow[i].flow_id , sft.c_str());
-                OLT.flow_remove(a_Flow[i].flow_id, sft);
+                std::string sft(a_Flow[j].flow_type); //Flow type //
+                printf("Remove flow %d id %s\r\n", a_Flow[j].flow_id , sft.c_str());
+                OLT.flow_remove(a_Flow[j].flow_id, sft);
                 usleep(300000);
             }
         }
