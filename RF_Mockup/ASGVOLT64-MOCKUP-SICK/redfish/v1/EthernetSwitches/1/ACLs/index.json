@@ -1,9 +1,0 @@
-{
-    "Description": "Switch Access Control List. Each ACL entry can be bound to any switch port",
-    "Members": [],
-    "@odata.type": "#EthernetSwitchACLCollection.EthernetSwitchACLCollection",
-    "Members@odata.count": 0,
-    "@odata.context": "/redfish/v1/$metadata#EthernetSwitchACLCollection.EthernetSwitchACLCollection",
-    "@odata.id": "/redfish/v1/EthernetSwitches/1/ACLs",
-    "Name": "Ethernet Switch Access Control List Collection"
-}
