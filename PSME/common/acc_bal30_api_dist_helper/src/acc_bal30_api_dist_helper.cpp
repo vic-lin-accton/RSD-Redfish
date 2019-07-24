@@ -24,7 +24,7 @@ extern "C"
 
 bcmolt_oltid dev_id = 0;
 
-const uint32_t tm_upstream_sched_id_start   = 1020;
+const uint32_t tm_upstream_sched_id_start   = 1080;
 const uint32_t tm_downstream_sched_id_start = 1004;
 #ifdef BAL31 
 #define TM_Q_SET_ID (bcmolt_tm_queue_set_id)32768U
