@@ -24,8 +24,8 @@ extern "C"
 
 bcmolt_oltid dev_id = 0;
 
-const uint32_t tm_upstream_sched_id_start   = 1080;
-const uint32_t tm_downstream_sched_id_start = 1004;
+const uint32_t tm_upstream_sched_id_start   = 600;
+const uint32_t tm_downstream_sched_id_start = 800;
 #ifdef BAL31 
 #define TM_Q_SET_ID (bcmolt_tm_queue_set_id)32768U
 #endif
@@ -1403,7 +1403,7 @@ bool CreateDefaultSchedQueue(uint32_t intf_id, const std::string direction)
     else
         printf("OK!!\r\n");
 
-    for (int queue_id = 1; queue_id < 4; queue_id++) 
+    for (int queue_id = 1; queue_id < 2; queue_id++) 
     {
         bcmolt_tm_queue_cfg tm_queue_cfg;
         bcmolt_tm_queue_key tm_queue_key = {};
@@ -1892,7 +1892,7 @@ bool Olt_Device::omci_msg_out(int intf_id, int onu_id, const std::string pkt)
     bcmos_errno err = bcmolt_oper_submit(dev_id, &omci_cpu_packets.hdr);
     if (err) 
     {
-        printf("Error sending OMCI message to ONU %d on PON %d\n", onu_id, intf_id);
+        printf("Error sending OMCI message to ONU %d on PON %d Err:%d\n", onu_id, intf_id, err);
     } 
 
     printf("OMCI raw data: ");

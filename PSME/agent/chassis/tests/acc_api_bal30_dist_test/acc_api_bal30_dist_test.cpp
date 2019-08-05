@@ -106,7 +106,8 @@ static struct sFLOW a_Flow[] =
         .flow_id              = 16,
         .flow_type            = "upstream",
         .packet_tag_type      = "single_tag",
-        .gemport_id           = 1032,
+//voltha1.4        .gemport_id           = 1032,
+        .gemport_id           = 1024,
         .network_interface_id = 0,
         .acton_cmd            = BCMOLT_ACTION_CMD_ID_ADD_OUTER_TAG,    
         .action               = BCMOLT_ACTION_ID_O_VID, 
@@ -143,7 +144,8 @@ static struct sFLOW a_Flow[] =
             .flow_id              = 16,
             .flow_type            = "downstream",
             .packet_tag_type      = "double_tag",
-            .gemport_id           = 1032,
+////voltha1.4               .gemport_id           = 1032,
+            .gemport_id           = 1024,
             .network_interface_id = 0,
             .acton_cmd            = BCMOLT_ACTION_CMD_ID_REMOVE_OUTER_TAG,    
             .action               = BCMOLT_ACTION_ID_O_VID, 
@@ -261,6 +263,7 @@ void TestClass1::SetUp()
 
     //Step 3. enable nni port//
     int nni_if_max = OLT.get_max_nni_num();
+    //nni_if_max = 1; 
     printf("//////////// NNI interface num[%d]  !!////////////\r\n", nni_if_max);
     for(i = 0; i < nni_if_max ; i++)
     {
@@ -321,14 +324,39 @@ void TestClass1::SetUp()
         }
         sleep(5);
 
-        int aOMCI_size = (sizeof (a_OMCI) / sizeof (a_OMCI[0]));
         int ij = 0;
+#if 0
+        //VOLTAH 1.4
+        int aOMCI_size = (sizeof (a_OMCI) / sizeof (a_OMCI[0]));
         for (ij = 0 ; ij < aOMCI_size ; ij++)
         {
-            printf("[%d] ", ij);
+            printf("a[%d] ", ij);
             OLT.omci_msg_out(pon_id, onu_id, a_OMCI[ij].raw_omci);
             usleep(300000);
         }
+
+#else
+//VOLTAH 1.7
+//Step 1 for EPOA packet
+        int bOMCI_size = (sizeof (b_OMCI_1) / sizeof (b_OMCI_1[0]));
+        ij = 0;
+        for (ij = 0 ; ij < bOMCI_size ; ij++)
+        {
+            printf("b1[%d] ", ij);
+            OLT.omci_msg_out(pon_id, onu_id, b_OMCI_1[ij].raw_omci);
+            usleep(500000);
+        }
+//Step 2 for vlan action
+
+        bOMCI_size = (sizeof (b_OMCI_2) / sizeof (b_OMCI_2[0]));
+        ij = 0;
+        for (ij = 0 ; ij < bOMCI_size ; ij++)
+        {
+            printf("b2[%d] ", ij);
+            OLT.omci_msg_out(pon_id, onu_id, b_OMCI_2[ij].raw_omci);
+            usleep(500000);
+        }
+#endif
 
         if(Onu_count > 1 )
         {
