@@ -39,11 +39,8 @@ public:
     ~OnlpSensorTask();
     /*! Executes task */
     void execute() override;
-};
-/*! Task class for reading port oom data */
-class OnlpPortTask final : public Task {
-public:
-    OnlpPortTask();
+    bool m_port_detect_thread = false;
+	
 };
 
 

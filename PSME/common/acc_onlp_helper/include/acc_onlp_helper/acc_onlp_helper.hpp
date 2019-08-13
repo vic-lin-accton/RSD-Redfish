@@ -150,8 +150,10 @@ namespace acc_onlp_helper
             int m_psu_thermal_alert = 0;				
 			
             static std::vector<std::string> m_Event_Resouce_Alert;		
+            static std::vector<std::string> m_Event_Port_Resouce_Alert;					
             static std::vector<std::string> get_Event_Resouce_Alert();	
             static void Clear_Event_Resouce_Alert();		
+            static void Clear_Event_Port_Resouce_Alert();		
     };
 
     class Thermal_Info : public Dev_Info
@@ -304,11 +306,18 @@ namespace acc_onlp_helper
 			
             static std::vector<std::string> m_Event_Resouce_Add;
             static std::vector<std::string> m_Event_Resouce_Remove;
+            static std::vector<std::string> m_Event_Port_Resouce_Add;
+            static std::vector<std::string> m_Event_Port_Resouce_Remove;
             static std::vector<std::string> get_Event_Resouce_Add();
+            static std::vector<std::string> get_Event_Port_Resouce_Add();
             static std::vector<std::string> get_Event_Resouce_Remove();
+            static std::vector<std::string> get_Event_Port_Resouce_Remove();
             static std::vector<std::string> get_Event_Resouce_Alert();
+            static std::vector<std::string> get_Event_Port_Resouce_Alert();
+			
 			
             static void clean_Event_Rresouce_Event();
+            static void clean_Event_Port_Rresouce_Event();
 			
             ~Switch();
 
@@ -371,7 +380,9 @@ namespace acc_onlp_helper
 
 
 
-            void get_port_info();
+            void get_port_present_info();
+            void get_port_oom_info();
+			
             int   get_port_info_by_(int portid, Port_Content id);	
             json::Value get_port_trans_info_by_(int portid);	
             int   get_port_num(){return m_port_max_num;};

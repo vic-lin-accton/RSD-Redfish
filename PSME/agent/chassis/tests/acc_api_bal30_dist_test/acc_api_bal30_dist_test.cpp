@@ -344,7 +344,7 @@ void TestClass1::SetUp()
         {
             printf("b1[%d] ", ij);
             OLT.omci_msg_out(pon_id, onu_id, b_OMCI_1[ij].raw_omci);
-            usleep(500000);
+            usleep(300000);
         }
 //Step 2 for vlan action
 
@@ -354,7 +354,7 @@ void TestClass1::SetUp()
         {
             printf("b2[%d] ", ij);
             OLT.omci_msg_out(pon_id, onu_id, b_OMCI_2[ij].raw_omci);
-            usleep(500000);
+            usleep(300000);
         }
 #endif
 

@@ -1872,7 +1872,7 @@ bool Olt_Device::omci_msg_out(int intf_id, int onu_id, const std::string pkt)
     char str2[MAX_CHAR_LEN];
     memset(&arraySend, 0, buf.len);
 
-    printf("Sending omci msg to ONU %d to PIN %d of length is %d\r\n", onu_id, intf_id, buf.len);
+    printf("Sending omci msg to ONU %d to PON %d of length is %d\r\n", onu_id, intf_id, buf.len);
 
     for (idx1=0,idx2=0; idx1<((buf.len)*2); idx1++,idx2++) 
     {

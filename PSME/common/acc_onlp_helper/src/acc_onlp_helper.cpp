@@ -1378,7 +1378,7 @@ namespace acc_onlp_helper {
         return;
     }
 
-    void Switch::get_port_info()
+    void Switch::get_port_present_info()
     {
         int ii = 0;
 
@@ -1403,9 +1403,48 @@ namespace acc_onlp_helper {
                         if(b)
                         {               
                             gADbg.acc_printf("SFP port [%d] present\r\n",ii);
-
                             set_port_present(ii , true);			
                             (*pObj)->set_info(ii,  Port_Info::XSFP_Port, 1 , true);  // Type 1: XFP // Type 2 : ETHER	
+                        }
+                        else
+                        {
+                            gADbg.acc_printf("SFP port [%d] not present\r\n",ii);
+                            set_port_present(ii , false);
+                            (*pObj)->set_info(ii,  Port_Info::XSFP_Port, 0 , false);  // Type 1: XFP // Type 2 : ETHER	
+                            (*pObj)->clean_trans_data();
+                        }
+                    }					
+                }
+            }
+        }
+        return;
+    }
+
+    void Switch::get_port_oom_info()
+    {
+        int ii = 0;
+
+        for(ii= 1; ii <= m_port_max_num ; ii++)
+        {
+            for (vector<Port_Info*>::iterator pObj = m_vec_Port_Info.begin();pObj != m_vec_Port_Info.end(); ++pObj) 
+            {
+                if((*pObj)->m_ID == ii)
+                {
+                    if((*pObj)->m_Type == Port_Info::Ether_Port)
+                    {
+                        set_port_present(ii , true);	
+                        (*pObj)->set_info(ii,  Port_Info::Ether_Port, 1 , true);  // Type 1: XFP // Type 2 : ETHER
+                        gADbg.acc_printf("s Ether Port ID: %d\r\n", (*pObj)->m_ID);
+                        gADbg.acc_printf("s Port present status [%d]\r\n", 1);	                    
+                    }
+                    else if((*pObj)->m_Type == Port_Info::XSFP_Port)
+                    {
+                        int rindex = ii -1; //Need start from 0//
+                        int b= onlp_sfpi_is_present(rindex);
+
+                        if(b)
+                        {               
+                            gADbg.acc_printf("SFP port [%d] present\r\n",ii);
 #if 1
                             if(1)							
                             {
@@ -1441,8 +1480,6 @@ namespace acc_onlp_helper {
                         else
                         {
                             gADbg.acc_printf("SFP port [%d] not present\r\n",ii);
-                            set_port_present(ii , false);
-                            (*pObj)->set_info(ii,  Port_Info::XSFP_Port, 0 , false);  // Type 1: XFP // Type 2 : ETHER	
                             (*pObj)->clean_trans_data();
                         }
                     }					
@@ -2302,7 +2339,7 @@ Area : 5
                     Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
     
                     std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug Out.");
-                    m_Event_Resouce_Remove.push_back(message_event);				
+                    m_Event_Port_Resouce_Remove.push_back(message_event);				
                 } 
                 else if((p_bit == 0) && (c_bit == 1))
                 { // port plug in
@@ -2313,7 +2350,7 @@ Area : 5
                     Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
     
                     std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug In.");
-                    m_Event_Resouce_Add.push_back(message_event);					
+                    m_Event_Port_Resouce_Add.push_back(message_event);					
                 }
             }
             else if( (id >= 64) && (id < 128))
@@ -2334,7 +2371,7 @@ Area : 5
                     Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
     
                     std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug Out.");
-                    m_Event_Resouce_Remove.push_back(message_event);				
+                    m_Event_Port_Resouce_Remove.push_back(message_event);				
                 } 
                 else if((p_bit == 0) && (c_bit == 1))
                 { // port plug in
@@ -2345,7 +2382,7 @@ Area : 5
                     Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
     
                     std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug In.");
-                    m_Event_Resouce_Add.push_back(message_event);					
+                    m_Event_Port_Resouce_Add.push_back(message_event);					
                 }
             }			
             else
@@ -2693,10 +2730,10 @@ Area : 5
         ifstream ifs ("/etc/onl/platform");
         std::string s;
         getline (ifs, s, (char) ifs.eof());
-        printf("Creating Olt_Device on platform [%s] size[%d]\r\n", s.c_str(),(int)s.size());	    
 
         if (NULL == g_Switch) 
         {
+            printf("Creating Olt_Device on platform [%s] size[%d]\r\n", s.c_str(),(int)s.size());	        
             if(s.find("asxvolt16", 0) != 0)
             {           
                 printf("x86-64-accton-asxvolt16\r\n");	    
@@ -2726,6 +2763,9 @@ Area : 5
 
     std::vector<std::string> Dev_Info::m_Event_Resouce_Alert = {} ;
 
+    std::vector<std::string> Dev_Info::m_Event_Port_Resouce_Alert = {} ;
+
+
     std::vector<std::string> Dev_Info::get_Event_Resouce_Alert()
     { 
         return m_Event_Resouce_Alert;
@@ -2737,11 +2777,24 @@ Area : 5
         return;
     }
 
+    void Dev_Info::Clear_Event_Port_Resouce_Alert()
+    { 
+        m_Event_Port_Resouce_Alert.clear(); 
+        return;
+    }
+
     std::vector<std::string> Switch::m_Event_Resouce_Add = {} ;
 	
     std::vector<std::string> Switch::get_Event_Resouce_Add()
     { 
         return m_Event_Resouce_Add;
+    }
+
+    std::vector<std::string> Switch::m_Event_Port_Resouce_Add = {} ;
+
+    std::vector<std::string> Switch::get_Event_Port_Resouce_Add()
+    { 
+        return m_Event_Port_Resouce_Add;
     }
 
     std::vector<std::string> Switch::m_Event_Resouce_Remove = {} ;
@@ -2751,11 +2804,23 @@ Area : 5
         return m_Event_Resouce_Remove;
     }
 
+    std::vector<std::string> Switch::m_Event_Port_Resouce_Remove = {} ;
+
+    std::vector<std::string> Switch::get_Event_Port_Resouce_Remove()
+    {
+        return m_Event_Port_Resouce_Remove;
+    }
+
     std::vector<std::string> Switch::get_Event_Resouce_Alert()
     {
         return Dev_Info::get_Event_Resouce_Alert();
     }
     
+    std::vector<std::string> Switch::get_Event_Port_Resouce_Alert()
+    {
+        return Dev_Info::get_Event_Resouce_Alert();
+    }
+	
     void Switch::clean_Event_Rresouce_Event()
     {
         m_Event_Resouce_Add.clear();
@@ -2763,4 +2828,12 @@ Area : 5
         Dev_Info::Clear_Event_Resouce_Alert()	;	
         return;
     }
+
+    void Switch::clean_Event_Port_Rresouce_Event()
+    {
+        m_Event_Port_Resouce_Add.clear();
+        m_Event_Port_Resouce_Remove.clear();
+        Dev_Info::Clear_Event_Port_Resouce_Alert()	;	
+        return;
+    }	
 }

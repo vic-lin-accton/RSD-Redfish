@@ -34,7 +34,7 @@
 #include <ipmb/command/thermal_sensor_response.hpp>
 #include <ipmb/gpio.hpp>
 #include <ipmb/service.hpp>
-
+ #include <thread>
 #include <ipmi/command/generic/get_device_id.hpp>
 #include <ipmi/command/generic/get_sensor_reading.hpp>
 #include <ipmi/command/generic/get_sensor_reading_factors.hpp>
@@ -79,17 +79,30 @@ public:
         get_onlp_info();
     }
 	void exec_shell(const char* cmd, char * result_a);
+    void get_onlp_port_info();
+    void get_onlp_port_oom_info();
 
 private:
-
-    ThermalSensorIpmbResponse m_response{};
     void get_onlp_info();
+    // Access transceiver oom content will block other PSU/Theremal detection . 
+    // remove to get_onlp_port_info get_onlp_port_oom_info thread //
 };
 
 void OnlpSensorTask::execute() {
     try {
         GetOnlpInfo ps{};
         ps.execute();
+		
+        if(!m_port_detect_thread)
+        {
+            std::thread mThread_port(&GetOnlpInfo::get_onlp_port_info, &ps);
+            mThread_port.detach();   
+
+            std::thread mThread_port_oom(&GetOnlpInfo::get_onlp_port_oom_info, &ps);
+            mThread_port_oom.detach();        
+
+            m_port_detect_thread = true;
+        }
     }
     catch (const std::exception& e) {
         log_debug(LOGUSR, "GetOnlpInfo - exception : " << e.what());
@@ -134,9 +147,8 @@ static signed int  UPPER_SYS_THRESHOLD_FATAL=0;
 
 
 
-void GetOnlpInfo::get_onlp_info() {
-
-
+void GetOnlpInfo::get_onlp_info() 
+{
 #ifdef ONLP
     auto& sonlp = Switch::Switch::get_instance();
 
@@ -274,100 +286,6 @@ void GetOnlpInfo::get_onlp_info() {
         }
     }
     sonlp.update_thermal_present_event();		
-
-
-    /*Get/Set  Port info.*/			
-    sonlp.get_port_info();
-
-    unsigned int port_num =  sonlp.get_port_num();
-    unsigned int portid=1;
-
-    auto network_components = agent_framework::module::NetworkComponents::get_instance();
-    auto &port_manager = network_components->get_instance()->get_port_manager();
-    auto port_uuids = port_manager.get_keys();
-
-    for(portid = 1; portid <=port_num ; portid++)
-    { 	     
-        for (const auto& port_uuid : port_uuids) 
-        {
-            auto port_ = port_manager.get_entry_reference(port_uuid);  //Get Port object by psu_uuid//
-
-            if (port_->get_port_id() == portid) 
-            { 
-                int current_present = sonlp.get_port_info_by_(portid , Switch::Port_Content::Port_Present);
-
-                if(current_present)
-               {
-                   port_->set_status(attribute::Status(
-                   agent_framework::model::enums::State::Enabled,
-                   agent_framework::model::enums::Health::OK));               
-               }
-               else
-               {
-                   port_->set_status(attribute::Status(
-                   agent_framework::model::enums::State::Absent,
-                   agent_framework::model::enums::Health::OK));               
-               }
-			   
-               //Collect  trans info			   
-               json::Value r(json::Value::Type::OBJECT);	
-               attribute::TransInfo tTransInfo;			   
-			   
-               r = sonlp.get_port_trans_info_by_(portid);
-
-               tTransInfo.set_spf_vendor_name(r["SFP Vendor Name"]);
-               tTransInfo.set_part_number(r["Part Number"]);		   
-               tTransInfo.set_serial_number(r["Serial Number"]);		   
-               tTransInfo.set_manufacture_date(r["Manufacture Date"]);
-                
-               tTransInfo.set_temp_reading(r["Temperature"]["Reading"]);
-               tTransInfo.set_temp_upper_th_fatal(r["Temperature"]["UpperThresholdFatal"]);		   
-               tTransInfo.set_temp_upper_th_critical(r["Temperature"]["UpperThresholdCritical"]);
-               tTransInfo.set_temp_lower_th_critical(r["Temperature"]["LowerThresholdCritical"]);
-               tTransInfo.set_temp_lower_th_fatal(r["Temperature"]["LowerThresholdFatal"]);
-               tTransInfo.set_temp_status_state(r["Temperature"]["Status"]["State"]);
-               tTransInfo.set_temp_status_health(r["Temperature"]["Status"]["Health"]);
-			   
-               tTransInfo.set_voltage_reading(r["Voltage"]["Reading"]);
-               tTransInfo.set_voltage_upper_th_fatal(r["Voltage"]["UpperThresholdFatal"]);		   
-               tTransInfo.set_voltage_upper_th_critical(r["Voltage"]["UpperThresholdCritical"]);
-               tTransInfo.set_voltage_lower_th_critical(r["Voltage"]["LowerThresholdCritical"]);
-               tTransInfo.set_voltage_lower_th_fatal(r["Voltage"]["LowerThresholdFatal"]);
-               tTransInfo.set_voltage_status_state(r["Voltage"]["Status"]["State"]);
-               tTransInfo.set_voltage_status_health(r["Voltage"]["Status"]["Health"]);
-
-               tTransInfo.set_bias_current_reading(r["BiasCurrent"]["Reading"]);
-               tTransInfo.set_bias_current_upper_th_fatal(r["BiasCurrent"]["UpperThresholdFatal"]);		   
-               tTransInfo.set_bias_current_upper_th_critical(r["BiasCurrent"]["UpperThresholdCritical"]);
-               tTransInfo.set_bias_current_lower_th_critical(r["BiasCurrent"]["LowerThresholdCritical"]);
-               tTransInfo.set_bias_current_lower_th_fatal(r["BiasCurrent"]["LowerThresholdFatal"]);
-               tTransInfo.set_bias_current_status_state(r["BiasCurrent"]["Status"]["State"]);
-               tTransInfo.set_bias_current_status_health(r["BiasCurrent"]["Status"]["Health"]);			   
-
-               tTransInfo.set_tx_power_reading(r["TxPower"]["Reading"]);
-               tTransInfo.set_tx_power_upper_th_fatal(r["TxPower"]["UpperThresholdFatal"]);		   
-               tTransInfo.set_tx_power_upper_th_critical(r["TxPower"]["UpperThresholdCritical"]);
-               tTransInfo.set_tx_power_lower_th_critical(r["TxPower"]["LowerThresholdCritical"]);
-               tTransInfo.set_tx_power_lower_th_fatal(r["TxPower"]["LowerThresholdFatal"]);
-               tTransInfo.set_tx_power_status_state(r["TxPower"]["Status"]["State"]);
-               tTransInfo.set_tx_power_status_health(r["TxPower"]["Status"]["Health"]);			   
-			   
-               tTransInfo.set_rx_power_reading(r["RxPower"]["Reading"]);
-               tTransInfo.set_rx_power_upper_th_fatal(r["RxPower"]["UpperThresholdFatal"]);		   
-               tTransInfo.set_rx_power_upper_th_critical(r["RxPower"]["UpperThresholdCritical"]);
-               tTransInfo.set_rx_power_lower_th_critical(r["RxPower"]["LowerThresholdCritical"]);
-               tTransInfo.set_rx_power_lower_th_fatal(r["RxPower"]["LowerThresholdFatal"]);
-               tTransInfo.set_rx_power_status_state(r["RxPower"]["Status"]["State"]);
-               tTransInfo.set_rx_power_status_health(r["RxPower"]["Status"]["Health"]);			   
-			   
-               port_->set_trans_info(tTransInfo);			   
-               
-            }
-        }
-    }
-	
-    sonlp.update_port_present_event();		
-
     /*Send all events */
     std::vector<std::string> tmp_e_a =  sonlp.get_Event_Resouce_Add();
 	
@@ -667,3 +585,156 @@ void GetOnlpInfo::get_onlp_info() {
     }
 #endif
 }
+
+
+void GetOnlpInfo::get_onlp_port_info() 
+{
+#ifdef ONLP
+
+    while(true)
+    {
+        auto& sonlp = Switch::Switch::get_instance();
+        /*Get/Set  Port info.*/		
+        sonlp.get_port_present_info();
+        sonlp.update_port_present_event();		
+        /*Send all events */
+        std::vector<std::string> tmp_e_a =  sonlp.get_Event_Port_Resouce_Add();
+        
+        for(unsigned int i = 0; i < tmp_e_a.size(); i++)
+        {
+            std::string t_es = tmp_e_a[i];
+            agent_framework::eventing::EventData edat;
+            edat.set_notification(::agent_framework::eventing::Notification::ResourceAdded);
+            edat.set_event_content(t_es); 		
+            agent_framework::eventing::EventsQueue::get_instance()->push_back(edat);
+        }
+        
+        std::vector<std::string> tmp_e_r =  sonlp.get_Event_Port_Resouce_Remove();
+        
+        for(unsigned int i = 0; i < tmp_e_r.size(); i++)
+        {
+            std::string t_er = tmp_e_r[i];
+            agent_framework::eventing::EventData edat;
+            edat.set_notification(::agent_framework::eventing::Notification::ResourceRemoved);
+            edat.set_event_content(t_er); 			 
+            agent_framework::eventing::EventsQueue::get_instance()->push_back(edat);
+        }
+        
+        std::vector<std::string> tmp_e_al =  sonlp.get_Event_Port_Resouce_Alert();
+        
+        for(unsigned int i = 0; i < tmp_e_al.size(); i++)
+        {
+            std::string t_ea = tmp_e_al[i];
+            agent_framework::eventing::EventData edat;
+            edat.set_notification(::agent_framework::eventing::Notification::Alert);
+            edat.set_event_content(t_ea); 			 	 
+            agent_framework::eventing::EventsQueue::get_instance()->push_back(edat);
+        }
+        sonlp.clean_Event_Port_Rresouce_Event(); //Reset event //   
+        sleep(2);
+    }
+    return;
+#endif
+}
+
+void GetOnlpInfo::get_onlp_port_oom_info() 
+{
+#ifdef ONLP
+    while(true)
+    {
+        auto& sonlp = Switch::Switch::get_instance();
+        /*Get/Set  Port info.*/		
+        sonlp.get_port_oom_info();
+        
+        unsigned int port_num =  sonlp.get_port_num();
+        unsigned int portid=1;
+        
+        auto network_components = agent_framework::module::NetworkComponents::get_instance();
+        auto &port_manager = network_components->get_instance()->get_port_manager();
+        auto port_uuids = port_manager.get_keys();
+        
+        for(portid = 1; portid <=port_num ; portid++)
+        { 	     
+            for (const auto& port_uuid : port_uuids) 
+            {
+                auto port_ = port_manager.get_entry_reference(port_uuid);  //Get Port object by psu_uuid//
+                
+                if (port_->get_port_id() == portid) 
+                { 
+                    int current_present = sonlp.get_port_info_by_(portid , Switch::Port_Content::Port_Present);
+                
+                    if(current_present)
+                   {
+                       port_->set_status(attribute::Status(
+                       agent_framework::model::enums::State::Enabled,
+                       agent_framework::model::enums::Health::OK));               
+                   }
+                   else
+                   {
+                       port_->set_status(attribute::Status(
+                       agent_framework::model::enums::State::Absent,
+                       agent_framework::model::enums::Health::OK));               
+                   }
+                   
+                   //Collect  trans info			   
+                   json::Value r(json::Value::Type::OBJECT);	
+                   attribute::TransInfo tTransInfo;			   
+                   
+                   r = sonlp.get_port_trans_info_by_(portid);
+                
+                   tTransInfo.set_spf_vendor_name(r["SFP Vendor Name"]);
+                   tTransInfo.set_part_number(r["Part Number"]);		   
+                   tTransInfo.set_serial_number(r["Serial Number"]);		   
+                   tTransInfo.set_manufacture_date(r["Manufacture Date"]);
+                    
+                   tTransInfo.set_temp_reading(r["Temperature"]["Reading"]);
+                   tTransInfo.set_temp_upper_th_fatal(r["Temperature"]["UpperThresholdFatal"]);		   
+                   tTransInfo.set_temp_upper_th_critical(r["Temperature"]["UpperThresholdCritical"]);
+                   tTransInfo.set_temp_lower_th_critical(r["Temperature"]["LowerThresholdCritical"]);
+                   tTransInfo.set_temp_lower_th_fatal(r["Temperature"]["LowerThresholdFatal"]);
+                   tTransInfo.set_temp_status_state(r["Temperature"]["Status"]["State"]);
+                   tTransInfo.set_temp_status_health(r["Temperature"]["Status"]["Health"]);
+                   
+                   tTransInfo.set_voltage_reading(r["Voltage"]["Reading"]);
+                   tTransInfo.set_voltage_upper_th_fatal(r["Voltage"]["UpperThresholdFatal"]);		   
+                   tTransInfo.set_voltage_upper_th_critical(r["Voltage"]["UpperThresholdCritical"]);
+                   tTransInfo.set_voltage_lower_th_critical(r["Voltage"]["LowerThresholdCritical"]);
+                   tTransInfo.set_voltage_lower_th_fatal(r["Voltage"]["LowerThresholdFatal"]);
+                   tTransInfo.set_voltage_status_state(r["Voltage"]["Status"]["State"]);
+                   tTransInfo.set_voltage_status_health(r["Voltage"]["Status"]["Health"]);
+                
+                   tTransInfo.set_bias_current_reading(r["BiasCurrent"]["Reading"]);
+                   tTransInfo.set_bias_current_upper_th_fatal(r["BiasCurrent"]["UpperThresholdFatal"]);		   
+                   tTransInfo.set_bias_current_upper_th_critical(r["BiasCurrent"]["UpperThresholdCritical"]);
+                   tTransInfo.set_bias_current_lower_th_critical(r["BiasCurrent"]["LowerThresholdCritical"]);
+                   tTransInfo.set_bias_current_lower_th_fatal(r["BiasCurrent"]["LowerThresholdFatal"]);
+                   tTransInfo.set_bias_current_status_state(r["BiasCurrent"]["Status"]["State"]);
+                   tTransInfo.set_bias_current_status_health(r["BiasCurrent"]["Status"]["Health"]);			   
+                
+                   tTransInfo.set_tx_power_reading(r["TxPower"]["Reading"]);
+                   tTransInfo.set_tx_power_upper_th_fatal(r["TxPower"]["UpperThresholdFatal"]);		   
+                   tTransInfo.set_tx_power_upper_th_critical(r["TxPower"]["UpperThresholdCritical"]);
+                   tTransInfo.set_tx_power_lower_th_critical(r["TxPower"]["LowerThresholdCritical"]);
+                   tTransInfo.set_tx_power_lower_th_fatal(r["TxPower"]["LowerThresholdFatal"]);
+                   tTransInfo.set_tx_power_status_state(r["TxPower"]["Status"]["State"]);
+                   tTransInfo.set_tx_power_status_health(r["TxPower"]["Status"]["Health"]);			   
+                   
+                   tTransInfo.set_rx_power_reading(r["RxPower"]["Reading"]);
+                   tTransInfo.set_rx_power_upper_th_fatal(r["RxPower"]["UpperThresholdFatal"]);		   
+                   tTransInfo.set_rx_power_upper_th_critical(r["RxPower"]["UpperThresholdCritical"]);
+                   tTransInfo.set_rx_power_lower_th_critical(r["RxPower"]["LowerThresholdCritical"]);
+                   tTransInfo.set_rx_power_lower_th_fatal(r["RxPower"]["LowerThresholdFatal"]);
+                   tTransInfo.set_rx_power_status_state(r["RxPower"]["Status"]["State"]);
+                   tTransInfo.set_rx_power_status_health(r["RxPower"]["Status"]["Health"]);			   
+                   
+                   port_->set_trans_info(tTransInfo);			   
+                }
+            }
+        }
+        sleep(2);
+    }
+    return;
+#endif
+}
+
+

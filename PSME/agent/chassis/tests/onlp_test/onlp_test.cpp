@@ -78,7 +78,8 @@ void TestClass1::SetUp()
     {
 
 	 auto start = std::chrono::system_clock::now();
-        sonlp.get_port_info();
+        sonlp.get_port_present_info();
+        sonlp.get_port_oom_info();
         auto end = std::chrono::system_clock::now();
 
 
