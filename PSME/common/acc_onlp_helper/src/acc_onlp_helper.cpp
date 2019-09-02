@@ -1714,7 +1714,7 @@ namespace acc_onlp_helper {
 
                 std::string event("Event");
                 std::string servrity("Warning");					   
-                std::string sensor_type("PSU FAN");		   
+                std::string sensor_type("Fan");		   
                 std::string message("PSU fan absent");    
                 Entry.set_log_entry(event , sensor_type , servrity, message, ID);
 
@@ -2334,7 +2334,7 @@ Area : 5
                 { // port unplug  					
                     std::string event("Event");
                     std::string servrity("OK");					   
-                    std::string sensor_type("Port");		   
+                    std::string sensor_type("Entity Presence");		   
                     std::string message("Port unplug.");
                     Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
     
@@ -2345,7 +2345,7 @@ Area : 5
                 { // port plug in
                     std::string event("Event");
                     std::string servrity("OK");					   
-                    std::string sensor_type("Port");		   
+                    std::string sensor_type("Entity Presence");		   
                     std::string message("Port plug in.");	
                     Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
     
@@ -2366,7 +2366,7 @@ Area : 5
                 { // port unplug  					
                     std::string event("Event");
                     std::string servrity("OK");					   
-                    std::string sensor_type("Port");		   
+                    std::string sensor_type("Entity Presence");		   
                     std::string message("Port unplug.");
                     Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
     
@@ -2377,7 +2377,7 @@ Area : 5
                 { // port plug in
                     std::string event("Event");
                     std::string servrity("OK");					   
-                    std::string sensor_type("Port");		   
+                    std::string sensor_type("Entity Presence");		   
                     std::string message("Port plug in.");	
                     Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
     
