@@ -4,8 +4,8 @@
 #################################################################################
 # Define currnt using variable depend on platform #
 	CURRENT_FAN_NUM="12"
-	CURRENT_THERMAL_NUM="11"
-	CURRENT_PORT_NUM="40"
+	CURRENT_THERMAL_NUM="17"
+	CURRENT_PORT_NUM="82"
 	CURRENT_PSU_NUM="4"
 
 	I2C_BUS="0"
@@ -19,11 +19,16 @@
 	         "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
 	         "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
 	         "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
+	         "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
+	         "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
+	         "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
+	         "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
+	         "XSFP" "XSFP" 
 		 ) 
 
         fans_type=("S" "S" "S" "S" "S" "S" "S" "S" "P" "P" "P" "P")
 
-        thermals_type=("C" "S" "S" "S" "S" "S" "S" "P" "P" "P" "P")
+        thermals_type=("C" "S" "S" "S" "S" "S" "S" "S" "S" "S" "S" "S" "S" "P" "P" "P" "P")
 
         psus_type=("S" "S" "S" "S")
 
