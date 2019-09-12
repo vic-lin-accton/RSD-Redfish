@@ -50,6 +50,14 @@ public:
      */
     uint64_t add(Subscription subscription);
 
+
+    /*!
+     * @brief Get current sub ID
+     *
+     * @return Subscription OD
+     */
+    uint64_t get_sub_id();
+
     /*!
      * @brief Get subscription by subscription id
      *
@@ -124,6 +132,7 @@ private:
     void del_by_name(const std::string& subscription_name);
 
     SubscriptionMap m_subscriptions{};
+    uint64_t m_MaxEvents{30};
     std::mutex m_mutex{};
 
     static std::uint64_t id;

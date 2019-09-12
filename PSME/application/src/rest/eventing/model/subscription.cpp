@@ -33,6 +33,7 @@ namespace model {
 
 json::Value Subscription::to_json() const {
     json::Value json(json::Value::Type::OBJECT);
+    json[Common::ID] = std::to_string(m_id);	
     json[Common::NAME] = m_name;
     json[EventSubscription::DESTINATION] = m_destination;
     json[EventSubscription::CONTEXT] = m_context;
@@ -46,6 +47,7 @@ json::Value Subscription::to_json() const {
 }
 
 Subscription Subscription::from_json(const json::Value& json) {
+    const auto& id = json[EventSubscription::ID].as_string();	
     const auto& name = json[Common::NAME].as_string();
     const auto& destination = json[EventSubscription::DESTINATION].as_string();
     const auto& context = json[EventSubscription::CONTEXT].as_string();
@@ -55,6 +57,7 @@ Subscription Subscription::from_json(const json::Value& json) {
         event_types.add(EventType::from_string(event_type.as_string()));
     }
     Subscription subscription;
+    subscription.set_id(std::stoi(id));	
     subscription.set_name(name);
     subscription.set_destination(destination);
     subscription.set_context(context);

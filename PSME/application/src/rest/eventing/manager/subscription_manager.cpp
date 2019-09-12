@@ -26,15 +26,48 @@
 
 #include <json/json.hpp>
 #include <fstream>
+#include <vector>
+#include <algorithm>
 
-
+using namespace std;
 
 namespace psme {
 namespace rest {
 namespace eventing {
 namespace manager {
 
-std::uint64_t SubscriptionManager::id = 1;
+bool inline comp_by_value(pair<string, Subscription> &p1, pair<string, Subscription> &p2)
+{
+   return p1.second.get_id() < p2.second.get_id();
+}
+
+uint64_t SubscriptionManager::get_sub_id()
+{
+    uint64_t id=0;
+    // Sort increase of m_subscriptions by event member ID //
+    vector<pair<string, Subscription>> myVec(m_subscriptions.begin(), m_subscriptions.end());
+    sort(myVec.begin(),  myVec.end(), comp_by_value);
+    //Get  first not used ID from 1 //
+    for(id = 1 ; (id <= m_MaxEvents ) ; id++)
+    {
+        bool found = false;	    
+        //Check if can find id in myVec //
+        for (const auto& item : myVec) 
+        {
+            const auto& tmp_event = item.second;
+            
+            if(tmp_event.get_id() == (id))
+            {
+                found = true;
+            }
+        }
+        if (found == true)
+            continue;
+        else
+            return id;
+    }
+    return 0;
+}
 
 uint64_t SubscriptionManager::add(Subscription subscription) {
     std::lock_guard<std::mutex> lock{m_mutex};
@@ -44,9 +77,29 @@ uint64_t SubscriptionManager::add(Subscription subscription) {
             "Subscription '" + subscription.get_name() + "' already exists."
         ));
     }
-    subscription.set_id(id++);
-    m_subscriptions[subscription.get_name()] = subscription;
-    return subscription.get_id();
+	
+    if (subscription.get_id() != 0) 
+    {
+        //From subscription tmp file  //    
+        uint64_t id = subscription.get_id();
+
+        subscription.set_id(id);
+        m_subscriptions[subscription.get_name()] = subscription;
+        return subscription.get_id();
+    }
+    else  //From web post add //
+    {
+        uint64_t id = get_sub_id();
+    
+        if ( id != 0)
+        {
+            subscription.set_id(id);
+            m_subscriptions[subscription.get_name()] = subscription;
+            return subscription.get_id();
+        }
+        else
+            return 0;    
+    }
 }
 
 Subscription SubscriptionManager::get(const std::string& subscription_name) {

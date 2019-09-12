@@ -64,6 +64,7 @@ Subscription to_model(const json::Value& json) {
     for (const auto& event_type : json[EventSubscription::EVENT_TYPES]) {
         event_types.add(EventType::from_string(event_type.as_string()));
     }
+    s.set_id(0);  //0 means add from subscribe //!0 get from file
     s.set_name(name);
     s.set_destination(destination);
     s.set_context(context);
@@ -100,7 +101,14 @@ void SubscriptionCollection::post(const server::Request& request, server::Respon
     const auto& json = JsonValidator::validate_request_body<schema::SubscriptionCollectionPostSchema>(request);
     Subscription subscription = to_model(json);
     uint64_t id = SubscriptionManager::get_instance()->add(subscription);
+    if(id !=0)
+    {
     SubscriptionConfig::get_instance()->save();
     endpoint::utils::set_location_header(response, PathBuilder(request).append(id).build());
     response.set_status(server::status_2XX::CREATED);
+}
+    else
+    {
+        response.set_status(server::status_4XX::METHOD_NOT_ALLOWED);    
+    }
 }

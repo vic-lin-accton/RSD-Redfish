@@ -374,6 +374,7 @@ const char PRIVILEGE_TYPES[] = "AssignedPrivileges";
 }
 //viclin add end
 namespace EventSubscription {
+const char ID[] = "Id";
 const char DESTINATION[] = "Destination";
 const char CONTEXT[] = "Context";
 const char PROTOCOL[] = "Protocol";

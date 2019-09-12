@@ -421,6 +421,7 @@ extern const char DESTINATION[];
 extern const char CONTEXT[];
 extern const char PROTOCOL[];
 extern const char EVENT_TYPES[];
+extern const char ID[];
 }
 
 /*!
