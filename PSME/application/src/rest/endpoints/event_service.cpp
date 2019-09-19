@@ -45,8 +45,8 @@ json::Value make_prototype() {
     r[EventService::DELIVERY_RETRY_ATTEMPTS] = 3;
     r[EventService::DELIVERY_RETRY_INTERVAL_SECONDS] = 60;
     r[EventService::EVENT_TYPES_FOR_SUBSCRIPTION] = json::Value::Type::ARRAY;
-    r[EventService::EVENT_TYPES_FOR_SUBSCRIPTION].push_back(EventService::STATUS_CHANGE);
-    r[EventService::EVENT_TYPES_FOR_SUBSCRIPTION].push_back(EventService::RESOURCE_UPDATED);
+//    r[EventService::EVENT_TYPES_FOR_SUBSCRIPTION].push_back(EventService::STATUS_CHANGE);
+//    r[EventService::EVENT_TYPES_FOR_SUBSCRIPTION].push_back(EventService::RESOURCE_UPDATED);
     r[EventService::EVENT_TYPES_FOR_SUBSCRIPTION].push_back(EventService::RESOURCE_ADDED);
     r[EventService::EVENT_TYPES_FOR_SUBSCRIPTION].push_back(EventService::RESOURCE_REMOVED);
     r[EventService::EVENT_TYPES_FOR_SUBSCRIPTION].push_back(EventService::ALERT);

@@ -55,6 +55,9 @@ if [ ! -z "${HW_type}" ];then
         "x86"[-_]"64-accton"[-_]"as7926"[-_]"80xk")
         . /etc/psme/HW_NODE_AS7926_80XK
         ;;
+        "x86"[-_]"64-accton"[-_]"as7926"[-_]"40xke")
+        . /etc/psme/HW_NODE_AS7926_40XKE
+        ;;
         "x86"[-_]"64-accton"[-_]"as9716"[-_]"32d")
         . /etc/psme/HW_NODE_AS9716_32D
         ;;

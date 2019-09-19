@@ -67,6 +67,7 @@ cp ${PSME_ACC_SW_DIR}/HW_NODE_AS7726_32X        $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS7326_56X        $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS4610_54T        $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS7926_80XK       $ITEM_PATH/etc/psme
+cp ${PSME_ACC_SW_DIR}/HW_NODE_AS7926_40XKE      $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS9716_32D        $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_SAU5081           $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/C_PINFO                   $ITEM_PATH/etc/psme

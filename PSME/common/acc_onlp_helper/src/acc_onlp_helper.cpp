@@ -58,18 +58,26 @@ namespace acc_onlp_helper {
 
     unsigned long  get_value_from_pointer_u(unsigned char *ptr, int size)
     {
-        unsigned long sum = 0;
-        unsigned char i;
-
-        if (size > 4)
+        try 
+        {    
+            unsigned long sum = 0;
+            unsigned char i;
+    
+            if (size > 4)
+                return (sum);
+    
+            for (i = 0; i < size; ++i)
+            {
+                sum = sum * 256 + (*(ptr + i));
+            }
+    
             return (sum);
-
-        for (i = 0; i < size; ++i)
-        {
-            sum = sum * 256 + (*(ptr + i));
         }
-
-        return (sum);
+        catch (const exception& e)
+        {
+            printf("get_value_from_pointer_u error\r\n");
+            return 0;
+        }		
     }
 
     float e_oom::get_value(std::string attri_name)
@@ -131,8 +139,8 @@ namespace acc_onlp_helper {
         catch (const exception& e)
         {
             printf("get_value_u error\r\n");
+            return 0;		
         }
-        return 0;
     }
 
     std::string e_oom::get_value_s(std::string attri_name)
@@ -162,44 +170,52 @@ namespace acc_onlp_helper {
         catch (const exception& e)
         {
             printf("get_value_s error\r\n");
+            return 0;					
         }
-        return 0;
     }
 		
 
 
     void e_oom::refresh_vendor_info()
     {
-        /*vendor_info Begin:*/
-        std::string ff ;
-        /* get SFP Vendor Name */
-        if(m_current_status["SFP Vendor Name"] == "NA")
-        {
-            ff = get_value_s("Vendor_name");
-            m_current_status["SFP Vendor Name"] = ff;
+        try 
+        {    
+            /*vendor_info Begin:*/
+            std::string ff ;
+            /* get SFP Vendor Name */
+            if(m_current_status["SFP Vendor Name"] == "NA")
+            {
+                ff = get_value_s("Vendor_name");
+                m_current_status["SFP Vendor Name"] = ff;
+            }
+    
+            /* get Part Number */
+            if(m_current_status["Part Number"]  == "NA")
+            {
+                ff = get_value_s("Vendor_PN");
+                m_current_status["Part Number"]= ff;
+            }			
+    
+            /* get Serial Number */
+            if(m_current_status["Serial Number"] == "NA")
+            {
+                ff =  get_value_s("Vendor_SN");
+                m_current_status["Serial Number"] = ff;
+            }				     
+    
+            /* get Manufacture Date */
+            if(m_current_status["Manufacture Date"] == "NA")
+            {
+                ff =  get_value_s("Data_Code");
+                m_current_status["Manufacture Date"] = ff;
+            }				
+            /*vendor_info End  :*/
         }
-
-        /* get Part Number */
-        if(m_current_status["Part Number"]  == "NA")
-        {
-            ff = get_value_s("Vendor_PN");
-            m_current_status["Part Number"]= ff;
-        }			
-
-        /* get Serial Number */
-        if(m_current_status["Serial Number"] == "NA")
-        {
-            ff =  get_value_s("Vendor_SN");
-            m_current_status["Serial Number"] = ff;
-        }				     
-
-        /* get Manufacture Date */
-        if(m_current_status["Manufacture Date"] == "NA")
-        {
-            ff =  get_value_s("Data_Code");
-            m_current_status["Manufacture Date"] = ff;
-        }				
-        /*vendor_info End  :*/
+        catch (const exception& e)
+        {		
+            printf("refresh_vendor_info error\r\n");
+            return;
+        }        
     }
 
 
@@ -216,77 +232,85 @@ namespace acc_onlp_helper {
 
     void e_oom::refresh_temp()
     {
-        /*Temperature Begin:*/
-        float ff ;
-        /* get Temp_High_Alarm */
-        if(m_current_status["Temperature"] ["UpperThresholdFatal"] == 0)
-        {
-            ff = get_value("Temp_High_Alarm");
-            m_current_status["Temperature"] ["UpperThresholdFatal"] =FF3(ff);
+        try 
+        {    
+            /*Temperature Begin:*/
+            float ff ;
+            /* get Temp_High_Alarm */
+            if(m_current_status["Temperature"] ["UpperThresholdFatal"] == 0)
+            {
+                ff = get_value("Temp_High_Alarm");
+                m_current_status["Temperature"] ["UpperThresholdFatal"] =FF3(ff);
+            }
+    
+            /* get Temp_Low_Alarm */
+            if(m_current_status["Temperature"] ["LowerThresholdFatal"] == 0)
+            {
+                ff = get_value("Temp_Low_Alarm");
+                m_current_status["Temperature"] ["LowerThresholdFatal"] =FF3(ff);
+            }			
+    
+            /* get Temp_High_Warning */
+            if(m_current_status["Temperature"] ["UpperThresholdCritical"] == 0)
+            {
+                ff =  get_value("Temp_High_Warning");
+                m_current_status["Temperature"] ["UpperThresholdCritical"] =FF3(ff);
+            }				     
+    
+            /* get Temp_Low_Warning */
+            if(m_current_status["Temperature"] ["LowerThresholdCritical"] == 0)
+            {
+                ff =  get_value("Temp_Low_Warning");
+                m_current_status["Temperature"] ["LowerThresholdCritical"] = FF3(ff);
+            }				
+    
+            /* get Temperature */
+            ff =  get_value("Temperature");
+            m_current_status["Temperature"]["Reading"] =FF3(ff);
+    
+    /*
+    
+               Critical
+    
+           UpperThresholdFatal >=
+    
+               Warning
+    
+           UpperThresholdCritical >=
+    
+               OK
+    
+           LowerrThresholdCritical >=
+          
+               Warning
+    
+           LowerThresholdFatal >=
+    
+               Critical
+    */
+            if(((FF3(ff) >= m_current_status["Temperature"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["Temperature"] ["UpperThresholdFatal"]))
+                    ||((FF3(ff) >= m_current_status["Temperature"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["Temperature"] ["LowerThresholdCritical"])))
+            {
+                m_current_status ["Temperature"] ["Status"]["Health"] = "Warning";
+                m_current_status ["Temperature"] ["Status"]["State"] = "Enabled";
+            }
+            else if ((FF3(ff) >= m_current_status["Temperature"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["Temperature"] ["LowerThresholdFatal"]))
+            {
+                m_current_status ["Temperature"] ["Status"]["Health"] = "Critical";
+                m_current_status ["Temperature"] ["Status"]["State"] = "Enabled";
+            }			
+            else
+            {
+                m_current_status ["Temperature"] ["Status"]["Health"] = "OK";
+                m_current_status ["Temperature"] ["Status"]["State"] = "Enabled";            
+            }
+            /*Temperature End  :*/
         }
-
-        /* get Temp_Low_Alarm */
-        if(m_current_status["Temperature"] ["LowerThresholdFatal"] == 0)
-        {
-            ff = get_value("Temp_Low_Alarm");
-            m_current_status["Temperature"] ["LowerThresholdFatal"] =FF3(ff);
-        }			
-
-        /* get Temp_High_Warning */
-        if(m_current_status["Temperature"] ["UpperThresholdCritical"] == 0)
-        {
-            ff =  get_value("Temp_High_Warning");
-            m_current_status["Temperature"] ["UpperThresholdCritical"] =FF3(ff);
-        }				     
-
-        /* get Temp_Low_Warning */
-        if(m_current_status["Temperature"] ["LowerThresholdCritical"] == 0)
-        {
-            ff =  get_value("Temp_Low_Warning");
-            m_current_status["Temperature"] ["LowerThresholdCritical"] = FF3(ff);
-        }				
-
-        /* get Temperature */
-        ff =  get_value("Temperature");
-        m_current_status["Temperature"]["Reading"] =FF3(ff);
-
-/*
-
-           Critical
-
-       UpperThresholdFatal >=
-
-           Warning
-
-       UpperThresholdCritical >=
-
-           OK
-
-       LowerrThresholdCritical >=
-      
-           Warning
-
-       LowerThresholdFatal >=
-
-           Critical
-*/
-        if(((FF3(ff) >= m_current_status["Temperature"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["Temperature"] ["UpperThresholdFatal"]))
-                ||((FF3(ff) >= m_current_status["Temperature"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["Temperature"] ["LowerThresholdCritical"])))
-        {
-            m_current_status ["Temperature"] ["Status"]["Health"] = "Warning";
-            m_current_status ["Temperature"] ["Status"]["State"] = "Enabled";
-        }
-        else if ((FF3(ff) >= m_current_status["Temperature"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["Temperature"] ["LowerThresholdFatal"]))
-        {
-            m_current_status ["Temperature"] ["Status"]["Health"] = "Critical";
-            m_current_status ["Temperature"] ["Status"]["State"] = "Enabled";
-        }			
-        else
-        {
-            m_current_status ["Temperature"] ["Status"]["Health"] = "OK";
-            m_current_status ["Temperature"] ["Status"]["State"] = "Enabled";            
-        }
-        /*Temperature End  :*/
+        catch (const exception& e)
+        {		
+            printf("refresh_temp error\r\n");
+            return;
+        }          
     }
 
     void e_oom::default_temp()
@@ -305,79 +329,86 @@ namespace acc_onlp_helper {
 
     void e_oom::refresh_voltage()
     {
-
-        /*Voltage Begin:*/
-        double ff ;
-        /* get Voltage_High_Alarm */
-        if(m_current_status["Voltage"] ["UpperThresholdFatal"] == 0)
-        {
-            ff = get_value_u("Voltage_High_Alarm");
-            m_current_status["Voltage"] ["UpperThresholdFatal"] =FF3(ff);
+        try 
+        { 
+            /*Voltage Begin:*/
+            double ff ;
+            /* get Voltage_High_Alarm */
+            if(m_current_status["Voltage"] ["UpperThresholdFatal"] == 0)
+            {
+                ff = get_value_u("Voltage_High_Alarm");
+                m_current_status["Voltage"] ["UpperThresholdFatal"] =FF3(ff);
+            }
+    
+            /* get Voltage_Low_Alarm */
+            if(m_current_status["Voltage"] ["LowerThresholdFatal"] == 0)
+            {
+                ff = get_value_u("Voltage_Low_Alarm");
+                m_current_status["Voltage"] ["LowerThresholdFatal"] =FF3(ff);
+            }
+    
+            /* get Voltage_High_Warning */
+            if(m_current_status["Voltage"] ["UpperThresholdCritical"] == 0)
+            {
+                ff =  get_value_u("Voltage_High_Warning");
+                m_current_status["Voltage"] ["UpperThresholdCritical"] =FF3(ff);
+            }					
+    
+            /* get Voltage_Low_Warning */
+            if(m_current_status["Voltage"] ["LowerThresholdCritical"] == 0)
+            {
+                ff =  get_value_u("Voltage_Low_Warning");
+                m_current_status["Voltage"] ["LowerThresholdCritical"] =FF3(ff);
+            }			
+    
+            /* get Voltage */
+            ff = get_value_u("Voltage");
+            m_current_status["Voltage"]["Reading"] =FF3(ff);	
+    
+    /*
+    
+               Critical
+    
+           UpperThresholdFatal 
+    
+               Warning
+    
+           UpperThresholdCritical 
+    
+               OK
+    
+           LowerThresholdCritical 
+          
+               Warning
+    
+           LowerThresholdFatal 
+    
+               Critical
+    */
+    
+            if(((FF3(ff) >= m_current_status["Voltage"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["Voltage"] ["UpperThresholdFatal"]))
+                    ||((FF3(ff) >= m_current_status["Temperature"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["Temperature"] ["LowerThresholdCritical"])))		
+            {
+                m_current_status ["Voltage"] ["Status"]["Health"] = "Warning";
+                m_current_status ["Voltage"] ["Status"]["State"] = "Enabled";
+            }
+            else if ((FF3(ff) >= m_current_status["Voltage"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["Voltage"] ["LowerThresholdFatal"]))
+            {
+                m_current_status ["Voltage"] ["Status"]["Health"] = "Critical";
+                m_current_status ["Voltage"] ["Status"]["State"] = "Enabled";
+            }			
+            else
+            {
+                m_current_status ["Voltage"] ["Status"]["Health"] = "OK";
+                m_current_status ["Voltage"] ["Status"]["State"] = "Enabled";            
+            }
+            /*Voltage End  :*/  
         }
-
-        /* get Voltage_Low_Alarm */
-        if(m_current_status["Voltage"] ["LowerThresholdFatal"] == 0)
-        {
-            ff = get_value_u("Voltage_Low_Alarm");
-            m_current_status["Voltage"] ["LowerThresholdFatal"] =FF3(ff);
-        }
-
-        /* get Voltage_High_Warning */
-        if(m_current_status["Voltage"] ["UpperThresholdCritical"] == 0)
-        {
-            ff =  get_value_u("Voltage_High_Warning");
-            m_current_status["Voltage"] ["UpperThresholdCritical"] =FF3(ff);
-        }					
-
-        /* get Voltage_Low_Warning */
-        if(m_current_status["Voltage"] ["LowerThresholdCritical"] == 0)
-        {
-            ff =  get_value_u("Voltage_Low_Warning");
-            m_current_status["Voltage"] ["LowerThresholdCritical"] =FF3(ff);
-        }			
-
-        /* get Voltage */
-        ff = get_value_u("Voltage");
-        m_current_status["Voltage"]["Reading"] =FF3(ff);	
-
-/*
-
-           Critical
-
-       UpperThresholdFatal 
-
-           Warning
-
-       UpperThresholdCritical 
-
-           OK
-
-       LowerThresholdCritical 
-      
-           Warning
-
-       LowerThresholdFatal 
-
-           Critical
-*/
-
-        if(((FF3(ff) >= m_current_status["Voltage"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["Voltage"] ["UpperThresholdFatal"]))
-                ||((FF3(ff) >= m_current_status["Temperature"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["Temperature"] ["LowerThresholdCritical"])))		
-        {
-            m_current_status ["Voltage"] ["Status"]["Health"] = "Warning";
-            m_current_status ["Voltage"] ["Status"]["State"] = "Enabled";
-        }
-        else if ((FF3(ff) >= m_current_status["Voltage"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["Voltage"] ["LowerThresholdFatal"]))
-        {
-            m_current_status ["Voltage"] ["Status"]["Health"] = "Critical";
-            m_current_status ["Voltage"] ["Status"]["State"] = "Enabled";
-        }			
-        else
-        {
-            m_current_status ["Voltage"] ["Status"]["Health"] = "OK";
-            m_current_status ["Voltage"] ["Status"]["State"] = "Enabled";            
-        }
-        /*Voltage End  :*/    
+        catch (const exception& e)
+        {		
+            printf("refresh_voltage error\r\n");
+            return;			
+        }   		
     }
 
     void e_oom::default_voltage()
@@ -397,78 +428,86 @@ namespace acc_onlp_helper {
 
     void e_oom::refresh_bias()
     {
-        float ff; 
-        /*BiasCurrent Begin  :*/
-        /* get Bias_High_Alarm */
-        if(m_current_status["BiasCurrent"] ["UpperThresholdFatal"] == 0)
-        {
-            ff = get_value_u("Bias_High_Alarm");
-            m_current_status["BiasCurrent"] ["UpperThresholdFatal"] =FF3(ff);
-        }			
-
-        /* get Bias_Low_Alarm */
-        if(m_current_status["BiasCurrent"] ["LowerThresholdFatal"] == 0)
-        {
-            ff = get_value_u("Bias_Low_Alarm");
-            m_current_status["BiasCurrent"] ["LowerThresholdFatal"] =FF3(ff);
-        }				        
-
-        /* get Bias_High_Warning */
-        if(m_current_status["BiasCurrent"] ["UpperThresholdCritical"] == 0)
-        {
-            ff =  get_value_u("Bias_High_Warning");
-            m_current_status["BiasCurrent"] ["UpperThresholdCritical"] =FF3(ff);
-        }					
-
-        /* get Bias_Low_Warning */
-        if(m_current_status["BiasCurrent"] ["LowerThresholdCritical"] == 0)
-        {
-            ff = get_value_u("Bias_Low_Warning");
-            m_current_status["BiasCurrent"] ["LowerThresholdCritical"] = FF3(ff);
-        }				
-
-        /* get Bias */
-        ff = get_value_u("Tx_Bias");
-        m_current_status["BiasCurrent"]["Reading"] =FF3(ff);
-/*
-
-           Critical
-
-       UpperThresholdFatal >=
-
-           Warning
-
-       UpperThresholdCritical >=
-
-           OK
-
-       LowerThresholdCritical >=
-      
-           Warning
-
-       LowerThresholdFatal >=
-
-           Critical
-*/
-        if(((FF3(ff) >= m_current_status["BiasCurrent"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["BiasCurrent"] ["UpperThresholdFatal"]))
-                ||((FF3(ff) >= m_current_status["BiasCurrent"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["BiasCurrent"] ["LowerThresholdCritical"])))		
-        {
-            m_current_status ["BiasCurrent"] ["Status"]["Health"] = "Warning";
-            m_current_status ["BiasCurrent"] ["Status"]["State"] = "Enabled";
+        try 
+        {     
+            float ff; 
+            /*BiasCurrent Begin  :*/
+            /* get Bias_High_Alarm */
+            if(m_current_status["BiasCurrent"] ["UpperThresholdFatal"] == 0)
+            {
+                ff = get_value_u("Bias_High_Alarm");
+                m_current_status["BiasCurrent"] ["UpperThresholdFatal"] =FF3(ff);
+            }			
+    
+            /* get Bias_Low_Alarm */
+            if(m_current_status["BiasCurrent"] ["LowerThresholdFatal"] == 0)
+            {
+                ff = get_value_u("Bias_Low_Alarm");
+                m_current_status["BiasCurrent"] ["LowerThresholdFatal"] =FF3(ff);
+            }				        
+    
+            /* get Bias_High_Warning */
+            if(m_current_status["BiasCurrent"] ["UpperThresholdCritical"] == 0)
+            {
+                ff =  get_value_u("Bias_High_Warning");
+                m_current_status["BiasCurrent"] ["UpperThresholdCritical"] =FF3(ff);
+            }					
+    
+            /* get Bias_Low_Warning */
+            if(m_current_status["BiasCurrent"] ["LowerThresholdCritical"] == 0)
+            {
+                ff = get_value_u("Bias_Low_Warning");
+                m_current_status["BiasCurrent"] ["LowerThresholdCritical"] = FF3(ff);
+            }				
+    
+            /* get Bias */
+            ff = get_value_u("Tx_Bias");
+            m_current_status["BiasCurrent"]["Reading"] =FF3(ff);
+    /*
+    
+               Critical
+    
+           UpperThresholdFatal >=
+    
+               Warning
+    
+           UpperThresholdCritical >=
+    
+               OK
+    
+           LowerThresholdCritical >=
+          
+               Warning
+    
+           LowerThresholdFatal >=
+    
+               Critical
+    */
+            if(((FF3(ff) >= m_current_status["BiasCurrent"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["BiasCurrent"] ["UpperThresholdFatal"]))
+                    ||((FF3(ff) >= m_current_status["BiasCurrent"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["BiasCurrent"] ["LowerThresholdCritical"])))		
+            {
+                m_current_status ["BiasCurrent"] ["Status"]["Health"] = "Warning";
+                m_current_status ["BiasCurrent"] ["Status"]["State"] = "Enabled";
+            }
+            else if ((FF3(ff) >= m_current_status["BiasCurrent"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["BiasCurrent"] ["LowerThresholdFatal"]))
+            {
+                m_current_status ["BiasCurrent"] ["Status"]["Health"] = "Critical";
+                m_current_status ["BiasCurrent"] ["Status"]["State"] = "Enabled";
+            }			
+            else
+            {
+                m_current_status ["BiasCurrent"] ["Status"]["Health"] = "OK";
+                m_current_status ["BiasCurrent"] ["Status"]["State"] = "Enabled";    
+            }
+            /*BiasCurrent End    :*/	
         }
-        else if ((FF3(ff) >= m_current_status["BiasCurrent"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["BiasCurrent"] ["LowerThresholdFatal"]))
-        {
-            m_current_status ["BiasCurrent"] ["Status"]["Health"] = "Critical";
-            m_current_status ["BiasCurrent"] ["Status"]["State"] = "Enabled";
-        }			
-        else
-        {
-            m_current_status ["BiasCurrent"] ["Status"]["Health"] = "OK";
-            m_current_status ["BiasCurrent"] ["Status"]["State"] = "Enabled";    
-        }
-        /*BiasCurrent End    :*/			    
+        catch (const exception& e)
+        {		
+            printf("refresh_bias error\r\n");
+            return;						
+        }  			
     }
-
+    
     void e_oom::default_bias()
     {
         /*BiasCurrent Begin  :*/
@@ -479,86 +518,96 @@ namespace acc_onlp_helper {
         m_current_status["BiasCurrent"]["Reading"] = 0;
         m_current_status ["BiasCurrent"] ["Status"]["Health"] =  json::Value::Type::NIL;
         m_current_status ["BiasCurrent"] ["Status"]["State"] =  json::Value::Type::NIL;
-		
-        /*BiasCurrent End    :*/			    
+    	
+        /*BiasCurrent End    :*/	
+ 		
     }
 
 
     void e_oom::refresh_tx_pwr()
     {
-        /*TxPower Current Begin    :*/
-        float ff ;
-        /* get TX_Power_High_Alarm */
-
-        if(m_current_status["TxPower"] ["UpperThresholdFatal"] == 0)
-        {
-            ff = get_value_u("TX_Power_High_Alarm");
-            m_current_status["TxPower"] ["UpperThresholdFatal"] =FF3(ff);
-        }				
-
-        /* get TX_Power_Low_Alarm */
-        if(m_current_status["TxPower"] ["LowerThresholdFatal"] == 0)
-        {
-            ff = get_value_u("TX_Power_Low_Alarm");
-            m_current_status["TxPower"] ["LowerThresholdFatal"] =FF3(ff);
-        }				    
-
-        /* get TX_Power_High_Warning */
-        if(m_current_status["TxPower"] ["UpperThresholdCritical"] == 0)
-        {
-            ff =  get_value_u("TX_Power_High_Warning");
-            m_current_status["TxPower"] ["UpperThresholdCritical"] =FF3(ff);
-        }				
-
-        /* get TX_Power_Low_Warning */
-        if(m_current_status["TxPower"] ["LowerThresholdCritical"] == 0)
-        {
-            ff = get_value_u("TX_Power_Low_Warning");
-            m_current_status["TxPower"] ["LowerThresholdCritical"] =FF3(ff);
-        }				
-
-        /* get Tx_Power */
-        ff = get_value_u("Tx_Power");            
-        m_current_status["TxPower"]["Reading"] =FF3(ff);
-
-/*
-
-           Critical
-
-       UpperThresholdFatal 
-
-           Warning
-
-       UpperThresholdCritical 
-
-           OK
-
-       LowerThresholdCritical 
-      
-           Warning
-
-       LowerThresholdFatal 
-
-           Critical
-*/
-
-        if(((FF3(ff) >= m_current_status["TxPower"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["TxPower"] ["UpperThresholdFatal"]))
-                ||((FF3(ff) >= m_current_status["TxPower"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["TxPower"] ["LowerThresholdCritical"])))		
-        {
-            m_current_status ["TxPower"] ["Status"]["Health"] = "Warning";
-            m_current_status ["TxPower"] ["Status"]["State"] = "Enabled";
+        try 
+        {         
+            /*TxPower Current Begin    :*/
+            float ff ;
+            /* get TX_Power_High_Alarm */
+    
+            if(m_current_status["TxPower"] ["UpperThresholdFatal"] == 0)
+            {
+                ff = get_value_u("TX_Power_High_Alarm");
+                m_current_status["TxPower"] ["UpperThresholdFatal"] =FF3(ff);
+            }				
+    
+            /* get TX_Power_Low_Alarm */
+            if(m_current_status["TxPower"] ["LowerThresholdFatal"] == 0)
+            {
+                ff = get_value_u("TX_Power_Low_Alarm");
+                m_current_status["TxPower"] ["LowerThresholdFatal"] =FF3(ff);
+            }				    
+    
+            /* get TX_Power_High_Warning */
+            if(m_current_status["TxPower"] ["UpperThresholdCritical"] == 0)
+            {
+                ff =  get_value_u("TX_Power_High_Warning");
+                m_current_status["TxPower"] ["UpperThresholdCritical"] =FF3(ff);
+            }				
+    
+            /* get TX_Power_Low_Warning */
+            if(m_current_status["TxPower"] ["LowerThresholdCritical"] == 0)
+            {
+                ff = get_value_u("TX_Power_Low_Warning");
+                m_current_status["TxPower"] ["LowerThresholdCritical"] =FF3(ff);
+            }				
+    
+            /* get Tx_Power */
+            ff = get_value_u("Tx_Power");            
+            m_current_status["TxPower"]["Reading"] =FF3(ff);
+    
+    /*
+    
+               Critical
+    
+           UpperThresholdFatal 
+    
+               Warning
+    
+           UpperThresholdCritical 
+    
+               OK
+    
+           LowerThresholdCritical 
+          
+               Warning
+    
+           LowerThresholdFatal 
+    
+               Critical
+    */
+    
+            if(((FF3(ff) >= m_current_status["TxPower"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["TxPower"] ["UpperThresholdFatal"]))
+                    ||((FF3(ff) >= m_current_status["TxPower"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["TxPower"] ["LowerThresholdCritical"])))		
+            {
+                m_current_status ["TxPower"] ["Status"]["Health"] = "Warning";
+                m_current_status ["TxPower"] ["Status"]["State"] = "Enabled";
+            }
+            else if ((FF3(ff) >= m_current_status["TxPower"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["TxPower"] ["LowerThresholdFatal"]))
+            {
+                m_current_status ["TxPower"] ["Status"]["Health"] = "Critical";
+                m_current_status ["TxPower"] ["Status"]["State"] = "Enabled";
+            }			
+            else
+            {
+                m_current_status ["TxPower"] ["Status"]["Health"] = "OK";
+                m_current_status ["TxPower"] ["Status"]["State"] = "Enabled";    
+            }
+            /*TxPower Current End      :*/  
         }
-        else if ((FF3(ff) >= m_current_status["TxPower"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["TxPower"] ["LowerThresholdFatal"]))
-        {
-            m_current_status ["TxPower"] ["Status"]["Health"] = "Critical";
-            m_current_status ["TxPower"] ["Status"]["State"] = "Enabled";
-        }			
-        else
-        {
-            m_current_status ["TxPower"] ["Status"]["Health"] = "OK";
-            m_current_status ["TxPower"] ["Status"]["State"] = "Enabled";    
-        }
-        /*TxPower Current End      :*/   
+        catch (const exception& e)
+        {		
+            printf("refresh_tx_pwr error\r\n");
+            return;						
+        }  	
+		
     }
 
     void e_oom::default_tx_pwr()
@@ -577,78 +626,86 @@ namespace acc_onlp_helper {
 
     void e_oom::refresh_rx_pwr()
     {
-        /*RxPower Current Begin      :*/
-        float ff;		
-        /* get RX_Power_High_Alarm */
-        if(m_current_status["RxPower"] ["UpperThresholdFatal"] == 0)
-        {
-            ff = get_value("RX_Power_High_Alarm");
-            m_current_status["RxPower"] ["UpperThresholdFatal"] =FF3(ff);
-        }				
-
-        /* get RX_Power_Low_Alarm */
-        if(m_current_status["RxPower"] ["LowerThresholdFatal"] == 0)
-        {
-            ff =  get_value("RX_Power_Low_Alarm");
-            m_current_status["RxPower"] ["LowerThresholdFatal"] =FF3(ff);
-        }				
-
-        /* get RX_Power_High_Warning */
-        if(m_current_status["RxPower"] ["UpperThresholdCritical"] == 0)
-        {
-            ff = get_value("RX_Power_High_Warning");
-            m_current_status["RxPower"] ["UpperThresholdCritical"] =FF3(ff);
-        }				
-
-        /* get RX_Power_Low_Warning */
-        if(m_current_status["RxPower"] ["LowerThresholdCritical"] == 0)
-        {
-            ff = get_value("RX_Power_Low_Warning");
-            m_current_status["RxPower"] ["LowerThresholdCritical"] =FF3(ff);
-        }					
-
-        /* get Rx_Power */
-        ff = get_value("Rx_Power");     
-        m_current_status["RxPower"]["Reading"] =FF3(ff);
-
-/*
-
-           Critical
-
-       UpperThresholdFatal >=
-
-           Warning
-
-       UpperThresholdCritical >=
-
-           OK
-
-       LowerThresholdCritical >=
-      
-           Warning
-
-       LowerThresholdFatal >=
-
-           Critical
-*/
-
-        if(((FF3(ff) >= m_current_status["RxPower"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["RxPower"] ["UpperThresholdFatal"]))
-                ||((FF3(ff) >= m_current_status["RxPower"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["RxPower"] ["LowerThresholdCritical"])))		
-        {
-            m_current_status ["RxPower"] ["Status"]["Health"] = "Warning";
-            m_current_status ["RxPower"] ["Status"]["State"] = "Enabled";
+        try 
+        {      
+            /*RxPower Current Begin      :*/
+            float ff;		
+            /* get RX_Power_High_Alarm */
+            if(m_current_status["RxPower"] ["UpperThresholdFatal"] == 0)
+            {
+                ff = get_value("RX_Power_High_Alarm");
+                m_current_status["RxPower"] ["UpperThresholdFatal"] =FF3(ff);
+            }				
+    
+            /* get RX_Power_Low_Alarm */
+            if(m_current_status["RxPower"] ["LowerThresholdFatal"] == 0)
+            {
+                ff =  get_value("RX_Power_Low_Alarm");
+                m_current_status["RxPower"] ["LowerThresholdFatal"] =FF3(ff);
+            }				
+    
+            /* get RX_Power_High_Warning */
+            if(m_current_status["RxPower"] ["UpperThresholdCritical"] == 0)
+            {
+                ff = get_value("RX_Power_High_Warning");
+                m_current_status["RxPower"] ["UpperThresholdCritical"] =FF3(ff);
+            }				
+    
+            /* get RX_Power_Low_Warning */
+            if(m_current_status["RxPower"] ["LowerThresholdCritical"] == 0)
+            {
+                ff = get_value("RX_Power_Low_Warning");
+                m_current_status["RxPower"] ["LowerThresholdCritical"] =FF3(ff);
+            }					
+    
+            /* get Rx_Power */
+            ff = get_value("Rx_Power");     
+            m_current_status["RxPower"]["Reading"] =FF3(ff);
+    
+    /*
+    
+               Critical
+    
+           UpperThresholdFatal >=
+    
+               Warning
+    
+           UpperThresholdCritical >=
+    
+               OK
+    
+           LowerThresholdCritical >=
+          
+               Warning
+    
+           LowerThresholdFatal >=
+    
+               Critical
+    */
+    
+            if(((FF3(ff) >= m_current_status["RxPower"] ["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["RxPower"] ["UpperThresholdFatal"]))
+                    ||((FF3(ff) >= m_current_status["RxPower"] ["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["RxPower"] ["LowerThresholdCritical"])))		
+            {
+                m_current_status ["RxPower"] ["Status"]["Health"] = "Warning";
+                m_current_status ["RxPower"] ["Status"]["State"] = "Enabled";
+            }
+            else if ((FF3(ff) >= m_current_status["RxPower"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["RxPower"] ["LowerThresholdFatal"]))
+            {
+                m_current_status ["RxPower"] ["Status"]["Health"] = "Critical";
+                m_current_status ["RxPower"] ["Status"]["State"] = "Enabled";
+            }			
+            else
+            {
+                m_current_status ["RxPower"] ["Status"]["Health"] = "OK";
+                m_current_status ["RxPower"] ["Status"]["State"] = "Enabled";    
+            }
+            /*RxPower Current End      :*/	   
         }
-        else if ((FF3(ff) >= m_current_status["RxPower"] ["UpperThresholdFatal"]) || (FF3(ff) < m_current_status["RxPower"] ["LowerThresholdFatal"]))
-        {
-            m_current_status ["RxPower"] ["Status"]["Health"] = "Critical";
-            m_current_status ["RxPower"] ["Status"]["State"] = "Enabled";
-        }			
-        else
-        {
-            m_current_status ["RxPower"] ["Status"]["Health"] = "OK";
-            m_current_status ["RxPower"] ["Status"]["State"] = "Enabled";    
-        }
-        /*RxPower Current End      :*/	   
+        catch (const exception& e)
+        {		
+            printf("refresh_rx_pwr error\r\n");
+            return;						
+        }  		
     }
 
     void e_oom::default_rx_pwr()
@@ -693,95 +750,122 @@ namespace acc_onlp_helper {
 
     bool e_oom::get_eeprom_raw()    
     {
-        std::ifstream is( m_eeprom_path, std::ifstream::binary);
-
-        if (is) 
+        try 
         {
-            is.seekg (0, is.end);
-            //int length = is.tellg();
-            int length = SIZE_EEPROM;
-            is.seekg (0, is.beg);
-
-            char * buffer = new char [length];
-
-            std::cout << "Port["  << m_eeprom_path << "] reading " << length << " characters... " << std::endl;
-
-            is.read (buffer,length);
-
-            if(store_eeprom(buffer))
+	
+            std::ifstream is( m_eeprom_path, std::ifstream::binary);
+    
+            if (is) 
             {
-#if 0            
-                int i = 0; 
-                while(i < length)
+                is.seekg (0, is.end);
+                //int length = is.tellg();
+                int length = SIZE_EEPROM;
+                is.seekg (0, is.beg);
+    
+                char * buffer = new char [length];
+    
+                std::cout << "Port["  << m_eeprom_path << "] reading " << length << " characters" << std::endl;
+    
+                is.read (buffer,length);
+    
+                if(store_eeprom(buffer))
                 {
-                    printf("%02x ", (unsigned char)buffer[i]);
-                    i++;
-                    if(i % 8 == 0)
-                        printf("\r\n");
-                }
-#endif				
-                refresh_status();
-            } 
+    #if 0            
+                    int i = 0; 
+                    while(i < length)
+                    {
+                        printf("%02x ", (unsigned char)buffer[i]);
+                        i++;
+                        if(i % 8 == 0)
+                            printf("\r\n");
+                    }
+    #endif				
+                    refresh_status();
+                } 
+                else
+                    status_default();
+    
+                is.close();
+                delete[] buffer;
+            }
             else
-                status_default();
-
-            is.close();
-            delete[] buffer;
+            {
+                std::cout << "Port["  << m_eeprom_path << "] reading file error!!"<< std::endl;        
+                status_default();	
+                return false;
+            }
+            return true;
         }
-        else
-        {
-            std::cout << "Port["  << m_eeprom_path << "] reading file error!!"<< std::endl;        
-            status_default();	
-            return false;
-        }
-        return true;
+        catch (const std::exception& e) 
+        {      
+            std::cout << "get_eeprom_raw() - exception : " << e.what()  << std::endl;
+            return false;	
+        }		
     }
 	
     bool e_oom::get_eeprom_raw( int rindex)
     {
-        int rv;
-        uint8_t data[256];
-
-        if((rv = onlp_sfpi_eeprom_read(rindex, data)) < 0) 
-        {
-            printf("onlp_sfpi_eeprom_read error!!\r\n");			
-        }
-        else
-        {
-            printf("onlp_sfpi_eeprom_read [%d] ok!!\r\n", rindex);
-
-               int i = 0; 
-               while(i < 256)
-               {
-               printf("%02x ", (unsigned char)data[i]);
-               i++;
-               if(i % 8 == 0)
-               printf("\r\n");
-               }
-               
-            if(store_eeprom((char *)data))
+        try 
+        {    
+            int rv;
+            uint8_t data[256];
+    
+            if((rv = onlp_sfpi_eeprom_read(rindex, data)) < 0) 
             {
-                refresh_status();
+                printf("onlp_sfpi_eeprom_read error!!\r\n");			
             }
+            else
+            {
+                printf("onlp_sfpi_eeprom_read [%d] ok!!\r\n", rindex);
+    
+                   int i = 0; 
+                   while(i < 256)
+                   {
+                       printf("%02x ", (unsigned char)data[i]);
+                       i++;
+                       if(i % 8 == 0)
+                       printf("\r\n");
+                   }
+                   
+                if(store_eeprom((char *)data))
+                {
+                    refresh_status();
+                }
+            }
+            return true;
         }
-        return true;
+        catch (const std::exception& e) 
+        {      
+            std::cout << "get_eeprom_raw() rindex - exception : " << e.what()  << std::endl;	
+            return false;			
+        }			
     }
 
 
     Json::Value e_oom::get_attri_by_name(std::string att_name , Json::Value in)
     {
-        Json::Value PN_Json ; 
-        int size = in.size();
-
-        for(int i = 0; i < size; i++)
-        {
-            if(in[i].isMember(att_name))
+        try 
+        {      
+            Json::Value PN_Json ; 
+            int size = in.size();
+    
+            for(int i = 0; i < size; i++)
             {
-                //printf("get_attri_by_name return [%d]\r\n", i);
-                return in[i];
+                if(in[i].isMember(att_name))
+                {
+                    //printf("get_attri_by_name return [%d]\r\n", i);
+                    return in[i];
+                }
             }
+            return PN_Json; 
         }
-        return PN_Json; 
+        catch (const std::exception& e) 
+        {     
+            Json::Value PN_Json ; 
+        
+            std::cout << "get_attri_by_name() - exception : " << e.what()  << std::endl;	
+            return PN_Json;		
+        }		
     }
 
     // ------------------------------------------------------------------
@@ -793,171 +877,178 @@ namespace acc_onlp_helper {
 
     bool e_oom::store_eeprom(char * in_eeprom)
     {
-        int id = in_eeprom[0]; 
-
-        //printf("store_eeprom id[0x%02X]\r\n", id);
-
-        if(!get_support())
-        {
-            if(id == 0x6)
-            { 
-                int size = m_8077i.size();
-                Json::Value tmp_std;
-
-                for(int i = 1; i <= size; i++)
-                {
-                    tmp_std =  m_8077i[std::make_pair(id, i)];
-                    std::string C_PN= tmp_std["C_PN"].asString();
-
-                    printf("8077 C_PN[%s]\r\n\r\n", C_PN.c_str());
-
-                    Json::Value Att_Json = tmp_std["Attributes"];
-                    Json::Value PN_Json = get_attri_by_name("Vendor_PN" , Att_Json);
-
-                    int PN_Base = PN_Json["Vendor_PN"]["Byte_Address"].asInt();
-                    //printf("PN_Base offset[%d]\r\n", PN_Base);
-                    unsigned int PN_Size = PN_Json["Vendor_PN"]["Size"].asInt();
-                    //printf("PN_Base Size[%d]\r\n", PN_Size);
-
-                    if(C_PN.size() < PN_Size)
-                    {
-                        char tmp_PN[16] = {0}; 
-                        memcpy(tmp_PN,in_eeprom + PN_Base, C_PN.size());
-                        printf("tmp_PN[%s]\r\n", tmp_PN);
-                        std::string tstring = tmp_PN;
-
-                        if(tstring == C_PN)
-                        {
-                            m_std = tmp_std;
-                            printf("8077i Use C_PN[%s] !!!!\r\n", C_PN.c_str());
-                            set_support(true);
-                            memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
-                            return true;
-                        }
-                    }
-                }
-
-                // Use 8077i as default //
-                std::string STD_PN = "8077i";
-                m_std = tmp_std;
-                printf("8077i Cannot get customer's define. Use Std[%s] one.\r\n", STD_PN.c_str());
-                set_support(true);
-               
-                memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
-                             
-                return true;
-            }
-            else if(id == 0x3)
-            { 
-                int size = m_8472.size();
-                Json::Value tmp_std;
-
-                for(int i = 1; i <= size; i++)
-                {
-                    tmp_std =  m_8472[std::make_pair(id, i)];
-                    std::string C_PN= tmp_std["C_PN"].asString();
-                    std::string STD_PN = "8472";
-
-                    printf("8472 C_PN[%s]\r\n", C_PN.c_str());
-
-                    Json::Value Att_Json = tmp_std["Attributes"];
-
-                    Json::Value PN_Json = get_attri_by_name("Vendor_PN" , Att_Json);
-
-                    int PN_Base = PN_Json["Vendor_PN"]["Byte_Address"].asInt();
-                    printf("PN_Base offset[%d]\r\n", PN_Base);
-
-                    unsigned int PN_Size = PN_Json["Vendor_PN"]["Size"].asInt();
-                    printf("PN_Base Size[%d]\r\n", PN_Size);
-
-                    if(C_PN.size() < PN_Size)
-                    {
-                        char tmp_PN[16] = {0}; 
-                        memcpy(tmp_PN,in_eeprom + PN_Base, C_PN.size());
-                        printf("8472 tmp_PN[%s]\r\n", tmp_PN);
-                        std::string tstring = tmp_PN;
-
-                        if(tstring == C_PN)
-                        {
-                            m_std = tmp_std;
-                            printf("8472 Use C_PN[%s] !!!!\r\n", C_PN.c_str());
-                            set_support(true);
-                            memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
-                            return true;
-                        }
-                    }
-                }
-
-                            // Use 8472 as default //
-                std::string STD_PN = "8472";
-                            m_std = tmp_std;
-                            printf("Cannot get customer's define. Use Std[%s] one.\r\n", STD_PN.c_str());
-                            set_support(true);
-                            memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
-
-                return true;
-            }			
-            else if(id == 0x11)
-            { 
-                int size = m_8438i.size();
-                Json::Value tmp_std;
-
-                for(int i = 1; i <= size; i++)
-                {
-                    tmp_std =  m_8438i[std::make_pair(0x11, i)];
-                    std::string C_PN= tmp_std["C_PN"].asString();
-                    std::string STD_PN = "8438";
-
-                    printf("8438 C_PN[%s]\r\n", C_PN.c_str());
-
-                    Json::Value Att_Json = tmp_std["Attributes"];
-
-                    Json::Value PN_Json = get_attri_by_name("Vendor_PN" , Att_Json);
-
-                    int PN_Base = PN_Json["Vendor_PN"]["Byte_Address"].asInt();
-                    printf("PN_Base offset[%d]\r\n", PN_Base);
-
-                    unsigned int PN_Size = PN_Json["Vendor_PN"]["Size"].asInt();
-                    printf("PN_Base Size[%d]\r\n", PN_Size);
-
-                    if(C_PN.size() < PN_Size)
-                    {
-                        char tmp_PN[16] = {0}; 
-                        memcpy(tmp_PN,in_eeprom + PN_Base, C_PN.size());
-                        printf("8438 tmp_PN[%s]\r\n", tmp_PN);
-                        std::string tstring = tmp_PN;
-
-                        if(tstring == C_PN)
-                        {
-                            m_std = tmp_std;
-                            printf("8438 Use C_PN[%s] !!!!\r\n", C_PN.c_str());
-                            set_support(true);
-                            memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
-                            return true;
-                        }
-                    }
-                }
-
-                // Use 8438 as default //
-                std::string STD_PN = "8438";
-                            m_std = tmp_std;
-                            printf("Cannot get customer's define. Use Std[%s] one.\r\n", STD_PN.c_str());
-                            set_support(true);
-                            memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
-
-                return true;
-            }					
-            else
+        try 
+        {    
+            int id = in_eeprom[0]; 
+    
+            //printf("store_eeprom id[0x%02X]\r\n", id);
+    
+            if(!get_support())
             {
-                printf("Not support Std.\r\n");
-                return false;
+                if(id == 0x6)
+                { 
+                    int size = m_8077i.size();
+                    Json::Value tmp_std;
+    
+                    for(int i = 1; i <= size; i++)
+                    {
+                        tmp_std =  m_8077i[std::make_pair(id, i)];
+                        std::string C_PN= tmp_std["C_PN"].asString();
+    
+                        printf("8077 C_PN[%s]\r\n\r\n", C_PN.c_str());
+    
+                        Json::Value Att_Json = tmp_std["Attributes"];
+                        Json::Value PN_Json = get_attri_by_name("Vendor_PN" , Att_Json);
+    
+                        int PN_Base = PN_Json["Vendor_PN"]["Byte_Address"].asInt();
+                        //printf("PN_Base offset[%d]\r\n", PN_Base);
+                        unsigned int PN_Size = PN_Json["Vendor_PN"]["Size"].asInt();
+                        //printf("PN_Base Size[%d]\r\n", PN_Size);
+    
+                        if(C_PN.size() < PN_Size)
+                        {
+                            char tmp_PN[16] = {0}; 
+                            memcpy(tmp_PN,in_eeprom + PN_Base, C_PN.size());
+                            printf("tmp_PN[%s]\r\n", tmp_PN);
+                            std::string tstring = tmp_PN;
+    
+                            if(tstring == C_PN)
+                            {
+                                m_std = tmp_std;
+                                printf("8077i Use C_PN[%s] !!!!\r\n", C_PN.c_str());
+                                set_support(true);
+                                memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
+                                return true;
+                            }
+                        }
+                    }
+    
+                    // Use 8077i as default //
+                    std::string STD_PN = "8077i";
+                    m_std = tmp_std;
+                    printf("8077i Cannot get customer's define. Use Std[%s] one.\r\n", STD_PN.c_str());
+                    set_support(true);
+                   
+                    memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
+                                 
+                    return true;
+                }
+                else if(id == 0x3)
+                { 
+                    int size = m_8472.size();
+                    Json::Value tmp_std;
+    
+                    for(int i = 1; i <= size; i++)
+                    {
+                        tmp_std =  m_8472[std::make_pair(id, i)];
+                        std::string C_PN= tmp_std["C_PN"].asString();
+                        std::string STD_PN = "8472";
+    
+                        printf("8472 C_PN[%s]\r\n", C_PN.c_str());
+    
+                        Json::Value Att_Json = tmp_std["Attributes"];
+    
+                        Json::Value PN_Json = get_attri_by_name("Vendor_PN" , Att_Json);
+    
+                        int PN_Base = PN_Json["Vendor_PN"]["Byte_Address"].asInt();
+                        printf("PN_Base offset[%d]\r\n", PN_Base);
+    
+                        unsigned int PN_Size = PN_Json["Vendor_PN"]["Size"].asInt();
+                        printf("PN_Base Size[%d]\r\n", PN_Size);
+    
+                        if(C_PN.size() < PN_Size)
+                        {
+                            char tmp_PN[16] = {0}; 
+                            memcpy(tmp_PN,in_eeprom + PN_Base, C_PN.size());
+                            printf("8472 tmp_PN[%s]\r\n", tmp_PN);
+                            std::string tstring = tmp_PN;
+    
+                            if(tstring == C_PN)
+                            {
+                                m_std = tmp_std;
+                                printf("8472 Use C_PN[%s] !!!!\r\n", C_PN.c_str());
+                                set_support(true);
+                                memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
+                                return true;
+                            }
+                        }
+                    }
+    
+                                // Use 8472 as default //
+                    std::string STD_PN = "8472";
+                                m_std = tmp_std;
+                                printf("Cannot get customer's define. Use Std[%s] one.\r\n", STD_PN.c_str());
+                                set_support(true);
+                                memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
+    
+                    return true;
+                }			
+                else if(id == 0x11)
+                { 
+                    int size = m_8438i.size();
+                    Json::Value tmp_std;
+    
+                    for(int i = 1; i <= size; i++)
+                    {
+                        tmp_std =  m_8438i[std::make_pair(0x11, i)];
+                        std::string C_PN= tmp_std["C_PN"].asString();
+                        std::string STD_PN = "8438";
+    
+                        printf("8438 C_PN[%s]\r\n", C_PN.c_str());
+    
+                        Json::Value Att_Json = tmp_std["Attributes"];
+    
+                        Json::Value PN_Json = get_attri_by_name("Vendor_PN" , Att_Json);
+    
+                        int PN_Base = PN_Json["Vendor_PN"]["Byte_Address"].asInt();
+                        printf("PN_Base offset[%d]\r\n", PN_Base);
+    
+                        unsigned int PN_Size = PN_Json["Vendor_PN"]["Size"].asInt();
+                        printf("PN_Base Size[%d]\r\n", PN_Size);
+    
+                        if(C_PN.size() < PN_Size)
+                        {
+                            char tmp_PN[16] = {0}; 
+                            memcpy(tmp_PN,in_eeprom + PN_Base, C_PN.size());
+                            printf("8438 tmp_PN[%s]\r\n", tmp_PN);
+                            std::string tstring = tmp_PN;
+    
+                            if(tstring == C_PN)
+                            {
+                                m_std = tmp_std;
+                                printf("8438 Use C_PN[%s] !!!!\r\n", C_PN.c_str());
+                                set_support(true);
+                                memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
+                                return true;
+                            }
+                        }
+                    }
+    
+                    // Use 8438 as default //
+                    std::string STD_PN = "8438";
+                                m_std = tmp_std;
+                                printf("Cannot get customer's define. Use Std[%s] one.\r\n", STD_PN.c_str());
+                                set_support(true);
+                                memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
+    
+                    return true;
+                }					
+                else
+                {
+                    printf("Not support Std.\r\n");
+                    return false;
+                }
             }
+            else
+                memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
+    
+            return true;
         }
-        else
-            memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
-
-        return true;
-
+        catch (const std::exception& e) 
+        {      
+            std::cout << "store_eeprom() - exception : " << e.what()  << std::endl;	
+            return false;			
+        }
     }
 
     void e_oom::set_proto()
@@ -1062,99 +1153,107 @@ namespace acc_onlp_helper {
 
     bool e_oom::get_conf()
     {
-        //New Transceiver Type need Added here//
-        int count_8077i = 0;
-        int count_8472 = 0;
-        int count_8438i = 0; 
-		
-        std::string ME_S_DIR(STD_SEC_PATH);
-        struct dirent *entry;
-
-        if(m_support == true)
-            return true;
-
-        DIR *dir = opendir(ME_S_DIR.c_str());
-
-        if (dir == NULL) 
-        {
-            printf("no such path exist!!\r\n" );
-            return false;
-        }
-
-        while ((entry = readdir(dir)) != NULL) 
-        {
-            std::string dot(".");
-            std::string ddot("..");
-            std::string maps("map");			
-
-            std::string tmp_me_name = entry->d_name;
-
-            if((dot == tmp_me_name) || (ddot == tmp_me_name) || (maps == tmp_me_name))
-                continue;
-
-            //printf("std name[%s] \r\n", tmp_me_name.c_str());
-            std::string m_config_file_path = ME_S_DIR + tmp_me_name ;
-            //printf("new pathname[%s]\r\n",  m_config_file_path.c_str());
-
-            std::ifstream m_source_files= {};
-
-            m_source_files.open(m_config_file_path);
-
-            if(m_source_files.good())
-            {   
-                Json::Value std_s;
-                Json::Reader reader;
-                bool isJsonOK = (reader.parse(m_source_files, std_s));
-                //New Transceiver Type need Added here//
-                if(isJsonOK)
-                {
-                    int id = std::stoi(std_s["Identifer"].asString(), 0, 16);
-                    if(id == 0x06) 
+        try 
+        {     
+            //New Transceiver Type need Added here//
+            int count_8077i = 0;
+            int count_8472 = 0;
+            int count_8438i = 0; 
+    		
+            std::string ME_S_DIR(STD_SEC_PATH);
+            struct dirent *entry;
+    
+            if(m_support == true)
+                return true;
+    
+            DIR *dir = opendir(ME_S_DIR.c_str());
+    
+            if (dir == NULL) 
+            {
+                printf("no such path exist!!\r\n" );
+                return false;
+            }
+    
+            while ((entry = readdir(dir)) != NULL) 
+            {
+                std::string dot(".");
+                std::string ddot("..");
+                std::string maps("map");			
+    
+                std::string tmp_me_name = entry->d_name;
+    
+                if((dot == tmp_me_name) || (ddot == tmp_me_name) || (maps == tmp_me_name))
+                    continue;
+    
+                //printf("std name[%s] \r\n", tmp_me_name.c_str());
+                std::string m_config_file_path = ME_S_DIR + tmp_me_name ;
+                //printf("new pathname[%s]\r\n",  m_config_file_path.c_str());
+    
+                std::ifstream m_source_files= {};
+    
+                m_source_files.open(m_config_file_path);
+    
+                if(m_source_files.good())
+                {   
+                    Json::Value std_s;
+                    Json::Reader reader;
+                    bool isJsonOK = (reader.parse(m_source_files, std_s));
+                    //New Transceiver Type need Added here//
+                    if(isJsonOK)
                     {
-                        count_8077i++;
-                        //printf("0x06 Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
-                        //printf("Set id[%d] count_std[%d] TRANS_TYPE_8077I\r\n", id, count_8077i);
-                        m_8077i[std::make_pair(id, count_8077i)]=std_s;
-                    }
-                    else if(id == 0x03) 
-                    {
-                        count_8472 ++ ;
-                        //printf("0x03 Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
-                        //printf("Set id[%d] count_std[%d] TRANS_TYPE_8472\r\n", id, count_8472);
-                        m_8472[std::make_pair(id, count_8472)]=std_s;
-                    }
-                    else if(id == 0x11) 
-                    {
-                        count_8438i ++ ;
-                        //printf("0x0B Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
-                        //printf("Set id[%d] count_std[%d] TRANS_TYPE_8438\r\n", id, count_8438i);
-                        m_8438i[std::make_pair(id, count_8438i)]=std_s;
-                    } 					
-                    else if(id == 0x0D)
-                    {
-                        printf("Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
+                        int id = std::stoi(std_s["Identifer"].asString(), 0, 16);
+                        if(id == 0x06) 
+                        {
+                            count_8077i++;
+                            //printf("0x06 Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
+                            //printf("Set id[%d] count_std[%d] TRANS_TYPE_8077I\r\n", id, count_8077i);
+                            m_8077i[std::make_pair(id, count_8077i)]=std_s;
+                        }
+                        else if(id == 0x03) 
+                        {
+                            count_8472 ++ ;
+                            //printf("0x03 Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
+                            //printf("Set id[%d] count_std[%d] TRANS_TYPE_8472\r\n", id, count_8472);
+                            m_8472[std::make_pair(id, count_8472)]=std_s;
+                        }
+                        else if(id == 0x11) 
+                        {
+                            count_8438i ++ ;
+                            //printf("0x0B Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
+                            //printf("Set id[%d] count_std[%d] TRANS_TYPE_8438\r\n", id, count_8438i);
+                            m_8438i[std::make_pair(id, count_8438i)]=std_s;
+                        } 					
+                        else if(id == 0x0D)
+                        {
+                            printf("Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
+                        }
+                        else
+                            printf("Can't identifiy!!\r\n");
                     }
                     else
-                        printf("Can't identifiy!!\r\n");
+                    {
+                        printf("Get conf_s ng\r\n");
+                        closedir(dir);
+                        m_source_files.close();					
+                        return false;
+                    }
                 }
                 else
                 {
-                    printf("Get conf_s ng\r\n");
-                    closedir(dir);
-                    m_source_files.close();					
+                    printf("Open file NG\r\n");
+                    m_source_files.close();								
+                    closedir(dir);					
                     return false;
                 }
             }
-            else
-            {
-                printf("Open file NG\r\n");
-                m_source_files.close();								
-                closedir(dir);					
-                return false;
-            }
+            closedir(dir);	
+            return true;	
         }
-        closedir(dir);	
-        return true;	
+        catch (const std::exception& e) 
+        {      
+            std::cout << "get_conf() - exception : " << e.what()  << std::endl;	
+            return false;	
+        }		
     }
 
     static Switch* g_Switch = NULL;
@@ -1373,362 +1472,402 @@ namespace acc_onlp_helper {
         }
         catch (const std::exception& ex)
         {
-            gADbg.acc_printf("catch get_board_info error");
+            std::cout << "get_board_info() - exception : " << ex.what()  << std::endl;	
+            return;		
         }	
-        return;
     }
 
     void Switch::get_port_present_info()
     {
-        int ii = 0;
-
-        for(ii= 1; ii <= m_port_max_num ; ii++)
+        try 
         {
-            for (vector<Port_Info*>::iterator pObj = m_vec_Port_Info.begin();pObj != m_vec_Port_Info.end(); ++pObj) 
+            int ii = 0;
+    
+            for(ii= 1; ii <= m_port_max_num ; ii++)
             {
-                if((*pObj)->m_ID == ii)
+                for (vector<Port_Info*>::iterator pObj = m_vec_Port_Info.begin();pObj != m_vec_Port_Info.end(); ++pObj) 
                 {
-                    if((*pObj)->m_Type == Port_Info::Ether_Port)
+                    if((*pObj)->m_ID == ii)
                     {
-                        set_port_present(ii , true);	
-                        (*pObj)->set_info(ii,  Port_Info::Ether_Port, 1 , true);  // Type 1: XFP // Type 2 : ETHER
-                        gADbg.acc_printf("s Ether Port ID: %d\r\n", (*pObj)->m_ID);
-                        gADbg.acc_printf("s Port present status [%d]\r\n", 1);	                    
-                    }
-                    else if((*pObj)->m_Type == Port_Info::XSFP_Port)
-                    {
-                        int rindex = ii -1; //Need start from 0//
-                        int b= onlp_sfpi_is_present(rindex);
-
-                        if(b)
-                        {               
-                            gADbg.acc_printf("SFP port [%d] present\r\n",ii);
-                            set_port_present(ii , true);			
-                            (*pObj)->set_info(ii,  Port_Info::XSFP_Port, 1 , true);  // Type 1: XFP // Type 2 : ETHER	
-                        }
-                        else
+                        if((*pObj)->m_Type == Port_Info::Ether_Port)
                         {
-                            gADbg.acc_printf("SFP port [%d] not present\r\n",ii);
-                            set_port_present(ii , false);
-                            (*pObj)->set_info(ii,  Port_Info::XSFP_Port, 0 , false);  // Type 1: XFP // Type 2 : ETHER	
-                            (*pObj)->clean_trans_data();
+                            set_port_present(ii , true);	
+                            (*pObj)->set_info(ii,  Port_Info::Ether_Port, 1 , true);  // Type 1: XFP // Type 2 : ETHER
+                            gADbg.acc_printf("s Ether Port ID: %d\r\n", (*pObj)->m_ID);
+                            gADbg.acc_printf("s Port present status [%d]\r\n", 1);	                    
                         }
-                    }					
+                        else if((*pObj)->m_Type == Port_Info::XSFP_Port)
+                        {
+                            int rindex = ii -1; //Need start from 0//
+                            int b= onlp_sfpi_is_present(rindex);
+    
+                            if(b)
+                            {               
+                                gADbg.acc_printf("SFP port [%d] present\r\n",ii);
+                                set_port_present(ii , true);			
+                                (*pObj)->set_info(ii,  Port_Info::XSFP_Port, 1 , true);  // Type 1: XFP // Type 2 : ETHER	
+                            }
+                            else
+                            {
+                                gADbg.acc_printf("SFP port [%d] not present\r\n",ii);
+                                set_port_present(ii , false);
+                                (*pObj)->set_info(ii,  Port_Info::XSFP_Port, 0 , false);  // Type 1: XFP // Type 2 : ETHER	
+                                (*pObj)->clean_trans_data();
+                            }
+                        }					
+                    }
                 }
             }
+            return;
         }
-        return;
+        catch (const std::exception& e) 
+        {      
+            std::cout << "get_port_present_info() - exception : " << e.what()  << std::endl;	
+            return;					
+        }			
     }
 
     void Switch::get_port_oom_info()
     {
-        int ii = 0;
-
-        for(ii= 1; ii <= m_port_max_num ; ii++)
-        {
-            for (vector<Port_Info*>::iterator pObj = m_vec_Port_Info.begin();pObj != m_vec_Port_Info.end(); ++pObj) 
+        try 
+        {    
+            int ii = 0;
+    
+            for(ii= 1; ii <= m_port_max_num ; ii++)
             {
-                if((*pObj)->m_ID == ii)
+                for (vector<Port_Info*>::iterator pObj = m_vec_Port_Info.begin();pObj != m_vec_Port_Info.end(); ++pObj) 
                 {
-                    if((*pObj)->m_Type == Port_Info::Ether_Port)
+                    if((*pObj)->m_ID == ii)
                     {
-                        set_port_present(ii , true);	
-                        (*pObj)->set_info(ii,  Port_Info::Ether_Port, 1 , true);  // Type 1: XFP // Type 2 : ETHER
-                        gADbg.acc_printf("s Ether Port ID: %d\r\n", (*pObj)->m_ID);
-                        gADbg.acc_printf("s Port present status [%d]\r\n", 1);	                    
-                    }
-                    else if((*pObj)->m_Type == Port_Info::XSFP_Port)
-                    {
-                        int rindex = ii -1; //Need start from 0//
-                        int b= onlp_sfpi_is_present(rindex);
-
-                        if(b)
-                        {               
-                            gADbg.acc_printf("SFP port [%d] present\r\n",ii);
-#if 1
-                            if(1)							
-                            {
-	                        auto start = std::chrono::system_clock::now();		
-                               if(!(*pObj)->get_eeprom_raw())
+                        if((*pObj)->m_Type == Port_Info::Ether_Port)
+                        {
+                            set_port_present(ii , true);	
+                            (*pObj)->set_info(ii,  Port_Info::Ether_Port, 1 , true);  // Type 1: XFP // Type 2 : ETHER
+                            gADbg.acc_printf("s Ether Port ID: %d\r\n", (*pObj)->m_ID);
+                            gADbg.acc_printf("s Port present status [%d]\r\n", 1);	                    
+                        }
+                        else if((*pObj)->m_Type == Port_Info::XSFP_Port)
+                        {
+                            int rindex = ii -1; //Need start from 0//
+                            int b= onlp_sfpi_is_present(rindex);
+    
+                            if(b)
+                            {               
+                                gADbg.acc_printf("SFP port [%d] present\r\n",ii);
+    #if 1
+                                if(1)							
+                                {
+    	                            auto start = std::chrono::system_clock::now();		
+                                   if(!(*pObj)->get_eeprom_raw())
+                                   {
+                                       gADbg.acc_printf("catch eeprom 8472 data error");
+                                   }
+                                   else
+                                   {
+                                       gADbg.acc_printf("catch eeprom 8472 data ok");
+                                   }
+    
+                                   auto end = std::chrono::system_clock::now();
+                                   std::chrono::duration<double> elapsed_seconds = end-start;
+                                   std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+                                   std::cout << "finished computation at getting get_eeprom_raw info.. " << std::ctime(&end_time)
+                                   << "elapsed time: " << elapsed_seconds.count() << "s\n";							   
+                                }        
+    #else						
+    //Use ONLP API to get EEPROM data, but only 256 bytes , not enough ..//
+                               if(!(*pObj)->get_eeprom_raw(rindex))   
                                {
-                                   gADbg.acc_printf("catch eeprom 8472 data error");
+                                   gADbg.acc_printf("catch eeprom 8077I data error");
                                }
                                else
                                {
-                                   gADbg.acc_printf("catch eeprom 8472 data ok");
-                               }
-
-                               auto end = std::chrono::system_clock::now();
-                               std::chrono::duration<double> elapsed_seconds = end-start;
-                               std::time_t end_time = std::chrono::system_clock::to_time_t(end);
-                               std::cout << "finished computation at getting get_eeprom_raw info.. " << std::ctime(&end_time)
-                               << "elapsed time: " << elapsed_seconds.count() << "s\n";							   
-                            }        
-#else						
-//Use ONLP API to get EEPROM data, but only 256 bytes , not enough ..//
-                           if(!(*pObj)->get_eeprom_raw(rindex))   
-                           {
-                               gADbg.acc_printf("catch eeprom 8077I data error");
-                           }
-                           else
-                           {
-                               gADbg.acc_printf("catch eeprom 8077I data ok");
-                           }									
-		
-#endif
-                        }
-                        else
-                        {
-                            gADbg.acc_printf("SFP port [%d] not present\r\n",ii);
-                            (*pObj)->clean_trans_data();
-                        }
-                    }					
+                                   gADbg.acc_printf("catch eeprom 8077I data ok");
+                               }									
+    		
+    #endif
+                            }
+                            else
+                            {
+                                gADbg.acc_printf("SFP port [%d] not present\r\n",ii);
+                                (*pObj)->clean_trans_data();
+                            }
+                        }					
+                    }
                 }
             }
+            return;
         }
-        return;
+        catch (const std::exception& e) 
+        {      
+            std::cout << "get_port_oom_info() - exception : " << e.what()  << std::endl;	
+            return;								
+        }		
     }
 
     void Switch::get_thermal_info()
     {
-        int rv;
-        onlp_thermal_info_t fv;
-        int ii=0;
-
-        for(ii= 1; ii <= m_thermal_sen_max_num ; ii++)
-        {
-            unsigned int id = ONLP_THERMAL_ID_CREATE(ii);
-            rv = onlp_thermal_info_get(id,&fv);
-
-            gADbg.acc_printf("/////////////////////////\r\n");
-
-            for (vector<Thermal_Info*>::iterator pObj = m_vec_Thermal_Info.begin();pObj != m_vec_Thermal_Info.end(); ++pObj) 
+        try 
+        {    
+            int rv;
+            onlp_thermal_info_t fv;
+            int ii=0;
+    
+            for(ii= 1; ii <= m_thermal_sen_max_num ; ii++)
             {
-                if((*pObj)->m_ID == ii)
+                unsigned int id = ONLP_THERMAL_ID_CREATE(ii);
+                rv = onlp_thermal_info_get(id,&fv);
+    
+                gADbg.acc_printf("/////////////////////////\r\n");
+    
+                for (vector<Thermal_Info*>::iterator pObj = m_vec_Thermal_Info.begin();pObj != m_vec_Thermal_Info.end(); ++pObj) 
                 {
-                    if(rv < 0 && (*pObj)->m_ID == ii)
+                    if((*pObj)->m_ID == ii)
                     {
-                        set_thermal_present(ii , false);	
-                        (*pObj)->set_info(ii  ,0 ,0 , 0, 0, false);												
-                        gADbg.acc_printf("get_thermal_info [%d] error\r\n", ii);
-                    }
-                    else
-                    {
-                        if(fv.status & 1)
+                        if(rv < 0 && (*pObj)->m_ID == ii)
                         {
-                            set_thermal_present(ii , true);			
-                            (*pObj)->set_info(ii  ,fv.mcelsius ,fv.thresholds.warning , fv.thresholds.error, fv.thresholds.shutdown, true);		
-                            gADbg.acc_printf("s thermal ID: %d\r\n", (*pObj)->m_ID);
-                            gADbg.acc_printf("s thermal Temperature: %d\r\n", (*pObj)->m_Current_Temperature);		
-                            gADbg.acc_printf("s thermal Warning: %d\r\n", (*pObj)->m_Warning);
-                            gADbg.acc_printf("s thermal Error: %d\r\n",  (*pObj)->m_Error);
-                            gADbg.acc_printf("s thermal Shutdown: %d\r\n", (*pObj)->m_Shutdown);                    
+                            set_thermal_present(ii , false);	
+                            (*pObj)->set_info(ii  ,0 ,0 , 0, 0, false);												
+                            gADbg.acc_printf("get_thermal_info [%d] error\r\n", ii);
                         }
                         else
                         {
-                            gADbg.acc_printf("Thermal [%d] Not present.\r\n", ii);
-                            set_thermal_present(ii , false);	
-                            (*pObj)->set_info(ii  ,fv.mcelsius ,fv.thresholds.warning , fv.thresholds.error, fv.thresholds.shutdown, false);								
+                            if(fv.status & 1)
+                            {
+                                set_thermal_present(ii , true);			
+                                (*pObj)->set_info(ii  ,fv.mcelsius ,fv.thresholds.warning , fv.thresholds.error, fv.thresholds.shutdown, true);		
+                                gADbg.acc_printf("s thermal ID: %d\r\n", (*pObj)->m_ID);
+                                gADbg.acc_printf("s thermal Temperature: %d\r\n", (*pObj)->m_Current_Temperature);		
+                                gADbg.acc_printf("s thermal Warning: %d\r\n", (*pObj)->m_Warning);
+                                gADbg.acc_printf("s thermal Error: %d\r\n",  (*pObj)->m_Error);
+                                gADbg.acc_printf("s thermal Shutdown: %d\r\n", (*pObj)->m_Shutdown);                    
+                            }
+                            else
+                            {
+                                gADbg.acc_printf("Thermal [%d] Not present.\r\n", ii);
+                                set_thermal_present(ii , false);	
+                                (*pObj)->set_info(ii  ,fv.mcelsius ,fv.thresholds.warning , fv.thresholds.error, fv.thresholds.shutdown, false);								
+                            }
                         }
                     }
                 }
             }
+            gADbg.acc_printf("THERMAL PRESNET [0x%04x]\r\n\r\n",get_thermal_present());	
+            gADbg.acc_printf("/////////////////////////\r\n");
+            return;
         }
-        gADbg.acc_printf("THERMAL PRESNET [0x%04x]\r\n\r\n",get_thermal_present());	
-        gADbg.acc_printf("/////////////////////////\r\n");
-        return;
-
+        catch (const std::exception& e) 
+        {      
+            std::cout << "get_thermal_info() - exception : " << e.what()  << std::endl;	
+            return;											
+        }
     }
 
 
     void Psu_Info::set_info(int ID, std::string Model , std::string SN,  int Vin,  int Vout ,int Iin , int Iout,int Pin , int Pout, onlp_psu_type_t type, bool present)
     {
-        m_ID = ID; 
-        m_Model = Model; 
-        m_SN = SN ;
-        m_Vin = Vin; 
-        m_Vout= Vout; 
-        m_Iin = Iin; 
-        m_Iout=Iout; 
-        m_Pin=Pin; 
-        m_Pout = Pout;
-        m_Present = present;
-        m_Psu_Type = type;		
-
-        if(m_Type == SYSTEM)
-        {
-            if(present && (Pout == 0))
+        try 
+        {      
+            m_ID = ID; 
+            m_Model = Model; 
+            m_SN = SN ;
+            m_Vin = Vin; 
+            m_Vout= Vout; 
+            m_Iin = Iin; 
+            m_Iout=Iout; 
+            m_Pin=Pin; 
+            m_Pout = Pout;
+            m_Present = present;
+            m_Psu_Type = type;		
+    
+            if(m_Type == SYSTEM)
             {
-                //PSU don't plugin power cord
-                m_Status_Health = "OK";
-                m_Status_State ="UnavailableOffline";	
-                gADbg.acc_printf("-----Psu_Info-----UnavailableOffline---\r\n");
-
-                std::string event("Event");
-                std::string servrity("Warning");					   
-                std::string sensor_type("Power Supply / Converter");
-                std::string message("PSU UnavailableOffline");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);
+                if(present && (Pout == 0))
+                {
+                    //PSU don't plugin power cord
+                    m_Status_Health = "OK";
+                    m_Status_State ="UnavailableOffline";	
+                    gADbg.acc_printf("-----Psu_Info-----UnavailableOffline---\r\n");
+    
+                    std::string event("Event");
+                    std::string servrity("Warning");					   
+                    std::string sensor_type("Power Supply / Converter");
+                    std::string message("PSU UnavailableOffline");    
+                    Entry.set_log_entry(event , sensor_type , servrity, message, ID);
+                }
+                else if (present && (Pout > 0))
+                {
+                    //PSU working normal
+                    m_Status_Health = "OK";
+                    m_Status_State ="Enabled";
+                    gADbg.acc_printf("-----Psu_Info-----PSU working normal---\r\n");
+                }
+                else if(!present)
+                {
+                    //PSU un-plug //
+                    m_Status_Health = "Warning";
+                    m_Status_State ="Absent";
+                    gADbg.acc_printf("-----Psu_Info-----absent---\r\n");
+    
+                    std::string event("Event");
+                    std::string servrity("Warning");					   
+                    std::string sensor_type("Power Supply / Converter");		   
+                    std::string message("PSU absent");    
+                    Entry.set_log_entry(event , sensor_type , servrity, message, ID);
+                }		
+                else
+                {
+                    m_Status_Health = "Warning";
+                    m_Status_State ="Absent";  
+                    gADbg.acc_printf("-----Psu_Info-----absent-2--\r\n");		
+    
+                    std::string event("Event");
+                    std::string servrity("Warning");					   
+                    std::string sensor_type("Power Supply / Converter");		   
+                    std::string message("PSU absent");    
+                    Entry.set_log_entry(event , sensor_type , servrity, message, ID);
+                }
             }
-            else if (present && (Pout > 0))
-            {
-                //PSU working normal
-                m_Status_Health = "OK";
-                m_Status_State ="Enabled";
-                gADbg.acc_printf("-----Psu_Info-----PSU working normal---\r\n");
-            }
-            else if(!present)
-            {
-                //PSU un-plug //
-                m_Status_Health = "Warning";
-                m_Status_State ="Absent";
-                gADbg.acc_printf("-----Psu_Info-----absent---\r\n");
-
-                std::string event("Event");
-                std::string servrity("Warning");					   
-                std::string sensor_type("Power Supply / Converter");		   
-                std::string message("PSU absent");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-            }		
-            else
-            {
-                m_Status_Health = "Warning";
-                m_Status_State ="Absent";  
-                gADbg.acc_printf("-----Psu_Info-----absent-2--\r\n");		
-
-                std::string event("Event");
-                std::string servrity("Warning");					   
-                std::string sensor_type("Power Supply / Converter");		   
-                std::string message("PSU absent");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-            }
+    
+            return;
         }
-
-        return;
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Psu_Info set_info() - exception : " << e.what()  << std::endl;	
+            return;											
+        }		
     }
 
     void Fan_Info::set_info(int ID, std::string Model , std::string SN,  int RPM ,int Per, bool present)
     {
-        m_ID = ID; 
-        m_Model = Model; 
-        m_SN = SN ; 
-        m_RPM = RPM;
-        m_Per = Per;
-        m_Present = present;
-
-        if(m_Type == SYSTEM_Fan)
-        {
-            if(present && (RPM == 0))
+        try 
+        {        
+            m_ID = ID; 
+            m_Model = Model; 
+            m_SN = SN ; 
+            m_RPM = RPM;
+            m_Per = Per;
+            m_Present = present;
+    
+            if(m_Type == SYSTEM_Fan)
             {
-                //Fan plug in but not SPIN
-                m_Status_Health = "Warning";
-                m_Status_State ="Enabled";	
-                gADbg.acc_printf("-----Fan_Info-----Fan plug in but not SPIN---\r\n");
-
-                std::string event("Event");
-                std::string servrity("Warning");					   
-                std::string sensor_type("Fan");		   
-                std::string message("Fan plug in but not SPIN");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);	
-
-                std::string message_event = std::string("Fan : ") + std::to_string( ID) +  std::string("not SPIN.");
-                if(!m_fan_alert)
-                {  //Only send alert once //
-                m_Event_Resouce_Alert.push_back(message_event);				
-                    m_fan_alert = true;
+                if(present && (RPM == 0))
+                {
+                    //Fan plug in but not SPIN
+                    m_Status_Health = "Warning";
+                    m_Status_State ="Enabled";	
+                    gADbg.acc_printf("-----Fan_Info-----Fan plug in but not SPIN---\r\n");
+    
+                    std::string event("Event");
+                    std::string servrity("Warning");					   
+                    std::string sensor_type("Fan");		   
+                    std::string message("Fan plug in but not SPIN");    
+                    Entry.set_log_entry(event , sensor_type , servrity, message, ID);	
+    
+                    std::string message_event = std::string("Fan : ") + std::to_string( ID) +  std::string("not SPIN.");
+                    if(!m_fan_alert)
+                    {  //Only send alert once //
+                    m_Event_Resouce_Alert.push_back(message_event);				
+                        m_fan_alert = true;
+                    }
+                }
+                else if (present && (RPM > 0))
+                {
+                    //Fan working normal
+                    m_Status_Health = "OK";
+                    m_Status_State ="Enabled";
+                    gADbg.acc_printf("-----Fan_Info-----Fan working normal---\r\n");
+                    m_fan_alert = false;
+                }
+                else if(!present)
+                {
+                    //FAN un-plug //
+                    m_Status_Health = "Warning";
+                    m_Status_State ="Absent";
+                    gADbg.acc_printf("-----Fan_Info-----absent---\r\n");	
+    
+                    std::string event("Event");
+                    std::string servrity("Warning");					   
+                    std::string sensor_type("Fan");		   
+                    std::string message("System fan absent");    
+                    Entry.set_log_entry(event , sensor_type , servrity, message, ID);
+    
+                }		
+                else
+                {
+                    m_Status_Health = "Warning";
+                    m_Status_State ="Absent";  
+                    gADbg.acc_printf("-----Fan_Info-----absent-2--\r\n");					
                 }
             }
-            else if (present && (RPM > 0))
+            else if(m_Type == PSU_Fan)
             {
-                //Fan working normal
-                m_Status_Health = "OK";
-                m_Status_State ="Enabled";
-                gADbg.acc_printf("-----Fan_Info-----Fan working normal---\r\n");
-                m_fan_alert = false;
+                if(present && (RPM == 0))
+                {
+                    //Fan plug in but not SPIN
+                    m_Status_Health = "Warning";
+                    m_Status_State ="Enabled";	
+                    gADbg.acc_printf("-----PSU_Info-----PSU plug in but not no power core plug in---\r\n");
+    
+                    std::string event("Event");
+                    std::string servrity("Warning");					   
+                    std::string sensor_type("Fan");		   
+                    std::string message("PSU plug in but not no power core plug in");    
+                    Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
+    
+                }
+                else if (present && (RPM > 0))
+                {
+                    //PSU working normal
+                    m_Status_Health = "OK";
+                    m_Status_State ="Enabled";
+                    gADbg.acc_printf("-----PSU_Info-----PSU working normal---\r\n");
+    
+                }
+                else if(!present)
+                {
+                    //PSU un-plug //
+                    m_Status_Health = "Warning";
+                    m_Status_State ="Absent";
+                    gADbg.acc_printf("-----PSU_Info-----PSU absent---\r\n");	
+    
+                    std::string event("Event");
+                    std::string servrity("Warning");					   
+                    std::string sensor_type("Fan");		   
+                    std::string message("PSU fan absent");    
+                    Entry.set_log_entry(event , sensor_type , servrity, message, ID);
+    
+    
+                }		
+                else
+                {
+                    m_Status_Health = "Warning";
+                    m_Status_State ="Absent";  
+                    gADbg.acc_printf("-----PSU_Info-----PSU absent-2--\r\n");		
+    
+                    std::string event("Event");
+                    std::string servrity("Warning");					   
+                    std::string sensor_type("Fan");		   
+                    std::string message("PSU fan absent");    
+                    Entry.set_log_entry(event , sensor_type , servrity, message, ID);
+    
+    
+                }    
             }
-            else if(!present)
-            {
-                //FAN un-plug //
-                m_Status_Health = "Warning";
-                m_Status_State ="Absent";
-                gADbg.acc_printf("-----Fan_Info-----absent---\r\n");	
-
-                std::string event("Event");
-                std::string servrity("Warning");					   
-                std::string sensor_type("Fan");		   
-                std::string message("System fan absent");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-
-            }		
             else
             {
-                m_Status_Health = "Warning";
-                m_Status_State ="Absent";  
-                gADbg.acc_printf("-----Fan_Info-----absent-2--\r\n");					
-            }
-        }
-        else if(m_Type == PSU_Fan)
-        {
-            if(present && (RPM == 0))
-            {
-                //Fan plug in but not SPIN
-                m_Status_Health = "Warning";
-                m_Status_State ="Enabled";	
-                gADbg.acc_printf("-----PSU_Info-----PSU plug in but not no power core plug in---\r\n");
-
-                std::string event("Event");
-                std::string servrity("Warning");					   
-                std::string sensor_type("Fan");		   
-                std::string message("PSU plug in but not no power core plug in");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
-
-            }
-            else if (present && (RPM > 0))
-            {
-                //PSU working normal
-                m_Status_Health = "OK";
-                m_Status_State ="Enabled";
-                gADbg.acc_printf("-----PSU_Info-----PSU working normal---\r\n");
-
-            }
-            else if(!present)
-            {
-                //PSU un-plug //
+                gADbg.acc_printf("-----PSU_Info-----Unkonw type--\r\n");					    
                 m_Status_Health = "Warning";
                 m_Status_State ="Absent";
-                gADbg.acc_printf("-----PSU_Info-----PSU absent---\r\n");	
-
-                std::string event("Event");
-                std::string servrity("Warning");					   
-                std::string sensor_type("Fan");		   
-                std::string message("PSU fan absent");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-
-
-            }		
-            else
-            {
-                m_Status_Health = "Warning";
-                m_Status_State ="Absent";  
-                gADbg.acc_printf("-----PSU_Info-----PSU absent-2--\r\n");		
-
-                std::string event("Event");
-                std::string servrity("Warning");					   
-                std::string sensor_type("Fan");		   
-                std::string message("PSU fan absent");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);
-
-
-            }    
+            }
+    
+            return;	
         }
-        else
-        {
-            gADbg.acc_printf("-----PSU_Info-----Unkonw type--\r\n");					    
-            m_Status_Health = "Warning";
-            m_Status_State ="Absent";
-        }
-
-        return;	
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Fan_Info set_info() - exception : " << e.what()  << std::endl;	
+            return;											
+        }		
+		
     }
 
     void Thermal_Info::set_thermal_threshold_value(int Warning , int Error, int Shutdown)	
@@ -1765,280 +1904,289 @@ namespace acc_onlp_helper {
 
     void Thermal_Info::set_info(int ID ,int Current_Temperature,int Warning , int Error, int Shutdown, bool present)
     {
-        m_ID = ID; 
-        m_Current_Temperature = Current_Temperature;
-        m_Present = present;
-        set_thermal_threshold_value(Warning , Error, Shutdown);
-        /*
-Area : 1 
-"Warning" "Enabled"
-
-Zero-th        ----- un-available offline
-
-Area : 2
-"OK" "Enabled"
-
-Warning-th   -----
-
-Area : 3
-"OK" "Warning"
-
-Error-th       -----
-
-Area : 4
-"OK" "Warning"
-
-
-Shutdown-th ----
-
-Area : 5
-
-*/
-        if(m_Type == CPU_Sensor && present)
-        {
-            if((m_Current_Temperature < 0) || ( (m_Current_Temperature >= m_Warning) && (m_Current_Temperature < m_Error ) ))
-            {
-                //     Area : 1 / 3
-                m_Status_Health = "Warning";					
-                m_Status_State = "Enabled";	
-
-                std::string event("Event");
-                std::string servrity("Warning");					   
-                std::string sensor_type("Temperature");		   
-                std::string message; 
-                message = std::string("CPU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over warning temperature.");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
-                gADbg.acc_printf("set_info-----CPU_Sensor-----Warning--\r\n");					    
-
-                if(m_cpu_thermal_alert != 1)
-                {
-                m_Event_Resouce_Alert.push_back(message);				
-                    m_cpu_thermal_alert = 1;
-                }
-
-            }
-            else if(((m_Current_Temperature >= m_Error))  && (m_Current_Temperature < m_Shutdown))
-            {
-                //     Area : 4
-
-                m_Status_Health = "Warning";					
-                m_Status_State = "Enabled";		
-
-                std::string event("Event");
-                std::string servrity("Warning");					   
-                std::string sensor_type("Temperature");		   
-                std::string message;
-                message = std::string("CPU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over error temperature.");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);		
-                gADbg.acc_printf("set_info-----CPU_Sensor-----Warning--\r\n");					    
-
-                if(m_cpu_thermal_alert != 4)
-                {
-                m_Event_Resouce_Alert.push_back(message);						
-                    m_cpu_thermal_alert = 4;
-                }				
-            }
-            else if((m_Current_Temperature >= m_Shutdown))
-            {
-                //     Area : 5        
-                m_Status_Health = "Critical";					
-                m_Status_State = "Enabled";	
-
-                std::string event("Event");
-                std::string servrity("Warning");					   
-                std::string sensor_type("Temperature");		   
-                std::string message;
-                message = std::string("CPU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over fatal temperature.");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);				
-                gADbg.acc_printf("set_info-----CPU_Sensor-----Critical--\r\n");					    
-
-                if(m_cpu_thermal_alert != 5)
-                {
-                m_Event_Resouce_Alert.push_back(message);		
-                    m_cpu_thermal_alert = 5;					
-                }
-            }
-            else
-            {
-                //     Area : 2
-
-                m_Status_Health = "OK";					
-                m_Status_State = "Enabled";
-                m_cpu_thermal_alert = 0;				
-            }                     
+        try 
+        {        
+    
+           m_ID = ID; 
+           m_Current_Temperature = Current_Temperature;
+           m_Present = present;
+           set_thermal_threshold_value(Warning , Error, Shutdown);
+           /*
+   Area : 1 
+   "Warning" "Enabled"
+   
+   Zero-th        ----- un-available offline
+   
+   Area : 2
+   "OK" "Enabled"
+   
+   Warning-th   -----
+   
+   Area : 3
+   "OK" "Warning"
+   
+   Error-th       -----
+   
+   Area : 4
+   "OK" "Warning"
+   
+   
+   Shutdown-th ----
+   
+   Area : 5
+   
+   */
+           if(m_Type == CPU_Sensor && present)
+           {
+               if((m_Current_Temperature < 0) || ( (m_Current_Temperature >= m_Warning) && (m_Current_Temperature < m_Error ) ))
+               {
+                   //     Area : 1 / 3
+                   m_Status_Health = "Warning";					
+                   m_Status_State = "Enabled";	
+   
+                   std::string event("Event");
+                   std::string servrity("Warning");					   
+                   std::string sensor_type("Temperature");		   
+                   std::string message; 
+                   message = std::string("CPU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over warning temperature.");    
+                   Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
+                   gADbg.acc_printf("set_info-----CPU_Sensor-----Warning--\r\n");					    
+   
+                   if(m_cpu_thermal_alert != 1)
+                   {
+                   m_Event_Resouce_Alert.push_back(message);				
+                       m_cpu_thermal_alert = 1;
+                   }
+   
+               }
+               else if(((m_Current_Temperature >= m_Error))  && (m_Current_Temperature < m_Shutdown))
+               {
+                   //     Area : 4
+   
+                   m_Status_Health = "Warning";					
+                   m_Status_State = "Enabled";		
+   
+                   std::string event("Event");
+                   std::string servrity("Warning");					   
+                   std::string sensor_type("Temperature");		   
+                   std::string message;
+                   message = std::string("CPU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over error temperature.");    
+                   Entry.set_log_entry(event , sensor_type , servrity, message, ID);		
+                   gADbg.acc_printf("set_info-----CPU_Sensor-----Warning--\r\n");					    
+   
+                   if(m_cpu_thermal_alert != 4)
+                   {
+                   m_Event_Resouce_Alert.push_back(message);						
+                       m_cpu_thermal_alert = 4;
+                   }				
+               }
+               else if((m_Current_Temperature >= m_Shutdown))
+               {
+                   //     Area : 5        
+                   m_Status_Health = "Critical";					
+                   m_Status_State = "Enabled";	
+   
+                   std::string event("Event");
+                   std::string servrity("Warning");					   
+                   std::string sensor_type("Temperature");		   
+                   std::string message;
+                   message = std::string("CPU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over fatal temperature.");    
+                   Entry.set_log_entry(event , sensor_type , servrity, message, ID);				
+                   gADbg.acc_printf("set_info-----CPU_Sensor-----Critical--\r\n");					    
+   
+                   if(m_cpu_thermal_alert != 5)
+                   {
+                   m_Event_Resouce_Alert.push_back(message);		
+                       m_cpu_thermal_alert = 5;					
+                   }
+               }
+               else
+               {
+                   //     Area : 2
+   
+                   m_Status_Health = "OK";					
+                   m_Status_State = "Enabled";
+                   m_cpu_thermal_alert = 0;				
+               }                     
+           }
+           else if (m_Type == SYSTEM_Sensor && present )
+           {
+               if((m_Current_Temperature < 0) || ( (m_Current_Temperature >= m_Warning) && (m_Current_Temperature < m_Error ) ))
+               {
+                   //     Area : 1 / 3
+                   m_Status_Health = "Warning";					
+                   m_Status_State = "Enabled";		
+   
+                   std::string event("Event");
+                   std::string servrity("Warning");					   
+                   std::string sensor_type("Temperature");		   
+                   std::string message;
+                   message = std::string("SYSTEM Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over warning temperature.");
+                   Entry.set_log_entry(event , sensor_type , servrity, message, ID);	
+                   gADbg.acc_printf("set_info-----SYSTEM_Sensor-----Warning--\r\n");					    
+   
+                   std::string message_event = std::string("SYSTEM Thermal ") + std::to_string( ID) + std::string(" is ") +std::to_string(m_Current_Temperature/1000) + 
+   	         std::string(" degrees. Over warning temperature.");
+   
+                   if(m_sys_thermal_alert != 1)
+                   {
+                   m_Event_Resouce_Alert.push_back(message_event);						
+                       m_sys_thermal_alert = 1;
+                   }					
+               }
+               else if(((m_Current_Temperature >= m_Error))  && (m_Current_Temperature < m_Shutdown))
+               {
+                   //     Area : 4
+   
+                   m_Status_Health = "Warning";					
+                   m_Status_State = "Enabled";	
+   
+                   std::string event("Event");
+                   std::string servrity("Warning");					   
+                   std::string sensor_type("Temperature");		   
+                   std::string message;
+                   message = std::string("SYSTEM Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over error temperature.");    
+                   Entry.set_log_entry(event , sensor_type , servrity, message, ID);				
+                   gADbg.acc_printf("set_info-----SYSTEM_Sensor-----Warning--\r\n");					    
+   
+                   std::string message_event = std::string("SYSTEM Thermal ") + std::to_string( ID) + std::string(" is ") +std::to_string(m_Current_Temperature/1000) + 
+   	         std::string(" degrees. Over error temperature.");
+   
+                   if(m_sys_thermal_alert != 4)
+                   {				
+                   m_Event_Resouce_Alert.push_back(message_event);					
+                       m_sys_thermal_alert = 4;
+                   }				
+   
+               }
+               else if((m_Current_Temperature >= m_Shutdown))
+               {
+                   //     Area : 5        
+                   m_Status_Health = "Critical";					
+                   m_Status_State = "Enabled";		
+   
+                   std::string event("Event");
+                   std::string servrity("Critical");					   
+                   std::string sensor_type("Temperature");		   
+                   std::string message;
+                   message = std::string("SYSTEM_Sensor Thermal is ")+std::to_string(m_Current_Temperature/1000)+std::string(" degrees.Over fatal temperature.");
+                   Entry.set_log_entry(event , sensor_type , servrity, message, ID);		
+                   gADbg.acc_printf("set_info-----SYSTEM_Sensor-----Critical--\r\n");					    			
+   
+                   std::string message_event = std::string("SYSTEM Thermal ") + std::to_string( ID) + std::string(" is ") +std::to_string(m_Current_Temperature/1000) + 
+   	         std::string(" degrees. Over fatal temperature.");
+   
+                   if(m_sys_thermal_alert != 5)
+                   {				
+                   m_Event_Resouce_Alert.push_back(message_event);				
+                       m_sys_thermal_alert = 5;
+                   }					
+               }
+               else
+               {
+                   //     Area : 2
+   
+                   m_Status_Health = "OK";					
+                   m_Status_State = "Enabled";
+                   m_sys_thermal_alert = 0;
+               }   
+           }
+           else if (m_Type == PSU_Sensor && present )
+           {
+               if(m_Current_Temperature ==0)
+               {
+                   m_Status_Health = "OK";
+                   m_Status_State ="UnavailableOffline";	       
+               }
+               else if((m_Current_Temperature < 0) || ( (m_Current_Temperature >= m_Warning) && (m_Current_Temperature < m_Error ) ))
+               {
+                   //     Area : 1 / 3
+                   m_Status_Health = "Warning";					
+                   m_Status_State = "Enabled";		
+   
+                   std::string event("Event");
+                   std::string servrity("Warning");					   
+                   std::string sensor_type("Temperature");		   
+                   std::string message;
+                   message = std::string("PSU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over warning temperature.");
+                   Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
+                   gADbg.acc_printf("set_info-----PSU_Sensor-----Warning--\r\n");					    			
+   
+                   std::string  message_event = std::string("PSU Thermal ") + std::to_string( ID) + std::string(" is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.  Over warning temperature.");    		
+   
+                   if(m_psu_thermal_alert != 1)
+                   {
+                   m_Event_Resouce_Alert.push_back(message_event);				
+                       m_psu_thermal_alert = 1; 					
+                   }
+               }
+               else if(((m_Current_Temperature >= m_Error))  && (m_Current_Temperature < m_Shutdown))
+               {
+                   //     Area : 4
+   
+                   m_Status_Health = "Warning";					
+                   m_Status_State = "Enabled";	
+   
+                   std::string event("Event");
+                   std::string servrity("Warning");					   
+                   std::string sensor_type("Temperature");		   
+                   std::string message;
+                   message = std::string("PSU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over error temperature.");
+                   Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
+                   gADbg.acc_printf("set_info-----PSU_Sensor-----Warning--\r\n");					    			
+   
+                   std::string  message_event = std::string("PSU Thermal ") + std::to_string( ID) + std::string(" is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.  Over error temperature.");    		
+   
+                   if(m_psu_thermal_alert != 4)
+                   {
+                   m_Event_Resouce_Alert.push_back(message_event);				
+                       m_psu_thermal_alert = 4;					
+                   }
+               }
+               else if((m_Current_Temperature >= m_Shutdown))
+               {
+                   //     Area : 5        
+                   m_Status_Health = "Critical";					
+                   m_Status_State = "Enabled";		
+   
+                   std::string event("Event");
+                   std::string servrity("Warning");					   
+                   std::string sensor_type("Temperature");		   
+                   std::string message;
+                   message = std::string("PSU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over fatal temperature.");
+                   Entry.set_log_entry(event , sensor_type , servrity, message, ID);		
+                   gADbg.acc_printf("set_info-----PSU_Sensor-----Critical--\r\n");					    			
+   
+                   std::string  message_event = std::string("PSU Thermal ") + std::to_string( ID) + std::string(" is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.  Over fatal temperature.");    		
+   
+                   if(m_psu_thermal_alert != 5)
+                   {
+                   m_Event_Resouce_Alert.push_back(message_event);				
+                       m_psu_thermal_alert = 5;					
+                   }					
+               }
+               else
+               {
+                   //     Area : 2
+   
+                   m_Status_Health = "OK";					
+                   m_Status_State = "Enabled";
+                   m_psu_thermal_alert = 0;					
+               }   
+           }
+           else
+           {
+               m_Status_Health = "Warning";					
+               m_Status_State = "Absent";	    
+           }
+   
+           return;
         }
-        else if (m_Type == SYSTEM_Sensor && present )
-        {
-            if((m_Current_Temperature < 0) || ( (m_Current_Temperature >= m_Warning) && (m_Current_Temperature < m_Error ) ))
-            {
-                //     Area : 1 / 3
-                m_Status_Health = "Warning";					
-                m_Status_State = "Enabled";		
-
-                std::string event("Event");
-                std::string servrity("Warning");					   
-                std::string sensor_type("Temperature");		   
-                std::string message;
-                message = std::string("SYSTEM Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over warning temperature.");
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);	
-                gADbg.acc_printf("set_info-----SYSTEM_Sensor-----Warning--\r\n");					    
-
-                std::string message_event = std::string("SYSTEM Thermal ") + std::to_string( ID) + std::string(" is ") +std::to_string(m_Current_Temperature/1000) + 
-	         std::string(" degrees. Over warning temperature.");
-
-                if(m_sys_thermal_alert != 1)
-                {
-                m_Event_Resouce_Alert.push_back(message_event);						
-                    m_sys_thermal_alert = 1;
-                }					
-            }
-            else if(((m_Current_Temperature >= m_Error))  && (m_Current_Temperature < m_Shutdown))
-            {
-                //     Area : 4
-
-                m_Status_Health = "Warning";					
-                m_Status_State = "Enabled";	
-
-                std::string event("Event");
-                std::string servrity("Warning");					   
-                std::string sensor_type("Temperature");		   
-                std::string message;
-                message = std::string("SYSTEM Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over error temperature.");    
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);				
-                gADbg.acc_printf("set_info-----SYSTEM_Sensor-----Warning--\r\n");					    
-
-                std::string message_event = std::string("SYSTEM Thermal ") + std::to_string( ID) + std::string(" is ") +std::to_string(m_Current_Temperature/1000) + 
-	         std::string(" degrees. Over error temperature.");
-
-                if(m_sys_thermal_alert != 4)
-                {				
-                m_Event_Resouce_Alert.push_back(message_event);					
-                    m_sys_thermal_alert = 4;
-                }				
-
-            }
-            else if((m_Current_Temperature >= m_Shutdown))
-            {
-                //     Area : 5        
-                m_Status_Health = "Critical";					
-                m_Status_State = "Enabled";		
-
-                std::string event("Event");
-                std::string servrity("Critical");					   
-                std::string sensor_type("Temperature");		   
-                std::string message;
-                message = std::string("SYSTEM_Sensor Thermal is ")+std::to_string(m_Current_Temperature/1000)+std::string(" degrees.Over fatal temperature.");
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);		
-                gADbg.acc_printf("set_info-----SYSTEM_Sensor-----Critical--\r\n");					    			
-
-                std::string message_event = std::string("SYSTEM Thermal ") + std::to_string( ID) + std::string(" is ") +std::to_string(m_Current_Temperature/1000) + 
-	         std::string(" degrees. Over fatal temperature.");
-
-                if(m_sys_thermal_alert != 5)
-                {				
-                m_Event_Resouce_Alert.push_back(message_event);				
-                    m_sys_thermal_alert = 5;
-                }					
-            }
-            else
-            {
-                //     Area : 2
-
-                m_Status_Health = "OK";					
-                m_Status_State = "Enabled";
-                m_sys_thermal_alert = 0;
-            }   
-        }
-        else if (m_Type == PSU_Sensor && present )
-        {
-            if(m_Current_Temperature ==0)
-            {
-                m_Status_Health = "OK";
-                m_Status_State ="UnavailableOffline";	       
-            }
-            else if((m_Current_Temperature < 0) || ( (m_Current_Temperature >= m_Warning) && (m_Current_Temperature < m_Error ) ))
-            {
-                //     Area : 1 / 3
-                m_Status_Health = "Warning";					
-                m_Status_State = "Enabled";		
-
-                std::string event("Event");
-                std::string servrity("Warning");					   
-                std::string sensor_type("Temperature");		   
-                std::string message;
-                message = std::string("PSU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over warning temperature.");
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
-                gADbg.acc_printf("set_info-----PSU_Sensor-----Warning--\r\n");					    			
-
-                std::string  message_event = std::string("PSU Thermal ") + std::to_string( ID) + std::string(" is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.  Over warning temperature.");    		
-
-                if(m_psu_thermal_alert != 1)
-                {
-                m_Event_Resouce_Alert.push_back(message_event);				
-                    m_psu_thermal_alert = 1; 					
-                }
-            }
-            else if(((m_Current_Temperature >= m_Error))  && (m_Current_Temperature < m_Shutdown))
-            {
-                //     Area : 4
-
-                m_Status_Health = "Warning";					
-                m_Status_State = "Enabled";	
-
-                std::string event("Event");
-                std::string servrity("Warning");					   
-                std::string sensor_type("Temperature");		   
-                std::string message;
-                message = std::string("PSU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over error temperature.");
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);			
-                gADbg.acc_printf("set_info-----PSU_Sensor-----Warning--\r\n");					    			
-
-                std::string  message_event = std::string("PSU Thermal ") + std::to_string( ID) + std::string(" is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.  Over error temperature.");    		
-
-                if(m_psu_thermal_alert != 4)
-                {
-                m_Event_Resouce_Alert.push_back(message_event);				
-                    m_psu_thermal_alert = 4;					
-                }
-            }
-            else if((m_Current_Temperature >= m_Shutdown))
-            {
-                //     Area : 5        
-                m_Status_Health = "Critical";					
-                m_Status_State = "Enabled";		
-
-                std::string event("Event");
-                std::string servrity("Warning");					   
-                std::string sensor_type("Temperature");		   
-                std::string message;
-                message = std::string("PSU Thermal is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.Over fatal temperature.");
-                Entry.set_log_entry(event , sensor_type , servrity, message, ID);		
-                gADbg.acc_printf("set_info-----PSU_Sensor-----Critical--\r\n");					    			
-
-                std::string  message_event = std::string("PSU Thermal ") + std::to_string( ID) + std::string(" is ") + std::to_string(m_Current_Temperature/1000) + std::string(" degrees.  Over fatal temperature.");    		
-
-                if(m_psu_thermal_alert != 5)
-                {
-                m_Event_Resouce_Alert.push_back(message_event);				
-                    m_psu_thermal_alert = 5;					
-                }					
-            }
-            else
-            {
-                //     Area : 2
-
-                m_Status_Health = "OK";					
-                m_Status_State = "Enabled";
-                m_psu_thermal_alert = 0;					
-            }   
-        }
-        else
-        {
-            m_Status_Health = "Warning";					
-            m_Status_State = "Absent";	    
-        }
-
-        return;
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Thermal_Info set_info() - exception : " << e.what()  << std::endl;	
+            return;														
+        }			
     }
 
     void  Port_Info::set_info(int ID,  int Type ,int Present_Status, bool present)
@@ -2052,571 +2200,690 @@ Area : 5
 
     void Switch::get_psu_info()
     {
-        int rv;
-        onlp_psu_info_t fv;
-        int ii=0;
-
-        for(ii= 1; ii <= m_psu_max_num; ii++)
-        {
-            unsigned int id = ONLP_PSU_ID_CREATE(ii);
-            rv = onlp_psu_info_get(id,&fv);
-
-            gADbg.acc_printf("/////////////////////\r\n");
-
-            for (vector<Psu_Info*>::iterator pObj = m_vec_Psu_Info.begin();pObj != m_vec_Psu_Info.end(); ++pObj) 
+        try 
+        {       
+            int rv;
+            onlp_psu_info_t fv;
+            int ii=0;
+    
+            for(ii= 1; ii <= m_psu_max_num; ii++)
             {
-                if(rv < 0 && (*pObj)->m_ID == ii)
+                unsigned int id = ONLP_PSU_ID_CREATE(ii);
+                rv = onlp_psu_info_get(id,&fv);
+    
+                gADbg.acc_printf("/////////////////////\r\n");
+    
+                for (vector<Psu_Info*>::iterator pObj = m_vec_Psu_Info.begin();pObj != m_vec_Psu_Info.end(); ++pObj) 
                 {
-                    set_psu_present(ii , false); 				
-                    gADbg.acc_printf("get_psu_info [%d] error\r\n", ii);
-                }
-                else
-                {		
-                    if((*pObj)->m_ID == ii)
+                    if(rv < 0 && (*pObj)->m_ID == ii)
                     {
-                        if(fv.status & 1)
-                        {
-                            unsigned int caps = fv.caps;
-                            Psu_Info::onlp_psu_type_t psu_type = Psu_Info::ONLP_PSU_TYPE_INVALID; 
-							
-                            if(caps & Psu_Info::ONLP_PSU_CAPS_AC)
-                                psu_type = Psu_Info::ONLP_PSU_TYPE_AC;
-                            else if(caps & Psu_Info::ONLP_PSU_CAPS_DC12)
-                                psu_type = Psu_Info::ONLP_PSU_TYPE_DC12;
-                            else if(caps & Psu_Info::ONLP_PSU_CAPS_DC48)
-                                psu_type = Psu_Info::ONLP_PSU_TYPE_DC48;
-							
-                            set_psu_present(ii , true);
-                            (*pObj)->set_info(ii,  fv.model[0] ? fv.model : "NULL", fv.serial[0] ? fv.serial : "NULL", fv.mvin, fv.mvout, fv.miin, fv.miout, fv.mpin, fv.mpout, psu_type , true);
-                            gADbg.acc_printf("s psu ID:  %d\r\n", (*pObj)->m_ID);					
-                            gADbg.acc_printf("s psu Model:  %s\r\n", (*pObj)->m_Model.c_str());
-                            gADbg.acc_printf("s psu SN:  %s\r\n", (*pObj)->m_SN.c_str());
-                            gADbg.acc_printf("s psu Vin:  %d\r\n", (*pObj)->m_Vin);
-                            gADbg.acc_printf("s psu Vout:  %d\r\n", (*pObj)->m_Vout);
-                            gADbg.acc_printf("s psu Iin:  %d\r\n", (*pObj)->m_Iin);
-                            gADbg.acc_printf("s psu Iout:  %d\r\n", (*pObj)->m_Iout);
-                            gADbg.acc_printf("s psu Pin:  %d\r\n", (*pObj)->m_Pin);
-                            gADbg.acc_printf("s psu Pout:  %d\r\n", (*pObj)->m_Pout);	
-                            gADbg.acc_printf("s psu Type:  %d\r\n", (*pObj)->m_Psu_Type);	
-							
-                        }
-                        else
-                        {
-                            set_psu_present(ii , false); 
-                            (*pObj)->set_info(ii,  "NULL", "NULL", 0, 0, 0, 0, 0, 0 , Psu_Info::ONLP_PSU_TYPE_INVALID, false);
-                            gADbg.acc_printf("PSU [%d] Not present.\r\n", ii);
-                        }
+                        set_psu_present(ii , false); 				
+                        gADbg.acc_printf("get_psu_info [%d] error\r\n", ii);
                     }
-
+                    else
+                    {		
+                        if((*pObj)->m_ID == ii)
+                        {
+                            if(fv.status & 1)
+                            {
+                                unsigned int caps = fv.caps;
+                                Psu_Info::onlp_psu_type_t psu_type = Psu_Info::ONLP_PSU_TYPE_INVALID; 
+    							
+                                if(caps & Psu_Info::ONLP_PSU_CAPS_AC)
+                                    psu_type = Psu_Info::ONLP_PSU_TYPE_AC;
+                                else if(caps & Psu_Info::ONLP_PSU_CAPS_DC12)
+                                    psu_type = Psu_Info::ONLP_PSU_TYPE_DC12;
+                                else if(caps & Psu_Info::ONLP_PSU_CAPS_DC48)
+                                    psu_type = Psu_Info::ONLP_PSU_TYPE_DC48;
+    							
+                                set_psu_present(ii , true);
+                                (*pObj)->set_info(ii,  fv.model[0] ? fv.model : "NULL", fv.serial[0] ? fv.serial : "NULL", fv.mvin, fv.mvout, fv.miin, fv.miout, fv.mpin, fv.mpout, psu_type , true);
+                                gADbg.acc_printf("s psu ID:  %d\r\n", (*pObj)->m_ID);					
+                                gADbg.acc_printf("s psu Model:  %s\r\n", (*pObj)->m_Model.c_str());
+                                gADbg.acc_printf("s psu SN:  %s\r\n", (*pObj)->m_SN.c_str());
+                                gADbg.acc_printf("s psu Vin:  %d\r\n", (*pObj)->m_Vin);
+                                gADbg.acc_printf("s psu Vout:  %d\r\n", (*pObj)->m_Vout);
+                                gADbg.acc_printf("s psu Iin:  %d\r\n", (*pObj)->m_Iin);
+                                gADbg.acc_printf("s psu Iout:  %d\r\n", (*pObj)->m_Iout);
+                                gADbg.acc_printf("s psu Pin:  %d\r\n", (*pObj)->m_Pin);
+                                gADbg.acc_printf("s psu Pout:  %d\r\n", (*pObj)->m_Pout);	
+                                gADbg.acc_printf("s psu Type:  %d\r\n", (*pObj)->m_Psu_Type);	
+    							
+                            }
+                            else
+                            {
+                                set_psu_present(ii , false); 
+                                (*pObj)->set_info(ii,  "NULL", "NULL", 0, 0, 0, 0, 0, 0 , Psu_Info::ONLP_PSU_TYPE_INVALID, false);
+                                gADbg.acc_printf("PSU [%d] Not present.\r\n", ii);
+                            }
+                        }
+    
+                    }
                 }
             }
+            gADbg.acc_printf("PSU PRESNET [0x%04x]\r\n\r\n",get_psu_present());
+            gADbg.acc_printf("/////////////////////\r\n");
+            return;
         }
-        gADbg.acc_printf("PSU PRESNET [0x%04x]\r\n\r\n",get_psu_present());
-        gADbg.acc_printf("/////////////////////\r\n");
-        return;
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Switch get_psu_info() - exception : " << e.what()  << std::endl;	
+            return;																	
+        }			
     }
 
     int Switch::get_psu_info_by_(int psuid, Psu_Content id)
     {
-        int ii=0;
-
-        for(ii= 1; ii <= m_psu_max_num; ii++)
-        {
-            for (vector<Psu_Info*>::iterator pObj = m_vec_Psu_Info.begin();pObj != m_vec_Psu_Info.end(); ++pObj) 
-            { 
-                if((*pObj)->m_ID == psuid)
-                {
-                    switch (id) 
+        try 
+        {       
+            int ii=0;
+    
+            for(ii= 1; ii <= m_psu_max_num; ii++)
+            {
+                for (vector<Psu_Info*>::iterator pObj = m_vec_Psu_Info.begin();pObj != m_vec_Psu_Info.end(); ++pObj) 
+                { 
+                    if((*pObj)->m_ID == psuid)
                     {
-                        case Vin : 
-                            return (*pObj)->m_Vin;
-                            break;
-                        case Vout:
-                            return (*pObj)->m_Vout;
-                            break;
-                        case Iin:
-                            return (*pObj)->m_Iin;
-                            break;	
-                        case Iout:
-                            return (*pObj)->m_Iout;
-                            break;
-                        case Pin:
-                            return (*pObj)->m_Pin;
-                            break;				
-                        case Pout:
-                            return (*pObj)->m_Pout;
-                            break;	
-                        case Psu_type:
-                            return (*pObj)->m_Psu_Type;
-                            break;
-                        case Psu_Present:
-                            return (*pObj)->m_Present;
-                            break;
-                        default :
-                            return 0;
-                            break;
-                    }		    	
+                        switch (id) 
+                        {
+                            case Vin : 
+                                return (*pObj)->m_Vin;
+                                break;
+                            case Vout:
+                                return (*pObj)->m_Vout;
+                                break;
+                            case Iin:
+                                return (*pObj)->m_Iin;
+                                break;	
+                            case Iout:
+                                return (*pObj)->m_Iout;
+                                break;
+                            case Pin:
+                                return (*pObj)->m_Pin;
+                                break;				
+                            case Pout:
+                                return (*pObj)->m_Pout;
+                                break;	
+                            case Psu_type:
+                                return (*pObj)->m_Psu_Type;
+                                break;
+                            case Psu_Present:
+                                return (*pObj)->m_Present;
+                                break;
+                            default :
+                                return 0;
+                                break;
+                        }		    	
+                    }
                 }
             }
+            return 0;
         }
-        return 0;
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Switch get_psu_info_by_() - exception : " << e.what()  << std::endl;	
+            return 0;																	
+        }			
     }
 
 
     std::string Switch::get_psu_info_by_(int psuid, std::string type)
     {
-        int ii=0;
-
-        for(ii= 1; ii <= m_psu_max_num; ii++)
-        {
-            for (vector<Psu_Info*>::iterator pObj = m_vec_Psu_Info.begin();pObj != m_vec_Psu_Info.end(); ++pObj) 
-            { 
-                if((*pObj)->m_ID == psuid)
-                {
-                    if (type == "Status_Health") 
-                        return (*pObj)->m_Status_Health;
-                    else if (type == "Status_State")
-                        return (*pObj)->m_Status_State;
-                    else if (type == "Model")
-                        return (*pObj)->m_Model;
-                    else if (type == "SN")
-                        return (*pObj)->m_SN;
-                    else
-                        return "na";
-
+        try 
+        {        
+            int ii=0;
+    
+            for(ii= 1; ii <= m_psu_max_num; ii++)
+            {
+                for (vector<Psu_Info*>::iterator pObj = m_vec_Psu_Info.begin();pObj != m_vec_Psu_Info.end(); ++pObj) 
+                { 
+                    if((*pObj)->m_ID == psuid)
+                    {
+                        if (type == "Status_Health") 
+                            return (*pObj)->m_Status_Health;
+                        else if (type == "Status_State")
+                            return (*pObj)->m_Status_State;
+                        else if (type == "Model")
+                            return (*pObj)->m_Model;
+                        else if (type == "SN")
+                            return (*pObj)->m_SN;
+                        else
+                            return "na";
+    
+                    }
                 }
             }
+    
+            return "na";	
         }
-
-        return "na";	
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Switch string get_psu_info_by_() - exception : " << e.what()  << std::endl;	
+            return "na";				
+        }			
     }
 
 
     std::string Switch::get_thermal_info_by_(int thermalid, std::string type)
     {
-        int ii=0;
-
-        for(ii= 1; ii <= m_thermal_sen_max_num; ii++)
-        {
-            for (vector<Thermal_Info*>::iterator pObj = m_vec_Thermal_Info.begin();pObj != m_vec_Thermal_Info.end(); ++pObj) 
-            { 
-                if((*pObj)->m_ID == thermalid)
-                {
-                    if (type == "Status_Health") 
-                        return (*pObj)->m_Status_Health;
-                    else if (type == "Status_State")
-                        return (*pObj)->m_Status_State;
-                    else
-                        return "na";
-
+        try 
+        {        
+            int ii=0;
+    
+            for(ii= 1; ii <= m_thermal_sen_max_num; ii++)
+            {
+                for (vector<Thermal_Info*>::iterator pObj = m_vec_Thermal_Info.begin();pObj != m_vec_Thermal_Info.end(); ++pObj) 
+                { 
+                    if((*pObj)->m_ID == thermalid)
+                    {
+                        if (type == "Status_Health") 
+                            return (*pObj)->m_Status_Health;
+                        else if (type == "Status_State")
+                            return (*pObj)->m_Status_State;
+                        else
+                            return "na";
+    
+                    }
                 }
             }
+    
+            return "na";	
         }
-
-        return "na";	
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Switch string get_thermal_info_by_() - exception : " << e.what()  << std::endl;	
+            return "na";			
+        }			
     }
 
 
     int Switch::get_thermal_info_by_(int thermalid, Thermal_Content id)
     {
-        int ii=0;
-
-        for(ii= 1; ii <= m_thermal_sen_max_num; ii++)
-        {
-            for (vector<Thermal_Info*>::iterator pObj = m_vec_Thermal_Info.begin();pObj != m_vec_Thermal_Info.end(); ++pObj) 
-            { 
-                if((*pObj)->m_ID == thermalid)
-                {
-                    switch (id) 
+        try 
+        {     
+            int ii=0;
+    
+            for(ii= 1; ii <= m_thermal_sen_max_num; ii++)
+            {
+                for (vector<Thermal_Info*>::iterator pObj = m_vec_Thermal_Info.begin();pObj != m_vec_Thermal_Info.end(); ++pObj) 
+                { 
+                    if((*pObj)->m_ID == thermalid)
                     {
-                        case Current_Temperature : 
-                            return (*pObj)->m_Current_Temperature;
-                            break;
-                        case Warning:
-                            return (*pObj)->m_Warning;
-                            break;
-                        case Error:
-                            return (*pObj)->m_Error;
-                            break;	
-                        case Shutdown:
-                            return (*pObj)->m_Shutdown;
-                            break;
-                        case Thermal_Type:
-                            return (*pObj)->m_Type;
-                            break;		
-                        case Thermal_Present:
-                            return (*pObj)->m_Present;
-                            break;				
-                        default :
-                            return 0;
-                            break;			
-                    }		    	
+                        switch (id) 
+                        {
+                            case Current_Temperature : 
+                                return (*pObj)->m_Current_Temperature;
+                                break;
+                            case Warning:
+                                return (*pObj)->m_Warning;
+                                break;
+                            case Error:
+                                return (*pObj)->m_Error;
+                                break;	
+                            case Shutdown:
+                                return (*pObj)->m_Shutdown;
+                                break;
+                            case Thermal_Type:
+                                return (*pObj)->m_Type;
+                                break;		
+                            case Thermal_Present:
+                                return (*pObj)->m_Present;
+                                break;				
+                            default :
+                                return 0;
+                                break;			
+                        }		    	
+                    }
                 }
             }
+            return 0;	
         }
-        return 0;	
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Switch  get_thermal_info_by_() - exception : " << e.what()  << std::endl;	
+            return 0;				
+        }		
     }
 
     int Switch::get_port_info_by_(int portid, Port_Content id)
     {
-        int ii=0;
-
-        for(ii= 1; ii <= m_port_max_num; ii++)
-        {
-            for (vector<Port_Info*>::iterator pObj = m_vec_Port_Info.begin();pObj != m_vec_Port_Info.end(); ++pObj) 
-            { 
-                if((*pObj)->m_ID == portid)
-                {
-                    switch (id) 
+        try 
+        {        
+            int ii=0;
+    
+            for(ii= 1; ii <= m_port_max_num; ii++)
+            {
+                for (vector<Port_Info*>::iterator pObj = m_vec_Port_Info.begin();pObj != m_vec_Port_Info.end(); ++pObj) 
+                { 
+                    if((*pObj)->m_ID == portid)
                     {
-                        case Port_Present : 
-                            if((*pObj)->m_Type == Port_Info::Ether_Port)
-                                return true;
-                            else
-                                return (*pObj)->m_Present_Status;
-                            break;
-                        default :
-                            return 0;
-                            break;			
-                    }		    	
+                        switch (id) 
+                        {
+                            case Port_Present : 
+                                if((*pObj)->m_Type == Port_Info::Ether_Port)
+                                    return true;
+                                else
+                                    return (*pObj)->m_Present_Status;
+                                break;
+                            default :
+                                return 0;
+                                break;			
+                        }		    	
+                    }
                 }
             }
+            return 0;	
         }
-        return 0;	
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Switch get_port_info_by_() - exception : " << e.what()  << std::endl;	
+            return 0;							
+        }			
     }
 
     json::Value Switch::get_port_trans_info_by_(int portid)
     {
-        int ii=0;
-
-        for(ii= 1; ii <= m_port_max_num; ii++)
-        {
-            for (vector<Port_Info*>::iterator pObj = m_vec_Port_Info.begin();pObj != m_vec_Port_Info.end(); ++pObj) 
-            { 
-                if((*pObj)->m_ID == portid)
-                {
-                    return (*pObj)->get_trans_status();
+        try 
+        {        
+            int ii=0;
+    
+            for(ii= 1; ii <= m_port_max_num; ii++)
+            {
+                for (vector<Port_Info*>::iterator pObj = m_vec_Port_Info.begin();pObj != m_vec_Port_Info.end(); ++pObj) 
+                { 
+                    if((*pObj)->m_ID == portid)
+                    {
+                        return (*pObj)->get_trans_status();
+                    }
                 }
             }
+            return json::Value::Type::NIL;
         }
-        return 0;
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Switch get_port_trans_info_by_() - exception : " << e.what()  << std::endl;	
+            return json::Value::Type::NIL;			
+        }			
     }
 
     void Switch::update_trasceivers_oom_event()
     {
-
-        int ii=0;
-
-        for(ii= 1; ii <= m_port_max_num; ii++)
-        {
-            for (vector<Port_Info*>::iterator pObj = m_vec_Port_Info.begin();pObj != m_vec_Port_Info.end(); ++pObj) 
-            { 
-                (*pObj)->get_trans_status();  //todo //
+        try 
+        { 
+            int ii=0;
+    
+            for(ii= 1; ii <= m_port_max_num; ii++)
+            {
+                for (vector<Port_Info*>::iterator pObj = m_vec_Port_Info.begin();pObj != m_vec_Port_Info.end(); ++pObj) 
+                { 
+                    (*pObj)->get_trans_status();  //todo //
+                }
             }
+            return ;
         }
-        return ;
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Switch update_trasceivers_oom_event() - exception : " << e.what()  << std::endl;	
+            return;			
+        }			
     }
 
     void Switch::update_port_present_event()
     {
-        int id = 0;
+        try 
+        {     
+            int id = 0;
+            
+            for(id = 0; id < m_port_max_num; id ++)
+            {
+                if(id < 64)
+                {
+                    // Check port present //
+                    unsigned long long  m_bit = (1ULL << id);
+                    int p_bit  = ((m_pre_Port_Present & m_bit) >> id);
+                    int c_bit  = ((m_Port_Present  & m_bit) >> id) ;
+    	
+                    if((p_bit == 1) && (c_bit == 0))
+                    { // port unplug  					
+                        std::string event("Event");
+                        std::string servrity("OK");					   
+                        std::string sensor_type("Entity Presence");		   
+                        std::string message("Port unplug.");
+                        Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
         
-        for(id = 0; id < m_port_max_num; id ++)
-        {
-            if(id < 64)
-            {
-                // Check port present //
-                unsigned long long  m_bit = (1ULL << id);
-                int p_bit  = ((m_pre_Port_Present & m_bit) >> id);
-                int c_bit  = ((m_Port_Present  & m_bit) >> id) ;
-	
-                if((p_bit == 1) && (c_bit == 0))
-                { // port unplug  					
-                    std::string event("Event");
-                    std::string servrity("OK");					   
-                    std::string sensor_type("Entity Presence");		   
-                    std::string message("Port unplug.");
-                    Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
-    
-                    std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug Out.");
-                    m_Event_Port_Resouce_Remove.push_back(message_event);				
-                } 
-                else if((p_bit == 0) && (c_bit == 1))
-                { // port plug in
-                    std::string event("Event");
-                    std::string servrity("OK");					   
-                    std::string sensor_type("Entity Presence");		   
-                    std::string message("Port plug in.");	
-                    Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
-    
-                    std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug In.");
-                    m_Event_Port_Resouce_Add.push_back(message_event);					
+                        std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug Out.");
+                        m_Event_Port_Resouce_Remove.push_back(message_event);				
+                    } 
+                    else if((p_bit == 0) && (c_bit == 1))
+                    { // port plug in
+                        std::string event("Event");
+                        std::string servrity("OK");					   
+                        std::string sensor_type("Entity Presence");		   
+                        std::string message("Port plug in.");	
+                        Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
+        
+                        std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug In.");
+                        m_Event_Port_Resouce_Add.push_back(message_event);					
+                    }
+                }
+                else if( (id >= 64) && (id < 128))
+                {
+                    int A64_id = id -64;
+    			
+                    // Check port present //
+                    unsigned long long  m_bit = (1ULL << A64_id);
+                    unsigned long long p_bit  = ((m_pre_Port_Present_A64 & m_bit) >> A64_id);
+                    unsigned long long c_bit  = ((m_Port_Present_A64  & m_bit) >> A64_id) ;
+        
+                    if((p_bit == 1) && (c_bit == 0))
+                    { // port unplug  					
+                        std::string event("Event");
+                        std::string servrity("OK");					   
+                        std::string sensor_type("Entity Presence");		   
+                        std::string message("Port unplug.");
+                        Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
+        
+                        std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug Out.");
+                        m_Event_Port_Resouce_Remove.push_back(message_event);				
+                    } 
+                    else if((p_bit == 0) && (c_bit == 1))
+                    { // port plug in
+                        std::string event("Event");
+                        std::string servrity("OK");					   
+                        std::string sensor_type("Entity Presence");		   
+                        std::string message("Port plug in.");	
+                        Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
+        
+                        std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug In.");
+                        m_Event_Port_Resouce_Add.push_back(message_event);					
+                    }
+                }			
+                else
+                {
+                     printf("Port chceking more then 128 port!!!!not enough bits to present\r\n\r\n");	
                 }
             }
-            else if( (id >= 64) && (id < 128))
-            {
-                int A64_id = id -64;
-			
-                // Check port present //
-                unsigned long long  m_bit = (1ULL << A64_id);
-                unsigned long long p_bit  = ((m_pre_Port_Present_A64 & m_bit) >> A64_id);
-                unsigned long long c_bit  = ((m_Port_Present_A64  & m_bit) >> A64_id) ;
     
-                if((p_bit == 1) && (c_bit == 0))
-                { // port unplug  					
-                    std::string event("Event");
-                    std::string servrity("OK");					   
-                    std::string sensor_type("Entity Presence");		   
-                    std::string message("Port unplug.");
-                    Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
-    
-                    std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug Out.");
-                    m_Event_Port_Resouce_Remove.push_back(message_event);				
-                } 
-                else if((p_bit == 0) && (c_bit == 1))
-                { // port plug in
-                    std::string event("Event");
-                    std::string servrity("OK");					   
-                    std::string sensor_type("Entity Presence");		   
-                    std::string message("Port plug in.");	
-                    Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
-    
-                    std::string message_event = std::string("Port ") + std::to_string( id + 1) +  std::string(" Plug In.");
-                    m_Event_Port_Resouce_Add.push_back(message_event);					
-                }
-            }			
-            else
-            {
-                 printf("Port chceking more then 128 port!!!!not enough bits to present\r\n\r\n");	
-            }
+                m_pre_Port_Present = m_Port_Present;
+                m_pre_Port_Present_A64 = m_Port_Present_A64;
+    		
+            return ;
         }
-
-            m_pre_Port_Present = m_Port_Present;
-            m_pre_Port_Present_A64 = m_Port_Present_A64;
-		
-        return ;
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Switch update_port_present_event() - exception : " << e.what()  << std::endl;	
+            return ;			
+        }		
     }
 
     void Switch::update_psu_present_event()
     {
-        int id = 0;
-
-        for(id = 0; id < m_psu_max_num; id ++)
-        {
-
-            // Check PSU present //
-            unsigned int m_bit = (1 << id);
-            unsigned int p_bit  = ((m_pre_Psu_Present & m_bit) >> id);
-            unsigned int c_bit  = ((m_Psu_Present  & m_bit) >> id) ;
-
-            if((p_bit == 1) && (c_bit == 0))
-            { // PSU unplug  					
-                std::string event("Event");
-                std::string servrity("OK");					   
-                std::string sensor_type("Power Supply / Converter");		   
-                std::string message("PSU unplug.");
-                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);		
-
-                std::string message_event = std::string("PSU ") + std::to_string( id + 1) +  std::string(" Plug Out.");
-                m_Event_Resouce_Remove.push_back(message_event);					
+        try 
+        {       
+            int id = 0;
+    
+            for(id = 0; id < m_psu_max_num; id ++)
+            {
+    
+                // Check PSU present //
+                unsigned int m_bit = (1 << id);
+                unsigned int p_bit  = ((m_pre_Psu_Present & m_bit) >> id);
+                unsigned int c_bit  = ((m_Psu_Present  & m_bit) >> id) ;
+    
+                if((p_bit == 1) && (c_bit == 0))
+                { // PSU unplug  					
+                    std::string event("Event");
+                    std::string servrity("OK");					   
+                    std::string sensor_type("Power Supply / Converter");		   
+                    std::string message("PSU unplug.");
+                    Entry.set_log_entry(event , sensor_type , servrity, message, id+1);		
+    
+                    std::string message_event = std::string("PSU ") + std::to_string( id + 1) +  std::string(" Plug Out.");
+                    m_Event_Resouce_Remove.push_back(message_event);					
+                }
+                else if((p_bit == 0) && (c_bit == 1))
+                { // PSU plug in
+                    std::string event("Event");
+                    std::string servrity("OK");					   
+                    std::string sensor_type("Power Supply / Converter");		   
+                    std::string message("PSU plug in.");	
+                    Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
+    
+                    std::string message_event = std::string("PSU ") + std::to_string( id + 1) +  std::string(" Plug In.");
+                    m_Event_Resouce_Add.push_back(message_event);				
+                }  
             }
-            else if((p_bit == 0) && (c_bit == 1))
-            { // PSU plug in
-                std::string event("Event");
-                std::string servrity("OK");					   
-                std::string sensor_type("Power Supply / Converter");		   
-                std::string message("PSU plug in.");	
-                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
-
-                std::string message_event = std::string("PSU ") + std::to_string( id + 1) +  std::string(" Plug In.");
-                m_Event_Resouce_Add.push_back(message_event);				
-            }  
+            m_pre_Psu_Present = m_Psu_Present;
+    
+            return ;
         }
-        m_pre_Psu_Present = m_Psu_Present;
-
-        return ;
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Switch update_psu_present_event() - exception : " << e.what()  << std::endl;	
+            return ;						
+        }			
     }
 
 
     void Switch::get_fan_info()
     {
-        int rv;
-        onlp_fan_info_t fv;
-        int ii=0;
-
-        gADbg.acc_printf("get_fan_info m_fan_max_num[%d]/////////////////////\r\n",m_fan_max_num );
-
-        for(ii= 1; ii <= m_fan_max_num; ii++)
-        {
-            unsigned int id = ONLP_FAN_ID_CREATE(ii);
-            rv = onlp_fan_info_get(id,&fv);
-
-            gADbg.acc_printf("get_fan_info [%d]/////////////////////\r\n", ii);
-
-            for (vector<Fan_Info*>::iterator pObj = m_vec_Fan_Info.begin();pObj != m_vec_Fan_Info.end(); ++pObj) 
+        try 
+        {     
+            int rv;
+            onlp_fan_info_t fv;
+            int ii=0;
+    
+            gADbg.acc_printf("get_fan_info m_fan_max_num[%d]/////////////////////\r\n",m_fan_max_num );
+    
+            for(ii= 1; ii <= m_fan_max_num; ii++)
             {
-                if(rv < 0 && (*pObj)->m_ID == ii)
+                unsigned int id = ONLP_FAN_ID_CREATE(ii);
+                rv = onlp_fan_info_get(id,&fv);
+    
+                gADbg.acc_printf("get_fan_info [%d]/////////////////////\r\n", ii);
+    
+                for (vector<Fan_Info*>::iterator pObj = m_vec_Fan_Info.begin();pObj != m_vec_Fan_Info.end(); ++pObj) 
                 {
-                    set_fan_present(ii , false);	
-                    (*pObj)->set_info(ii , fv.model[0] ? fv.model : "NULL" ,fv.serial[0] ? fv.serial : "NULL" ,  0 , 0, false);
-                    gADbg.acc_printf("get_fan_info [%d] error\r\n", ii);
-                }
-                else if((*pObj)->m_ID == ii)
-                {  
-                    if(fv.status & 1)
+                    if(rv < 0 && (*pObj)->m_ID == ii)
                     {
-                        set_fan_present(ii , true);		                   
-                        (*pObj)->set_info(ii , fv.model[0] ? fv.model : "NULL" ,fv.serial[0] ? fv.serial : "NULL" ,  fv.rpm , fv.percentage, true);
-                        gADbg.acc_printf("s fan fan[%d]\r\n", (*pObj)->m_ID);
-                        gADbg.acc_printf("s fan RPM:    %d\r\n", (*pObj)->m_RPM );
-                        gADbg.acc_printf("s fan Per:    %d\r\n", (*pObj)->m_Per);
-                        gADbg.acc_printf("s fan Model:  %s\r\n", (*pObj)->m_Model.c_str());
-                        gADbg.acc_printf("s fan SN:     %s\r\n", (*pObj)->m_SN.c_str());    
-                        /* Present */
+                        set_fan_present(ii , false);	
+                        (*pObj)->set_info(ii , fv.model[0] ? fv.model : "NULL" ,fv.serial[0] ? fv.serial : "NULL" ,  0 , 0, false);
+                        gADbg.acc_printf("get_fan_info [%d] error\r\n", ii);
                     }
-                    else 
-                    {
-                        set_fan_present(ii , false);		
-                        (*pObj)->set_info(ii , "NULL" ,"NULL" ,  0 , 0, false);					
-                        gADbg.acc_printf("FAN [%d] Not present.\r\n", ii);
-                    }						    
-                }		
+                    else if((*pObj)->m_ID == ii)
+                    {  
+                        if(fv.status & 1)
+                        {
+                            set_fan_present(ii , true);		                   
+                            (*pObj)->set_info(ii , fv.model[0] ? fv.model : "NULL" ,fv.serial[0] ? fv.serial : "NULL" ,  fv.rpm , fv.percentage, true);
+                            gADbg.acc_printf("s fan fan[%d]\r\n", (*pObj)->m_ID);
+                            gADbg.acc_printf("s fan RPM:    %d\r\n", (*pObj)->m_RPM );
+                            gADbg.acc_printf("s fan Per:    %d\r\n", (*pObj)->m_Per);
+                            gADbg.acc_printf("s fan Model:  %s\r\n", (*pObj)->m_Model.c_str());
+                            gADbg.acc_printf("s fan SN:     %s\r\n", (*pObj)->m_SN.c_str());    
+                            /* Present */
+                        }
+                        else 
+                        {
+                            set_fan_present(ii , false);		
+                            (*pObj)->set_info(ii , "NULL" ,"NULL" ,  0 , 0, false);					
+                            gADbg.acc_printf("FAN [%d] Not present.\r\n", ii);
+                        }						    
+                    }		
+                }
             }
+            gADbg.acc_printf("FAN PRESNET [0x%04x]\r\n\r\n",get_fan_present());
+            gADbg.acc_printf("/////////////////////\r\n");
         }
-        gADbg.acc_printf("FAN PRESNET [0x%04x]\r\n\r\n",get_fan_present());
-        gADbg.acc_printf("/////////////////////\r\n");
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Switch get_fan_info() - exception : " << e.what()  << std::endl;	
+            return ;									
+        }			
 
     }
 
     int Switch::get_fan_info_by_(int fanid, Fan_Content id)
     {
-        int ii=0;
-
-        for(ii= 1; ii <= m_fan_max_num; ii++)
-        {
-            for (vector<Fan_Info*>::iterator pObj = m_vec_Fan_Info.begin();pObj != m_vec_Fan_Info.end(); ++pObj) 
-            { 
-                if((*pObj)->m_ID == fanid)
-                {
-                    switch (id) 
+        try 
+        {     
+            int ii=0;
+    
+            for(ii= 1; ii <= m_fan_max_num; ii++)
+            {
+                for (vector<Fan_Info*>::iterator pObj = m_vec_Fan_Info.begin();pObj != m_vec_Fan_Info.end(); ++pObj) 
+                { 
+                    if((*pObj)->m_ID == fanid)
                     {
-                        case RPM : 
-                            return (*pObj)->m_RPM;
-                            break;
-                        case Per:
-                            return (*pObj)->m_Per;
-                            break;
-                        case Type:
-                            return (*pObj)->m_Type;
-                            break;		
-                        case Fan_Present:
-                            return (*pObj)->m_Present;
-                            break;	
-
-                        default :
-                            return 0;
-                            break;			
-                    }		    	
+                        switch (id) 
+                        {
+                            case RPM : 
+                                return (*pObj)->m_RPM;
+                                break;
+                            case Per:
+                                return (*pObj)->m_Per;
+                                break;
+                            case Type:
+                                return (*pObj)->m_Type;
+                                break;		
+                            case Fan_Present:
+                                return (*pObj)->m_Present;
+                                break;	
+    
+                            default :
+                                return 0;
+                                break;			
+                        }		    	
+                    }
                 }
             }
+            return 0;
         }
-        return 0;
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Switch get_fan_info_by_() - exception : " << e.what()  << std::endl;	
+            return 0;			
+        }			
     }
 
 
     std::string Switch::get_fan_info_by_(int fanid, std::string type)
     {
-        int ii=0;
-
-        for(ii= 1; ii <= m_fan_max_num; ii++)
-        {
-            for (vector<Fan_Info*>::iterator pObj = m_vec_Fan_Info.begin();pObj != m_vec_Fan_Info.end(); ++pObj) 
-            { 
-                if((*pObj)->m_ID == fanid)
-                {
-                    if (type == "Status_Health") 
-                        return (*pObj)->m_Status_Health;
-                    else if (type == "Status_State")
-                        return (*pObj)->m_Status_State;
-                    else
-                        return "na";
-
+        try 
+        {         
+            int ii=0;
+    
+            for(ii= 1; ii <= m_fan_max_num; ii++)
+            {
+                for (vector<Fan_Info*>::iterator pObj = m_vec_Fan_Info.begin();pObj != m_vec_Fan_Info.end(); ++pObj) 
+                { 
+                    if((*pObj)->m_ID == fanid)
+                    {
+                        if (type == "Status_Health") 
+                            return (*pObj)->m_Status_Health;
+                        else if (type == "Status_State")
+                            return (*pObj)->m_Status_State;
+                        else
+                            return "na";
+    
+                    }
                 }
             }
+            return "na";	
         }
-        return "na";	
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Switch string get_fan_info_by_() - exception : " << e.what()  << std::endl;	
+            return "na";				
+        }			
     }
 
     void Switch::update_fan_present_event()
     {
-        int id = 0;
-
-        for(id = 0; id < m_fan_max_num; id ++)
-        {
-            // Check FAN present //
-            unsigned long long m_bit = (1 << id);
-            unsigned long long p_bit  = ((m_pre_Fan_Present & m_bit) >> id);
-            unsigned long long c_bit  = ((m_Fan_Present  & m_bit) >> id) ;
-
-            if((p_bit == 1) && (c_bit == 0))
-            { // FAN unplug  					
-                std::string event("Event");
-                std::string servrity("OK");					   
-                std::string sensor_type("Fan");		   
-                std::string message("FAN unplug.");
-                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);
-		
-                std::string message_event = std::string("Fan ") + std::to_string( id + 1) +  std::string(" Plug Out.");
-                m_Event_Resouce_Remove.push_back(message_event);				
+        try 
+        {      
+            int id = 0;
+    
+            for(id = 0; id < m_fan_max_num; id ++)
+            {
+                // Check FAN present //
+                unsigned long long m_bit = (1 << id);
+                unsigned long long p_bit  = ((m_pre_Fan_Present & m_bit) >> id);
+                unsigned long long c_bit  = ((m_Fan_Present  & m_bit) >> id) ;
+    
+                if((p_bit == 1) && (c_bit == 0))
+                { // FAN unplug  					
+                    std::string event("Event");
+                    std::string servrity("OK");					   
+                    std::string sensor_type("Fan");		   
+                    std::string message("FAN unplug.");
+                    Entry.set_log_entry(event , sensor_type , servrity, message, id+1);
+    		
+                    std::string message_event = std::string("Fan ") + std::to_string( id + 1) +  std::string(" Plug Out.");
+                    m_Event_Resouce_Remove.push_back(message_event);				
+                }
+                else if((p_bit == 0) && (c_bit == 1))
+                { // FAN plug in
+                    std::string event("Event");
+                    std::string servrity("OK");					   
+                    std::string sensor_type("Fan");		   
+                    std::string message("FAN plug in.");	
+                    Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
+    
+                    std::string message_event = std::string("Fan ") + std::to_string( id + 1) +  std::string(" Plug In.");
+                    m_Event_Resouce_Add.push_back(message_event);				
+                }  
             }
-            else if((p_bit == 0) && (c_bit == 1))
-            { // FAN plug in
-                std::string event("Event");
-                std::string servrity("OK");					   
-                std::string sensor_type("Fan");		   
-                std::string message("FAN plug in.");	
-                Entry.set_log_entry(event , sensor_type , servrity, message, id+1);			   
-
-                std::string message_event = std::string("Fan ") + std::to_string( id + 1) +  std::string(" Plug In.");
-                m_Event_Resouce_Add.push_back(message_event);				
-            }  
+            m_pre_Fan_Present = m_Fan_Present;
+    
+            return ;
         }
-        m_pre_Fan_Present = m_Fan_Present;
-
-        return ;
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Switch update_fan_present_event() - exception : " << e.what()  << std::endl;	
+            return ;			
+        }			
     }
 
 
     void Switch::update_thermal_present_event()
     {
-        int id = 0;
-
-        for(id = 0; id < m_thermal_sen_max_num; id ++)
-        {
-
-            // Check Thermal present //
-            unsigned int m_bit = (1 << id);
-            unsigned int p_bit  = ((m_pre_Thermal_Present & m_bit) >> id);
-            unsigned int c_bit  = ((m_Thermal_Present  & m_bit) >> id) ;
-
-            if((p_bit == 1) && (c_bit == 0))
-            { // Thermal unplug  					
-                std::string event("Event");
-                std::string servrity("OK");					   
-                std::string sensor_type("Thermal");		   
-                std::string message("Thermal sensor unplug.");
+        try 
+        {      
+            int id = 0;
+    
+            for(id = 0; id < m_thermal_sen_max_num; id ++)
+            {
+    
+                // Check Thermal present //
+                unsigned int m_bit = (1 << id);
+                unsigned int p_bit  = ((m_pre_Thermal_Present & m_bit) >> id);
+                unsigned int c_bit  = ((m_Thermal_Present  & m_bit) >> id) ;
+    
+                if((p_bit == 1) && (c_bit == 0))
+                { // Thermal unplug  					
+                    std::string event("Event");
+                    std::string servrity("OK");					   
+                    std::string sensor_type("Thermal");		   
+                    std::string message("Thermal sensor unplug.");
+                }
+                else if((p_bit == 0) && (c_bit == 1))
+                { // Thermal Thermal in
+                    std::string event("Event");
+                    std::string servrity("OK");					   
+                    std::string sensor_type("Thermal");		   
+                    std::string message("Thermal sensor plug in.");	
+                }  
             }
-            else if((p_bit == 0) && (c_bit == 1))
-            { // Thermal Thermal in
-                std::string event("Event");
-                std::string servrity("OK");					   
-                std::string sensor_type("Thermal");		   
-                std::string message("Thermal sensor plug in.");	
-            }  
+            m_pre_Thermal_Present = m_Thermal_Present;
+    
+            return ;
         }
-        m_pre_Thermal_Present = m_Thermal_Present;
-
-        return ;
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Switch update_thermal_present_event() - exception : " << e.what()  << std::endl;	
+            return ;						
+        }		
     }
 
 
@@ -2624,81 +2891,89 @@ Area : 5
 
     void Switch::get_basic_info()
     {
-        int rv;
-        onlp_init();
-        onlp_sys_info_t si;
-        rv = onlp_sys_info_get(&si);
-        if(rv < 0) {
-            gADbg.acc_printf("error-get_basic_info\r\n");
-            return;
+        try 
+        {       
+            int rv;
+            onlp_init();
+            onlp_sys_info_t si;
+            rv = onlp_sys_info_get(&si);
+            if(rv < 0) {
+                gADbg.acc_printf("error-get_basic_info\r\n");
+                return;
+            }
+            else
+            {
+                onlp_onie_info_t* info =&si.onie_info;
+    
+                if(info->product_name)
+                    m_Product_Name = info->product_name;
+    
+                if(info->part_number)
+                    m_Part_Number= info->part_number;
+    
+                if(info->serial_number)		 
+                    m_Serial_Number= info->serial_number;
+    
+                memcpy(this->m_MAC, info->mac, 6);
+    
+                if(info->mac_range)		
+                    m_MAC_Range= info->mac_range;
+    
+                if(info->manufacturer)		
+                    m_Manufacturer= info->manufacturer;
+    
+                if(info->manufacture_date)			
+                    m_Manu_Date= info->manufacture_date;
+    
+                if(info->vendor)			
+                    m_Vendor= info->vendor;
+    
+                if(info->platform_name)	
+                    m_Platform_Name = info->platform_name;
+    
+                if(info->device_version)			
+                    m_Device_Version= info->device_version;
+    
+                if(info->label_revision)		
+                    m_Label_Revision= info->label_revision;
+    
+                if(info->country_code)		
+                    m_Country_Code= info->country_code;
+    
+                if(info->diag_version)			
+                    m_Diag_Version= info->diag_version;
+    
+                if(info->service_tag)				
+                    m_Service_Tag= info->service_tag;
+    
+                if(info->onie_version)			
+                    m_ONIE_Version= info->onie_version;
+    
+                gADbg.acc_printf( "Product Name: %s\r\n", info->product_name);
+                gADbg.acc_printf( "Part Number: %s\r\n", info->part_number);
+                gADbg.acc_printf( "Serial Number: %s\r\n", info->serial_number);
+                gADbg.acc_printf( "MAC: [0x%02x:0x%02x:0x%02x:0x%02x:0x%02x:0x%02x:\r\n", info->mac[0], info->mac[1] \
+                        , info->mac[2], info->mac[3], info->mac[4],info->mac[5]);
+                gADbg.acc_printf( "MAC Range: %d\r\n", info->mac_range);
+                gADbg.acc_printf( "Manufacturer: %s\r\n", info->manufacturer);
+                gADbg.acc_printf( "Manufacture Date: %s\r\n", info->manufacture_date);
+                gADbg.acc_printf( "Vendor: %s\r\n", info->vendor);
+                gADbg.acc_printf( "Platform Name: %s\r\n", info->platform_name);
+                gADbg.acc_printf( "Device Version: %u\r\n", info->device_version);
+                gADbg.acc_printf( "Label Revision: %s\r\n", info->label_revision);
+                gADbg.acc_printf( "Country Code: %s\r\n", info->country_code);
+                gADbg.acc_printf( "Diag Version: %s\r\n", info->diag_version);
+                gADbg.acc_printf( "Service Tag: %s\r\n", info->service_tag);
+                gADbg.acc_printf( "ONIE Version: %s\r\n", info->onie_version);
+    
+                onlp_sys_info_free(&si);		
+            }
         }
-        else
-        {
-            onlp_onie_info_t* info =&si.onie_info;
-
-            if(info->product_name)
-                m_Product_Name = info->product_name;
-
-            if(info->part_number)
-                m_Part_Number= info->part_number;
-
-            if(info->serial_number)		 
-                m_Serial_Number= info->serial_number;
-
-            memcpy(this->m_MAC, info->mac, 6);
-
-            if(info->mac_range)		
-                m_MAC_Range= info->mac_range;
-
-            if(info->manufacturer)		
-                m_Manufacturer= info->manufacturer;
-
-            if(info->manufacture_date)			
-                m_Manu_Date= info->manufacture_date;
-
-            if(info->vendor)			
-                m_Vendor= info->vendor;
-
-            if(info->platform_name)	
-                m_Platform_Name = info->platform_name;
-
-            if(info->device_version)			
-                m_Device_Version= info->device_version;
-
-            if(info->label_revision)		
-                m_Label_Revision= info->label_revision;
-
-            if(info->country_code)		
-                m_Country_Code= info->country_code;
-
-            if(info->diag_version)			
-                m_Diag_Version= info->diag_version;
-
-            if(info->service_tag)				
-                m_Service_Tag= info->service_tag;
-
-            if(info->onie_version)			
-                m_ONIE_Version= info->onie_version;
-
-            gADbg.acc_printf( "Product Name: %s\r\n", info->product_name);
-            gADbg.acc_printf( "Part Number: %s\r\n", info->part_number);
-            gADbg.acc_printf( "Serial Number: %s\r\n", info->serial_number);
-            gADbg.acc_printf( "MAC: [0x%02x:0x%02x:0x%02x:0x%02x:0x%02x:0x%02x:\r\n", info->mac[0], info->mac[1] \
-                    , info->mac[2], info->mac[3], info->mac[4],info->mac[5]);
-            gADbg.acc_printf( "MAC Range: %d\r\n", info->mac_range);
-            gADbg.acc_printf( "Manufacturer: %s\r\n", info->manufacturer);
-            gADbg.acc_printf( "Manufacture Date: %s\r\n", info->manufacture_date);
-            gADbg.acc_printf( "Vendor: %s\r\n", info->vendor);
-            gADbg.acc_printf( "Platform Name: %s\r\n", info->platform_name);
-            gADbg.acc_printf( "Device Version: %u\r\n", info->device_version);
-            gADbg.acc_printf( "Label Revision: %s\r\n", info->label_revision);
-            gADbg.acc_printf( "Country Code: %s\r\n", info->country_code);
-            gADbg.acc_printf( "Diag Version: %s\r\n", info->diag_version);
-            gADbg.acc_printf( "Service Tag: %s\r\n", info->service_tag);
-            gADbg.acc_printf( "ONIE Version: %s\r\n", info->onie_version);
-
-            onlp_sys_info_free(&si);		
-        }
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Switch get_basic_info() - exception : " << e.what()  << std::endl;	
+            return ;						
+        }			
     }
 
     Switch::~Switch()
@@ -2742,8 +3017,8 @@ Area : 5
             else if (s.find("asgvolt64", 0) != 0)
             {
                 printf("x86-64-accton-asgvolt64\r\n");	    
-            g_Switch = new Switch();
-        }
+                g_Switch = new Switch();
+            }
             else
             {
                 printf("x86-64-accton-generic\r\n");	    
