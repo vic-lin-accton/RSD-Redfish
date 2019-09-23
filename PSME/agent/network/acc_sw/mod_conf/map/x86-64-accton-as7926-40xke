@@ -1,4 +1,4 @@
-
+{
   "1":"/sys/bus/i2c/devices/33-0050/eeprom",
   "2":"/sys/bus/i2c/devices/34-0050/eeprom",
   "3":"/sys/bus/i2c/devices/35-0050/eeprom",
