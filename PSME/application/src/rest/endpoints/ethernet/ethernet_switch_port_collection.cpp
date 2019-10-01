@@ -101,27 +101,6 @@ void EthernetSwitchPortCollection::get(const server::Request& req, server::Respo
         link_elem[Common::ODATA_ID] =  PathBuilder(req).append(i).build();
         json[Collection::MEMBERS].push_back(std::move(link_elem));
     }
-
-#else
-
-    sprintf(command, "psme.sh get max_port_num");
-    memset(resultA,0x0, sizeof(resultA));
-    exec_shell(command, resultA);
-    
-    if(strlen(resultA) != 0)
-    {  
-        int count = atoi(resultA);
-        max_port = count;
-
-        json[Collection::ODATA_COUNT] = max_port;
-		
-        for(int i = 1; i <= count; i++)
-        {	
-                json::Value link_elem(json::Value::Type::OBJECT);
-                link_elem[Common::ODATA_ID] =  PathBuilder(req).append(i).build();
-                json[Collection::MEMBERS].push_back(std::move(link_elem));
-        }
-    }
 #endif
     //For LAG port 
     // Port status //

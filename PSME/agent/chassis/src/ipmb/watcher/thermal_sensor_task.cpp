@@ -31,15 +31,7 @@
 #include "agent-framework/eventing/event_data.hpp"
 #include "agent-framework/eventing/events_queue.hpp"
 #include <ipmb/watcher/thermal_sensor_task.hpp>
-#include <ipmb/command/thermal_sensor_response.hpp>
-#include <ipmb/gpio.hpp>
-#include <ipmb/service.hpp>
  #include <thread>
-#include <ipmi/command/generic/get_device_id.hpp>
-#include <ipmi/command/generic/get_sensor_reading.hpp>
-#include <ipmi/command/generic/get_sensor_reading_factors.hpp>
-#include <ipmi/command/sdv/get_fan_pwm.hpp>
-#include <ipmi/manager/ipmitool/management_controller.hpp>
 
 #include <acc_net_helper/acc_net_helper.hpp>
 using namespace acc_net_helper;
@@ -55,11 +47,7 @@ using namespace agent_framework::module;
 using namespace agent::chassis;
 using namespace agent::chassis::ipmb;
 using namespace agent::chassis::ipmb::watcher;
-using namespace ipmi;
-using namespace ipmi::command;
-
 using namespace agent_framework::command_ref;
-//using namespace agent::network;
 
 using agent_framework::module::ChassisComponents;
 using agent_framework::module::CommonComponents;
@@ -75,8 +63,11 @@ public:
      * Executes Drawer thermal sensor processing
      * @param[in] manager_keys Blades' manager keys
      */
-    void execute() {
+    void execute() 
+    {
         get_onlp_info();
+        get_onlp_port_info();		
+        get_onlp_port_oom_info();
     }
 	void exec_shell(const char* cmd, char * result_a);
     void get_onlp_port_info();
@@ -92,7 +83,7 @@ void OnlpSensorTask::execute() {
     try {
         GetOnlpInfo ps{};
         ps.execute();
-		
+/*		
         if(!m_port_detect_thread)
         {
             std::thread mThread_port(&GetOnlpInfo::get_onlp_port_info, &ps);
@@ -103,6 +94,7 @@ void OnlpSensorTask::execute() {
 
             m_port_detect_thread = true;
         }
+*/
     }
     catch (const std::exception& e) {
         log_debug(LOGUSR, "GetOnlpInfo - exception : " << e.what());
@@ -129,23 +121,6 @@ void GetOnlpInfo::exec_shell(const char* cmd, char * result_a){
 	
 	return;
 	}
-
-
-#ifndef ONLP
-static unsigned int pre_fan_presence= 0;
-static unsigned int pre_psu_presence= 0;
-
-static signed int  UPPER_CPU_THRESHOLD_NON_CRITICAL=0;
-static signed int  UPPER_CPU_THRESHOLD_CRITICAL=0;
-static signed int  UPPER_CPU_THRESHOLD_FATAL=0;
-
-static signed int  UPPER_SYS_THRESHOLD_NON_CRITICAL=0;
-static signed int  UPPER_SYS_THRESHOLD_CRITICAL=0;
-static signed int  UPPER_SYS_THRESHOLD_FATAL=0;
-#define ZERO 0
-#endif
-
-
 
 void GetOnlpInfo::get_onlp_info() 
 {
@@ -334,11 +309,12 @@ void GetOnlpInfo::get_onlp_info()
 void GetOnlpInfo::get_onlp_port_info() 
 {
 #ifdef ONLP
-    try 
-    {
+
         auto& sonlp = Switch::Switch::get_instance();
     
-        while(true)
+    //while(true)
+    {
+        try 
         {
             /*Get/Set  Port info.*/		
             sonlp.get_port_present_info();
@@ -377,13 +353,14 @@ void GetOnlpInfo::get_onlp_port_info()
                 agent_framework::eventing::EventsQueue::get_instance()->push_back(edat);
             }
             sonlp.clean_Event_Port_Rresouce_Event(); //Reset event //   
-            sleep(2);
-        }
     }
     catch (const std::exception& e) 
     {
         log_debug(LOGUSR, "get_onlp_port_info - exception : " << e.what());
     }		
+        //sleep(2);
+    }
+	
     return;
 #endif
 }
@@ -391,11 +368,12 @@ void GetOnlpInfo::get_onlp_port_info()
 void GetOnlpInfo::get_onlp_port_oom_info() 
 {
 #ifdef ONLP
-    try 
-    {
+
         auto& sonlp = Switch::Switch::get_instance();
 
-        while(true)
+    //while(true)
+    {
+        try 
         {
             /*Get/Set  Port info.*/		
             sonlp.get_port_oom_info();
@@ -435,6 +413,7 @@ void GetOnlpInfo::get_onlp_port_oom_info()
                         attribute::TransInfo tTransInfo;			   
                        
                         r = sonlp.get_port_trans_info_by_(portid);
+						
                         if(r != json::Value::Type::NIL)
                         {
                     
@@ -488,14 +467,14 @@ void GetOnlpInfo::get_onlp_port_oom_info()
                     }
                 }
             }
-            sleep(2);
-        }
-
     }
     catch (const std::exception& e) 
     {
         log_debug(LOGUSR, "get_onlp_port_oom_info - exception : " << e.what());
     }			
+        //sleep(2);
+    }
+		
     return;
 #endif
 }

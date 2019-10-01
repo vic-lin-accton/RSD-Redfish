@@ -58,7 +58,8 @@ void PsuCollection::get(const server::Request& req, server::Response& res) {
 // Use ONLP library to to get ONLP info.
 
     //Set PSU related info. //
-	
+    try 
+    {	
     auto json = ::make_prototype();
 
     json[Common::ODATA_ID] = PathBuilder(req).build();
@@ -76,14 +77,6 @@ void PsuCollection::get(const server::Request& req, server::Response& res) {
         
         json::Value jsonctrl; 
         {
-/*			
-            jsonctrl[Common::ODATA_ID] =  endpoint::PathBuilder(PathParam::BASE_URL).
-            append(Common::CHASSIS).
-            append(chassis.get_id()).
-            append("Power#").
-            append(constants::Root::PCTRL).				
-            append(psu_.get_psu_id()).build();
-*/
             jsonctrl[Common::ODATA_ID] =  endpoint::PathBuilder(PathParam::BASE_URL).
             append(Common::CHASSIS).
             append(chassis.get_id()).
@@ -127,14 +120,6 @@ void PsuCollection::get(const server::Request& req, server::Response& res) {
         
         json::Value jsonVoltages; 
         {
-/*			
-            jsonVoltages[Common::ODATA_ID] =  endpoint::PathBuilder(PathParam::BASE_URL).
-            append(Common::CHASSIS).
-            append(chassis.get_id()).
-            append("Power#").
-            append(constants::Root::PVOLTAGE).				
-            append(psu_.get_psu_id()).build();
-*/
             jsonVoltages[Common::ODATA_ID] =  endpoint::PathBuilder(PathParam::BASE_URL).
             append(Common::CHASSIS).
             append(chassis.get_id()).
@@ -218,182 +203,11 @@ void PsuCollection::get(const server::Request& req, server::Response& res) {
     }
     json["Oem"] =json::Value::Type::OBJECT; 
     set_response(res, json);
-#else
-//Todo , move all platform using ONLP library
-    char command[256] = {0};
-    char resultA[256] = {0};	
-    int PRESENT= 0;
-	
-    sprintf(command, "psme.sh  get psu_presence");
-    memset(resultA,0x0, sizeof(resultA));
-    exec_shell(command, resultA);
-    
-    if(strlen(resultA) != 0)
-    {  
-        PRESENT=atoi(resultA);
+		}
+    catch (const std::exception& e) 
+		{
+        log_debug(LOGUSR, "PsuCollection get - exception : " << e.what());
     }
-    
-    auto json = ::make_prototype();
-
-    json[Common::ODATA_ID] = PathBuilder(req).build();
-       json[Common::ID] = "Power";
-	//For PSU
-    auto chassis_ids = ChassisComponents::get_instance()->get_thermal_zone_manager().get_ids();	
-    auto chassis = psme::rest::model::Find<agent_framework::model::Chassis>(req.params[PathParam::CHASSIS_ID]).get();
-
-    auto& psu_manager = agent_framework::module::ChassisComponents::get_instance()->get_psu_manager();
-    auto psu_uuids = psu_manager.get_keys();
-	
-    for (const auto& psu_uuid : psu_uuids) {
-		auto psu_ = psu_manager.get_entry(psu_uuid);  //Get Fan object by fan_uuid//
-
-		json::Value jsonctrl; 
-		{
-		       jsonctrl[Common::ODATA_ID] =  endpoint::PathBuilder(PathParam::BASE_URL).
-			append(Common::CHASSIS).
-			append(chassis.get_id()).
-			append("Power#").
-			append(constants::Root::PCTRL).				
-			append(psu_.get_psu_id()).build();
-
-			jsonctrl[Common::MEMBER_ID] = std::to_string(psu_.get_psu_id());
-			jsonctrl[Common::NAME] = "System Power Control";
-
-                     if(PRESENT & psu_.get_psu_id())
-			    jsonctrl[PowerZone::POWER_CONSUMED] = (psu_.get_power_output() * 0.001);	
-                     else
-			    jsonctrl[PowerZone::POWER_CONSUMED] = json::Value::Type::NIL;
-					 	
-			jsonctrl["PowerRequestedWatts"] = json::Value::Type::NIL;
-			jsonctrl["PowerAvailableWatts"] = json::Value::Type::NIL;
-			jsonctrl["PowerCapacityWatts"] = 0;
-			jsonctrl["PowerAllocatedWatts"] = json::Value::Type::NIL;
-
-			json::Value jsonctrl_Metrics; 
-
-			jsonctrl_Metrics["PowerMetrics"]["IntervalInMin"]= json::Value::Type::NIL;
-			jsonctrl_Metrics["PowerMetrics"]["MinConsumedWatts"]= json::Value::Type::NIL;
-			jsonctrl_Metrics["PowerMetrics"]["MaxConsumedWatts"]= json::Value::Type::NIL;
-			jsonctrl_Metrics["PowerMetrics"]["AverageConsumedWatts"]= json::Value::Type::NIL;
-			jsonctrl.push_back(std::move(jsonctrl_Metrics));
-
-			jsonctrl["PowerLimit"]["LimitInWatts"]= json::Value::Type::NIL;
-			jsonctrl["PowerLimit"]["LimitException"]= json::Value::Type::NIL;
-			jsonctrl["PowerLimit"]["CorrectionInMs"]= json::Value::Type::NIL;
-
-
-			json::Value lrejsontmp;
-			lrejsontmp[Common::ODATA_ID] = endpoint::PathBuilder(PathParam::BASE_URL).append(Common::CHASSIS).append(chassis.get_id()).build();	
-	              jsonctrl["RelatedItem"].push_back(std::move(lrejsontmp));
-
-			int bpresent=(1 << (psu_.get_psu_id()-1));
-
-                     if(psu_.get_power_output() != 0 )
-                     {  //PSU with power cord connected //
-                         jsonctrl["Status"]["State"]="Enabled";
-                         jsonctrl["Status"]["Health"]="OK";
-                         jsonctrl["Status"]["HealthRollup"]="OK";
-                     }
-                     else if((PRESENT & bpresent) && psu_.get_power_output() == 0)
-                     {  //PSU exist with no power cord connected //
-                         jsonctrl["Status"]["State"]= "UnavailableOffline"; 
-                         jsonctrl["Status"]["Health"]= json::Value::Type::NIL;
-                         jsonctrl["Status"]["HealthRollup"]= json::Value::Type::NIL;
-                     }					 
-                     else if(!(PRESENT & bpresent))
-                     { //PSU doesn't exist  //
-                         jsonctrl["Status"]["State"]= "Absent"; 
-                         jsonctrl["Status"]["Health"]= json::Value::Type::NIL;
-                         jsonctrl["Status"]["HealthRollup"]= json::Value::Type::NIL;
-                     }
-                     else
-                     {
-                         jsonctrl["Status"]["State"]= json::Value::Type::NIL;
-                         jsonctrl["Status"]["Health"]= json::Value::Type::NIL;
-                         jsonctrl["Status"]["HealthRollup"]= json::Value::Type::NIL;
-                     }					 	
-					 	
-			jsonctrl["Oem"] = json::Value::Type::OBJECT;
-		}
-
-		json["PowerControl"].push_back(std::move(jsonctrl));
-
-
-		json::Value jsonVoltages; 
-		{
-		       jsonVoltages[Common::ODATA_ID] =  endpoint::PathBuilder(PathParam::BASE_URL).
-			append(Common::CHASSIS).
-			append(chassis.get_id()).
-			append("Power#").
-				append(constants::Root::PVOLTAGE).				
-			append(psu_.get_psu_id()).build();
-
-			jsonVoltages[Common::MEMBER_ID] = std::to_string(psu_.get_psu_id());
-			jsonVoltages[Common::NAME] = "Voltage";
-	              jsonVoltages["SensorNumber"] =  psu_.get_psu_id();		
-			jsonVoltages["ReadingVolts"] = json::Value::Type::NIL;
-			jsonVoltages["UpperThresholdNonCritical"] = json::Value::Type::NIL;
-			jsonVoltages["UpperThresholdCritical"] = json::Value::Type::NIL;
-			jsonVoltages["UpperThresholdFatal"] = json::Value::Type::NIL;
-			jsonVoltages["LowerThresholdNonCritical"] = json::Value::Type::NIL;
-			jsonVoltages["LowerThresholdCritical"] = json::Value::Type::NIL;
-			jsonVoltages["LowerThresholdFatal"] = json::Value::Type::NIL;
-			jsonVoltages["PhysicalContext"] = "VoltageRegulator";
-			jsonVoltages["Status"]["State"]="Enabled";
-			jsonVoltages["Status"]["Health"]="OK";
-
-			json::Value lrejsontmp;
-			lrejsontmp[Common::ODATA_ID] = endpoint::PathBuilder(PathParam::BASE_URL).append(Common::CHASSIS).append(chassis.get_id()).build();	
-	              jsonVoltages["RelatedItem"].push_back(std::move(lrejsontmp));
-		}
-
-		json["Voltages"].push_back(std::move(jsonVoltages));
-
-
-		json::Value json_PowerSupplies; 
-		{
-		       json_PowerSupplies[Common::ODATA_ID] =  endpoint::PathBuilder(PathParam::BASE_URL).
-			append(Common::CHASSIS).
-			append(chassis.get_id()).
-			append("Power#").
-				append(constants::Root::PSUS).				
-			append(psu_.get_psu_id()).build();
-
-			json_PowerSupplies[Common::MEMBER_ID] = std::to_string(psu_.get_psu_id());
-			json_PowerSupplies[Common::NAME] = "System PowerSupplies";
-			json_PowerSupplies["Oem"]= json::Value::Type::OBJECT;
-			json_PowerSupplies["PowerSupplyType"] = json::Value::Type::NIL;
-			json_PowerSupplies["LineInputVoltageType"] = json::Value::Type::NIL;
-			json_PowerSupplies["LineInputVoltage"] = json::Value::Type::NIL;
-			json_PowerSupplies["PowerCapacityWatts"] = json::Value::Type::NIL;
-			json_PowerSupplies["LastPowerOutputWatts"] = json::Value::Type::NIL;
-			json_PowerSupplies["Model"] = json::Value::Type::NIL;
-			json_PowerSupplies["Manufacturer"] = "N/A";
-			json_PowerSupplies["FirmwareVersion"] = json::Value::Type::NIL;
-			json_PowerSupplies["SerialNumber"] = json::Value::Type::NIL;
-			json_PowerSupplies["PartNumber"] = json::Value::Type::NIL;
-			json_PowerSupplies["SparePartNumber"] = json::Value::Type::NIL;
-			json_PowerSupplies["Status"]["State"]="Enabled";
-			json_PowerSupplies["Status"]["Health"]="OK";
-
-			json::Value json_input_range; 
-
-			json_input_range["InputType"]= json::Value::Type::NIL;
-			json_input_range["MinimumVoltage"]= json::Value::Type::NIL;
-			json_input_range["MaximumVoltage"]= json::Value::Type::NIL;
-			json_input_range["OutputWattage"]= json::Value::Type::NIL;
-			//json_PowerSupplies["InputRanges"].push_back(std::move(json_input_range));
-
-			json::Value lrejsontmp;
-			lrejsontmp[Common::ODATA_ID] = endpoint::PathBuilder(PathParam::BASE_URL).append(Common::CHASSIS).append(chassis.get_id()).build();	
-	              json_PowerSupplies["RelatedItem"].push_back(std::move(lrejsontmp));
-		}
-
-		json["PowerSupplies"].push_back(std::move(json_PowerSupplies));
-    }
-
-    json["Oem"] =json::Value::Type::OBJECT;
-    set_response(res, json);
 #endif
 
 

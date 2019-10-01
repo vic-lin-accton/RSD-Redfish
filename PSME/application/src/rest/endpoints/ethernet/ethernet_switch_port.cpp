@@ -219,15 +219,6 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
 #ifdef ONLP
     auto& sonlp = acc_onlp_helper::Switch::get_instance();
     max_port = sonlp.get_port_num();	
-#else
-    sprintf(command, "psme.sh get max_port_num");
-    memset(resultA,0x0, sizeof(resultA));
-    exec_shell(command, resultA);
-    
-    if(strlen(resultA) != 0)
-    {  
-        max_port = atoi(resultA);
-    }
 #endif
 
     if( port_id  >max_port )	

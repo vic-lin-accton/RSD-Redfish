@@ -35,6 +35,8 @@ Psu::~Psu() {}
 
 Json::Value Psu::to_json() const {
     Json::Value result;
+    try 
+    {	
     result[literals::Psu::STATUS] = get_status().to_json();
     result[literals::Psu::SLOT] = get_slot();
     result[literals::Psu::POWER_INPUT] = get_power_input();
@@ -55,12 +57,19 @@ Json::Value Psu::to_json() const {
     result[literals::Psu::PSU_SN]            = get_psu_sn();
     result[literals::Psu::PSU_MODULE]        = get_psu_module();
 /*Nick Added End  : */	
+    }
+    catch (const std::exception& e) 
+    {
+        log_debug(LOGUSR, "Psu::to_json - exception : " << e.what());
+    }
+
     return result;
 }
 
 Psu Psu::from_json(const Json::Value& json) {
     Psu psu;
-
+    try 
+    {	
     psu.set_status(attribute::Status::from_json(json[literals::Psu::STATUS]));
     psu.set_slot(json[literals::Psu::SLOT].asUInt());
     psu.set_power_input(json[literals::Psu::POWER_INPUT].asDouble());
@@ -81,6 +90,10 @@ Psu Psu::from_json(const Json::Value& json) {
     psu.set_psu_sn(json[literals::Psu::PSU_SN]);       
     psu.set_psu_module(json[literals::Psu::PSU_MODULE]);       
 /*Nick Added End  : */		
-
+    }
+    catch (const std::exception& e) 
+    {
+        log_debug(LOGUSR, "Psu::from_json - exception : " << e.what());
+    }
     return psu;
 }

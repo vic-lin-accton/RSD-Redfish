@@ -750,23 +750,21 @@ namespace acc_onlp_helper {
 
     bool e_oom::get_eeprom_raw()    
     {
+        std::ifstream is( m_eeprom_path, std::ifstream::binary);    
         try 
         {
-	
-            std::ifstream is( m_eeprom_path, std::ifstream::binary);
-    
             if (is) 
             {
                 is.seekg (0, is.end);
                 //int length = is.tellg();
-                int length = SIZE_EEPROM;
                 is.seekg (0, is.beg);
     
-                char * buffer = new char [length];
+                //char * buffer = new char [length];
+                char buffer[SIZE_EEPROM] = {0};
     
-                std::cout << "Port["  << m_eeprom_path << "] reading " << length << " characters" << std::endl;
+                std::cout << "Port["  << m_eeprom_path << "] reading " << SIZE_EEPROM << " characters.." << std::endl;
     
-                is.read (buffer,length);
+                is.read (buffer,SIZE_EEPROM);
     
                 if(store_eeprom(buffer))
                 {
@@ -786,7 +784,7 @@ namespace acc_onlp_helper {
                     status_default();
     
                 is.close();
-                delete[] buffer;
+                //delete[] buffer;
             }
             else
             {
@@ -907,7 +905,7 @@ namespace acc_onlp_helper {
     
                         if(C_PN.size() < PN_Size)
                         {
-                            char tmp_PN[16] = {0}; 
+                            char tmp_PN[64] = {0}; 
                             memcpy(tmp_PN,in_eeprom + PN_Base, C_PN.size());
                             printf("tmp_PN[%s]\r\n", tmp_PN);
                             std::string tstring = tmp_PN;
@@ -958,7 +956,7 @@ namespace acc_onlp_helper {
     
                         if(C_PN.size() < PN_Size)
                         {
-                            char tmp_PN[16] = {0}; 
+                            char tmp_PN[64] = {0}; 
                             memcpy(tmp_PN,in_eeprom + PN_Base, C_PN.size());
                             printf("8472 tmp_PN[%s]\r\n", tmp_PN);
                             std::string tstring = tmp_PN;
@@ -1008,7 +1006,7 @@ namespace acc_onlp_helper {
     
                         if(C_PN.size() < PN_Size)
                         {
-                            char tmp_PN[16] = {0}; 
+                            char tmp_PN[64] = {0}; 
                             memcpy(tmp_PN,in_eeprom + PN_Base, C_PN.size());
                             printf("8438 tmp_PN[%s]\r\n", tmp_PN);
                             std::string tstring = tmp_PN;
@@ -2785,7 +2783,6 @@ namespace acc_onlp_helper {
                             return (*pObj)->m_Status_State;
                         else
                             return "na";
-    
                     }
                 }
             }
@@ -3002,12 +2999,14 @@ namespace acc_onlp_helper {
 
     Switch& Switch::get_instance() 
     {
+        try 
+        {       
+            if (NULL == g_Switch) 
+            {
         ifstream ifs ("/etc/onl/platform");
         std::string s;
         getline (ifs, s, (char) ifs.eof());
 
-        if (NULL == g_Switch) 
-        {
             printf("Creating Olt_Device on platform [%s] size[%d]\r\n", s.c_str(),(int)s.size());	        
             if(s.find("asxvolt16", 0) != 0)
             {           
@@ -3025,8 +3024,13 @@ namespace acc_onlp_helper {
                 g_Switch = new Switch();
             }
         }
-
         return *g_Switch;
+    }
+        catch (const std::exception& e) 
+        {      
+            std::cout << "Switch get_basic_info() - exception : " << e.what()  << std::endl;	
+            return *g_Switch;						
+        }			
     }
 
 

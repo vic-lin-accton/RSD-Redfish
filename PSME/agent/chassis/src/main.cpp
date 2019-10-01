@@ -51,6 +51,11 @@
 
 #include <jsonrpccpp/server/connectors/httpserver.h>
 #include <csignal>
+#include <stdio.h>
+#include <execinfo.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #ifdef ONLP
 #include "acc_onlp_helper/acc_onlp_helper.hpp"
@@ -92,7 +97,22 @@ void add_state_machine_entries(StateMachineThread* machine_thread, StateMachineT
 const json::Value& init_configuration(int argc, const char** argv);
 bool check_configuration(const json::Value& json);
 
+void seg_fault_handler(int sig) ;
 
+
+void seg_fault_handler(int sig) 
+{
+    void *array[10];
+    long unsigned int size;
+    
+    // get void*'s for all entries on the stack
+    size = backtrace(array, 10);
+    
+    // print out all the frames to stderr
+    fprintf(stderr, "Error: signal %d:\n", sig);
+    backtrace_symbols_fd(array, size, STDERR_FILENO);
+    exit(1);
+}
 
 
 /*!
@@ -137,6 +157,12 @@ int main(int argc, const char* argv[]) {
     intf_ip.Restart();
 
     /* Initialize command server */
+    signal(SIGSEGV, seg_fault_handler);   // install our handler
+
+    //int *foo = (int*)-1; // make a bad pointer
+    //printf("%d\n", *foo);       // causes segfault
+
+  
     jsonrpc::HttpServer http_server((int(server_port)));
     agent_framework::command_ref::CommandServer server(http_server);
     server.add(command_ref::Registry::get_instance()->get_commands());
