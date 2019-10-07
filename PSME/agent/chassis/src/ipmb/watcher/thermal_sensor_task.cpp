@@ -66,8 +66,8 @@ public:
     void execute() 
     {
         get_onlp_info();
-        get_onlp_port_info();		
-        get_onlp_port_oom_info();
+        //get_onlp_port_info();		
+        //get_onlp_port_oom_info();
     }
 	void exec_shell(const char* cmd, char * result_a);
     void get_onlp_port_info();
@@ -83,7 +83,7 @@ void OnlpSensorTask::execute() {
     try {
         GetOnlpInfo ps{};
         ps.execute();
-/*		
+///*		
         if(!m_port_detect_thread)
         {
             std::thread mThread_port(&GetOnlpInfo::get_onlp_port_info, &ps);
@@ -94,7 +94,7 @@ void OnlpSensorTask::execute() {
 
             m_port_detect_thread = true;
         }
-*/
+//*/
     }
     catch (const std::exception& e) {
         log_debug(LOGUSR, "GetOnlpInfo - exception : " << e.what());
@@ -312,7 +312,7 @@ void GetOnlpInfo::get_onlp_port_info()
 
         auto& sonlp = Switch::Switch::get_instance();
     
-    //while(true)
+    while(true)
     {
         try 
         {
@@ -358,7 +358,7 @@ void GetOnlpInfo::get_onlp_port_info()
     {
         log_debug(LOGUSR, "get_onlp_port_info - exception : " << e.what());
     }		
-        //sleep(2);
+        sleep(2);
     }
 	
     return;
@@ -371,7 +371,7 @@ void GetOnlpInfo::get_onlp_port_oom_info()
 
         auto& sonlp = Switch::Switch::get_instance();
 
-    //while(true)
+    while(true)
     {
         try 
         {
@@ -472,7 +472,7 @@ void GetOnlpInfo::get_onlp_port_oom_info()
     {
         log_debug(LOGUSR, "get_onlp_port_oom_info - exception : " << e.what());
     }			
-        //sleep(2);
+        sleep(2);
     }
 		
     return;

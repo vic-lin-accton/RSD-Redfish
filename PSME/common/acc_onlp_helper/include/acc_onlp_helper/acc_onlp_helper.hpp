@@ -30,7 +30,7 @@
 #include <linux/sockios.h>
 #include <json/json.h>
 #include <json/json.hpp>
-
+#include <mutex>
 #include <acc_net_helper/acc_net_helper.hpp>
 
 //#define FF3(readin) (float(int(readin*1000))/1000.000);
@@ -442,6 +442,7 @@ namespace acc_onlp_helper
             void get_basic_info();
             void get_board_info();
 
+            mutable std::mutex m_data_mutex{};
 
             void set_port_present(int ID, bool status)
             {

@@ -1261,6 +1261,7 @@ namespace acc_onlp_helper {
 
     void Switch::get_board_info()
     {
+        std::lock_guard<std::mutex> lock{m_data_mutex};
         gADbg.acc_printf("/////////start get_board_info////////////\r\n");
 
         try 
@@ -1479,6 +1480,8 @@ namespace acc_onlp_helper {
     {
         try 
         {
+            std::lock_guard<std::mutex> lock{m_data_mutex};
+
             int ii = 0;
     
             for(ii= 1; ii <= m_port_max_num ; ii++)
@@ -1529,6 +1532,8 @@ namespace acc_onlp_helper {
     {
         try 
         {    
+            std::lock_guard<std::mutex> lock{m_data_mutex};
+
             int ii = 0;
     
             for(ii= 1; ii <= m_port_max_num ; ii++)
@@ -2447,6 +2452,8 @@ namespace acc_onlp_helper {
     {
         try 
         {        
+            std::lock_guard<std::mutex> lock{m_data_mutex};
+
             int ii=0;
     
             for(ii= 1; ii <= m_port_max_num; ii++)
@@ -2483,6 +2490,8 @@ namespace acc_onlp_helper {
     {
         try 
         {        
+            std::lock_guard<std::mutex> lock{m_data_mutex};
+
             int ii=0;
     
             for(ii= 1; ii <= m_port_max_num; ii++)
@@ -2508,6 +2517,8 @@ namespace acc_onlp_helper {
     {
         try 
         { 
+            std::lock_guard<std::mutex> lock{m_data_mutex};
+		
             int ii=0;
     
             for(ii= 1; ii <= m_port_max_num; ii++)
