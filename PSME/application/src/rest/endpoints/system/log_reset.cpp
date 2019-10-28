@@ -46,14 +46,9 @@ endpoint::LogReset::~LogReset() {}
 
 void endpoint::LogReset::post(const server::Request& request, server::Response& response) 
 {
+    //dummy //
+    PathBuilder(request).build();
     RFLogEntry Entry;
     Entry.clean_log();
-/*
-    char command[256] = {0};
-    char resultA[256] = {0};
-
-    sprintf(command, "%s" ,"logsrv.sh set Reset");	
-    exec_shell(command, resultA);
-*/
     response.set_status(server::status_2XX::OK);
 }

@@ -31,6 +31,10 @@ add_gtest(parser smbios
         test_fixture.hpp
         conversions_test.cpp
 )
+set_source_files_properties(
+	conversions_test.cpp
+	PROPERTIES COMPILE_FLAGS "-Wno-missing-field-initializers"
+)
 
 target_link_libraries(${test_target}
         smbios

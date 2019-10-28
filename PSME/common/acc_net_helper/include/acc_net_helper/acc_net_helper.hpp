@@ -263,19 +263,6 @@ namespace acc_net_helper {
 
     };
 
-    class RFKafkaEntry
-    {
-        public:
-            void set_Kaffa_entry(std::string& event_type,std::string& sensor_type,std::string& Serverity, std::string& message_content, int sensor_id);
-            std::string get_current_time();	
-            std::string   m_kafka_tmp_path = {"/tmp/tmp_kaka"};			
-            HelperTools m_help_tools = {};
-
-        private:
-            std::string   m_timeStr = {};
-
-    };
-	
 }
 
 #endif

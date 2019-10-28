@@ -24,12 +24,19 @@ if (CMAKE_CROSSCOMPILING)
     return()
 endif()
 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-field-initializers")
+
 set(FRU_EEPROM_LIBRARIES
         )
 set(FRU_EEPROM_INCLUDE_DIRS
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         CACHE PATH "FRU EEPROM include directory"
         )
+
+set_source_files_properties(
+   fru_eeprom_parser.hpp
+   PROPERTIES COMPILE_FLAGS "-Wno-missing-field-initializers"
+)
 
 include_directories(
         include

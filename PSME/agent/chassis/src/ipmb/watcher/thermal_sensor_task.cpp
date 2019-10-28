@@ -306,7 +306,7 @@ void GetOnlpInfo::get_onlp_info()
 }
 
 
-void GetOnlpInfo::get_onlp_port_info() 
+[[ noreturn ]]  void GetOnlpInfo::get_onlp_port_info() 
 {
 #ifdef ONLP
 
@@ -360,12 +360,10 @@ void GetOnlpInfo::get_onlp_port_info()
     }		
         sleep(2);
     }
-	
-    return;
 #endif
 }
 
-void GetOnlpInfo::get_onlp_port_oom_info() 
+[[ noreturn ]] void GetOnlpInfo::get_onlp_port_oom_info() 
 {
 #ifdef ONLP
 
@@ -474,8 +472,6 @@ void GetOnlpInfo::get_onlp_port_oom_info()
     }			
         sleep(2);
     }
-		
-    return;
 #endif
 }
 

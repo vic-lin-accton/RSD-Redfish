@@ -301,28 +301,6 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
             r["Statistics"] = pOLT.get_port_statistic(iPort); 
     #endif    
 
-//        r["Transceiver Statistics gg"] = sonlp.get_port_trans_info_by_(iPort);		
-
-
-#else
-        sprintf(command, "psme.sh get sfp_port_status %d" , std::stoi(req.params[PathParam::SWITCH_PORT_ID]));
-        memset(resultA,0x0, sizeof(resultA));
-        exec_shell(command, resultA);
-		
-        if(!strncmp(resultA, "1", 1) || !strncmp("2", resultA, 1))
-        {
-            r[Common::STATUS][Common::STATE]  = "Enabled";
-            r[Common::STATUS][Common::HEALTH] = "OK";
-            r[Common::STATUS][Common::HEALTH_ROLLUP] = "OK";	
-            r[constants::EthernetSwitchPort::LINK_TYPE] = "Ethernet";		
-        }
-        else
-        {
-            r[Common::STATUS][Common::STATE]  = "Absent";
-            r[Common::STATUS][Common::HEALTH] = "Warning";
-            r[Common::STATUS][Common::HEALTH_ROLLUP] = "Warning";	
-        }
-
 #endif
         r[Common::STATUS][Common::HEALTH_ROLLUP] =
         endpoint::HealthRollup<agent_framework::model::EthernetSwitchPort>().get(port.get_uuid());

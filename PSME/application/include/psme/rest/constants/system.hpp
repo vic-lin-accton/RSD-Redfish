@@ -88,6 +88,12 @@ extern const char NMI[];
 extern const char GRACEFUL_RESTART[];
 extern const char FORCE_ON[];
 extern const char PUSH_POWER_BUTTON[];
+extern const char MEMROY_STATE[];
+extern const char TO_MEMROY_B[];
+extern const char FR_MEMROY_B[];
+extern const char TO_SWAP_MEMROY_B[];
+extern const char FR_SWAP_MEMROY_B[];
+
 }
 
 
@@ -151,6 +157,8 @@ extern const char MICROCODE_INFO[];
 extern const char MAX_SPEED[];
 extern const char TOTAL_CORES[];
 extern const char TOTAL_THREADS[];
+extern const char CPU_STATUS[];
+extern const char LOAD_PERCENT[];
 }
 
 /*!

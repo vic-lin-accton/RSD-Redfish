@@ -54,10 +54,10 @@ json::Value make_prototype() {
     return r;
 }
 
-const json::Value validate_post_request(const server::Request& request) {
-    return JsonValidator::validate_request_body(request,
-                                                schema::VlanNetworkInterfaceCollectionPostSchema::get_procedure());
-}
+//const json::Value validate_post_request(const server::Request& request) {
+//    return JsonValidator::validate_request_body(request,
+//                                                schema::VlanNetworkInterfaceCollectionPostSchema::get_procedure());
+//}
 
 }
 
@@ -104,5 +104,5 @@ void Mgmt_VlanNetworkInterfaceCollection::get(const server::Request& req, server
     set_response(res, r);
 }
 
-void Mgmt_VlanNetworkInterfaceCollection::post(const server::Request& req, server::Response& res) {
-}
+//void Mgmt_VlanNetworkInterfaceCollection::post(const server::Request& req, server::Response& res) {
+//}

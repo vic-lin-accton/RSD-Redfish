@@ -28,6 +28,7 @@ set (SOURCES
 include_directories(
     ${PSME_APPLICATION_DIR}/include
     ${ACC_ONLP_HELPER_INCLUDE_DIRS}
+    ${ACC_SYS_HELPER_INCLUDE_DIRS}
     ${ACC_BAL_API_DIST_HELPER_INCLUDE_DIRS}
 )
 
@@ -88,6 +89,7 @@ target_link_libraries(psme-rest-server
     ${SAFESTRING_LIBRARIES}
     ${EXTRA_LIBS}
     ${ACC_NET_HELPER_LIBRARIES}
+    ${ACC_SYS_HELPER_LIBRARIES}
     ${ACC_ONLP_HELPER_LIBRARIES}
     ${LIBONLP}
     ${LIBONLP_PF}

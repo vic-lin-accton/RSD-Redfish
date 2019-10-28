@@ -53,6 +53,12 @@
           <Annotation Term="OData.Description" String="Identification information for this processor."/>
           <Annotation Term="OData.LongDescription" String="This object shall contain identification information for this processor."/>
         </Property>
+
+        <Property Name="CpuStatus" Type="Processor.v1_0_0.CpuStatus"  Nullable="false">
+          <Annotation Term="OData.Description" String="CPU usage for this processor."/>
+          <Annotation Term="OData.LongDescription" String="This object shall contain CPU usage information for this processor."/>
+        </Property>
+        
         <Property Name="Status" Type="Resource.Status" Nullable="false"/>
         <Property Name="Manufacturer" Type="Edm.String">
           <Annotation Term="OData.Permissions" EnumMember="OData.Permission/Read" />
@@ -113,6 +119,21 @@
           <Annotation Term="OData.Description" String="The Microcode Information for this processor" />
           <Annotation Term="OData.LongDescription" String="This property shall indicate the Microcode Information as provided by the manufacturer of this processor." />
         </Property>
+      </ComplexType>
+
+      <ComplexType Name="CpuStatus">
+          <Annotation Term="OData.AdditionalProperties" Bool="false"/>
+          <Property Name="LoadingPercentage" Type="Edm.Double"/>
+          <Property Name="user" Type="Edm.Double"/>
+          <Property Name="user nice" Type="Edm.Double"/>
+          <Property Name="system" Type="Edm.Double"/>
+          <Property Name="idle" Type="Edm.Double"/>
+          <Property Name="io wait" Type="Edm.Double"/>
+          <Property Name="hard irq" Type="Edm.Double"/>
+          <Property Name="soft irq" Type="Edm.Double"/>
+          <Property Name="steal" Type="Edm.Double"/>
+          <Property Name="guest" Type="Edm.Double"/>
+          <Property Name="guest nice" Type="Edm.Double"/>		
       </ComplexType>
 
       <EnumType Name="ProcessorType">

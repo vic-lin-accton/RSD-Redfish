@@ -60,9 +60,6 @@
 #ifdef ONLP
 #include "acc_onlp_helper/acc_onlp_helper.hpp"
 using namespace acc_onlp_helper;
-#else
-#include <acc_net_helper/acc_net_helper.hpp>
-using namespace acc_net_helper;
 #endif
 
 #ifdef VOLT
@@ -103,15 +100,15 @@ void seg_fault_handler(int sig) ;
 void seg_fault_handler(int sig) 
 {
     void *array[10];
-    long unsigned int size;
+    int size;
     
     // get void*'s for all entries on the stack
     size = backtrace(array, 10);
     
     // print out all the frames to stderr
     fprintf(stderr, "Error: signal %d:\n", sig);
-    backtrace_symbols_fd(array, size, STDERR_FILENO);
-    exit(1);
+    backtrace_symbols_fd(array, size, (int)STDERR_FILENO);
+    return;
 }
 
 

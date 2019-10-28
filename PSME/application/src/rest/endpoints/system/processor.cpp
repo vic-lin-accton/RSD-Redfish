@@ -25,10 +25,11 @@
 
 #include <json/json.hpp>
 #include <regex>
+#include <acc_sys_helper/acc_sys_helper.hpp>
 
 using namespace psme::rest;
 using namespace psme::rest::constants;
-
+using namespace acc_sys_helper;
 
 
 namespace {
@@ -115,5 +116,20 @@ void endpoint::Processor::get(const server::Request& req, server::Response& res)
     json[constants::Processor::TOTAL_CORES] = processor.get_total_cores();
     json[constants::Processor::TOTAL_THREADS] = processor.get_total_threads();
 
+#define FF3(readin) float(int(readin*1000))/1000
+
+#if 1
+    CPU s1;
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    CPU s2;    
+    CPUStatsPrinter printer(s1, s2);
+
+    json[constants::Processor::CPU_STATUS][constants::Processor::LOAD_PERCENT] = printer.GetPercActiveTotal();
+
+    for(int s = 0; s < CPUData::NUM_CPU_STATES; ++s)
+    {
+       json[constants::Processor::CPU_STATUS][CPUStatsPrinter::STR_STATES[s]] = FF3(printer.GetPercStateTotal(s));
+    }
+#endif 
     set_response(res, json);
 }

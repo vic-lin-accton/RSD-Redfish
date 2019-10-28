@@ -31,6 +31,7 @@ add_subdirectory(fru_eeprom)
 add_subdirectory(net)
 add_subdirectory(ssdp)
 add_subdirectory(acc_net_helper)
+add_subdirectory(acc_sys_helper)
 
 IF(${CUSEONLPLIB} STREQUAL "TRUE")
     add_subdirectory(acc_onlp_helper)

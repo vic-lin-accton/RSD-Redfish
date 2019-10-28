@@ -209,7 +209,4 @@ void PsuCollection::get(const server::Request& req, server::Response& res) {
         log_debug(LOGUSR, "PsuCollection get - exception : " << e.what());
     }
 #endif
-
-
-
 }

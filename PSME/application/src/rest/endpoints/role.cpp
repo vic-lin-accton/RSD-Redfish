@@ -99,11 +99,10 @@ void endpoint::Role::del(const server::Request& request, server::Response& respo
 
 void endpoint::Role::patch(const server::Request& request, server::Response& response) {
 	
-    
+#if 0        
     using namespace psme::rest::account::model;
     const auto& id = id_to_uint64(request.params[PathParam::ROLE_ID]);
    
-#if 0    
     account::model::Account account = AccountManager::get_instance()->getAccount(id);    
     const auto json = JsonValidator::validate_request_body<schema::AccountCollectionPostSchema>(request);
     

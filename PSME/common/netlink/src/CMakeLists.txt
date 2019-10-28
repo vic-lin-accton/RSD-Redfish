@@ -27,6 +27,11 @@ set(SOURCES
     utils.cpp
 )
 
+set_source_files_properties(
+    neigh_message.cpp 
+    PROPERTIES COMPILE_FLAGS "-Wno-missing-field-initializers"
+)
+
 add_library(netlink STATIC ${SOURCES})
 
 install(TARGETS netlink

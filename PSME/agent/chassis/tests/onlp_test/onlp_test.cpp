@@ -24,13 +24,17 @@
 
 #include "gtest/gtest.h"
 #include <acc_onlp_helper/acc_onlp_helper.hpp>
+#include <acc_sys_helper/acc_sys_helper.hpp>
+
 using namespace acc_onlp_helper;
+using namespace acc_sys_helper;
 using namespace std;
 
 #include <string>
 #include <iostream>
 #include <chrono>
 #include <ctime>  
+#include <thread>
 
 
 class TestClass1 : public ::testing::Test {
@@ -51,6 +55,30 @@ TestClass1::~TestClass1()
 void TestClass1::SetUp() 
 {
     printf("TestClass1-SetUp-Begin InterfaceConfig TESTING/////////////////////\r\n");
+
+
+    int iii = 10;
+    while(iii !=0)
+    {
+        CPU s1;
+        std::this_thread::sleep_for(std::chrono::milliseconds(200)	);
+        CPU s2;    
+        CPUStatsPrinter printer(s1, s2);
+
+        printf("PrintActivePercentageTotal/////////////////////\r\n");	
+        printer.PrintActivePercentageTotal();
+
+        printf("PrintActivePercentageAll/////////////////////\r\n");	
+        printer.PrintActivePercentageAll();
+			
+        printf("PrintFullStatePercentageTotal/////////////////////\r\n");	
+        printer.PrintFullStatePercentageTotal();		
+
+        printf("PrintFullStatePercentageAll/////////////////////\r\n");	
+        printer.PrintFullStatePercentageAll();	
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000)	);
+	 iii--;	
+    }
 
     InterfaceConfig intf_ip;
     intf_ip.Restart();

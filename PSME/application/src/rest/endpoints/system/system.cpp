@@ -32,7 +32,7 @@
 #include "agent-framework/service_uuid.hpp"
 /* Do not remove numeric header - needed by ARM compilation */
 #include <numeric>
-
+#include <sys/sysinfo.h>
 
 
 using namespace psme::rest;
@@ -352,7 +352,6 @@ void endpoint::System::get(const server::Request& req, server::Response& res) {
         endpoint::HealthRollup<agent_framework::model::System>().get(system.get_uuid());
     response[constants::System::POWER_STATE] = system.get_power_state().to_string();
 
-	{
 		char command[256] = {0};
 		char resultA[256] = {0};
 		sprintf(command, "%s" ,"dmidecode | grep 'BIOS Revision' | awk '{print $3}'");
@@ -365,8 +364,6 @@ void endpoint::System::get(const server::Request& req, server::Response& res) {
 			response[constants::System::BIOS_VERSION] = resultA;
 		}
 
-
-	}
     response[constants::System::SKU] = json::Value::Type::NIL; // system.get_sku();
     response[constants::Common::ASSET_TAG] = system.get_asset_tag();
     response[constants::System::INDICATOR_LED] = system.get_indicator_led();
@@ -400,10 +397,9 @@ void endpoint::System::get(const server::Request& req, server::Response& res) {
     add_system_relations(system, response);
     make_children_links(req, response);
 
-
     /*For get Hostname/FQDN*/
-    char command[256] = {0};
-    char resultA[256] = {0};	
+    memset(command,0x0, sizeof(command));	
+    memset(resultA,0x0, sizeof(resultA));	
     sprintf(command, "%s" ,"hostname");
     memset(resultA,0x0, sizeof(resultA));
     exec_shell(command, resultA);
@@ -413,8 +409,19 @@ void endpoint::System::get(const server::Request& req, server::Response& res) {
     	resultA[strcspn(resultA, "\r\n")]=0;
     	response[constants::System::HOST_NAME] = resultA;
     }
+#if 1
+    struct sysinfo s_info;
+    int error;
 
-
+    error = sysinfo(&s_info);
+    if(!error)
+    {
+    	response[constants::System::MEMROY_STATE][constants::System::TO_MEMROY_B] = s_info.totalram;
+    	response[constants::System::MEMROY_STATE][constants::System::FR_MEMROY_B] = s_info.freeram;
+    	response[constants::System::MEMROY_STATE][constants::System::TO_SWAP_MEMROY_B] = s_info.totalswap;
+    	response[constants::System::MEMROY_STATE][constants::System::FR_SWAP_MEMROY_B] = s_info.freeswap;
+    }
+#endif	
     set_response(res, response);
 }
 

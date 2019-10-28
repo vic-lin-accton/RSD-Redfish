@@ -100,6 +100,8 @@ void AccountRoleCollection::get(const server::Request& req, server::Response& re
 
 
 void AccountRoleCollection::post(const server::Request& request, server::Response& response) {
+    //Dummy 
+    PathBuilder(request).build();
 #if 0	
     const auto& json = JsonValidator::validate_request_body<schema::SubscriptionCollectionPostSchema>(request);
     Subscription subscription = to_model(json);

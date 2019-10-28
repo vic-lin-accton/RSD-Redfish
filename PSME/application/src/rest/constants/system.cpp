@@ -87,6 +87,11 @@ const char NMI[] = "Nmi";
 const char GRACEFUL_RESTART[] = "GracefulRestart";
 const char FORCE_ON[] = "ForceOn";
 const char PUSH_POWER_BUTTON[] = "PushPowerButton";
+const char MEMROY_STATE[] = "MemoryState";
+const char TO_MEMROY_B[]="TotalMemoryByte";
+const char FR_MEMROY_B[]="FreeMemoryByte";
+const char TO_SWAP_MEMROY_B[]="TotalSwapMemoryByte";
+const char FR_SWAP_MEMROY_B[]="FreeSwapMemoryByte";
 
 }
 
@@ -145,6 +150,9 @@ const char MICROCODE_INFO[] = "MicrocodeInfo";
 const char MAX_SPEED[] = "MaxSpeedMHz";
 const char TOTAL_CORES[] = "TotalCores";
 const char TOTAL_THREADS[] = "TotalThreads";
+const char CPU_STATUS[] = "CpuStatus";
+const char LOAD_PERCENT[] = "LoadingPercentage";
+
 }
 
 namespace StorageAdapter {

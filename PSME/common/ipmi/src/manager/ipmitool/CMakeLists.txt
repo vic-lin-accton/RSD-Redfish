@@ -23,7 +23,7 @@ set(SOURCES
 
 set_source_files_properties(
     management_controller.cpp
-    PROPERTIES COMPILE_FLAGS "-Wno-undef -Wno-reserved-id-macro"
+    PROPERTIES COMPILE_FLAGS "-Wno-undef -Wno-reserved-id-macro -Wno-missing-field-initializers"
 )
 
 add_library(ipmi-manager-ipmitool OBJECT ${SOURCES})

@@ -152,6 +152,12 @@
           <Annotation Term="OData.Description" String="This object describes the central memory of the system in general detail."/>
           <Annotation Term="OData.LongDescription" String="This object shall contain properties which describe the central memory for the current resource."/>
         </Property>
+
+        <Property Name="MemoryState" Type="ComputerSystem.v1_0_0.MemoryState"  Nullable="false">
+          <Annotation Term="OData.Description" String="This object describes the central memory usage state of the system in general detail."/>
+          <Annotation Term="OData.LongDescription" String="This object shall contain properties which describe the central memory usage state for the current resource."/>
+        </Property>
+        
         <Property Name="Actions" Type="ComputerSystem.v1_0_0.Actions" Nullable="false">
           <Annotation Term="OData.Permissions" EnumMember="OData.Permission/Read"/>
           <Annotation Term="OData.Description" String="The available actions for this resource."/>
@@ -357,6 +363,14 @@
         </Property>
         <Property Name="Status" Type="Resource.Status"  Nullable="false"/>
         <Annotation Term="OData.Description" String="This object describes the memory of the system in general detail."/>
+      </ComplexType>
+
+      <ComplexType Name="MemoryState">
+        <Annotation Term="OData.AdditionalProperties" Bool="false"/>
+        <Property Name="TotalMemoryByte" Type="Edm.Decimal"/>
+        <Property Name="FreeMemoryByte" Type="Edm.Decimal"/>
+        <Property Name="TotalSwapMemoryByte" Type="Edm.Decimal"/>
+        <Property Name="FreeSwapMemoryByte" Type="Edm.Decimal"/>  
       </ComplexType>
 
     </Schema>
