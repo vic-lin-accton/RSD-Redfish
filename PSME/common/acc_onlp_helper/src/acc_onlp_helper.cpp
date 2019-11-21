@@ -750,27 +750,29 @@ namespace acc_onlp_helper {
 
     bool e_oom::get_eeprom_raw()    
     {
-        std::ifstream is( m_eeprom_path, std::ifstream::binary);    
+        std::ifstream is;    
+        is.rdbuf()->pubsetbuf(0,0);// do not buffer //
         try 
         {
             if (is) 
             {
-                is.seekg (0, is.end);
-                //int length = is.tellg();
                 is.seekg (0, is.beg);
-    
-                //char * buffer = new char [length];
                 char buffer[SIZE_EEPROM] = {0};
-    
                 std::cout << "Port["  << m_eeprom_path << "] reading " << SIZE_EEPROM << " characters.." << std::endl;
-    
+#if 1 
+                is.open(m_eeprom_path);
+#else
+//Read raw data file for testing //
+                is.open("/outputfile.bin");
+#endif
+                if(is)
+                {
                 is.read (buffer,SIZE_EEPROM);
-    
                 if(store_eeprom(buffer))
                 {
     #if 0            
                     int i = 0; 
-                    while(i < length)
+                        while(i < SIZE_EEPROM)
                     {
                         printf("%02x ", (unsigned char)buffer[i]);
                         i++;
@@ -784,7 +786,9 @@ namespace acc_onlp_helper {
                     status_default();
     
                 is.close();
-                //delete[] buffer;
+                }
+                else
+                    std::cout << "Open" << m_eeprom_path <<" error!!" << std::endl;
             }
             else
             {
@@ -867,8 +871,12 @@ namespace acc_onlp_helper {
     }
 
     // ------------------------------------------------------------------
+    //  New Transceiver Type need Added here
     //  1. Decide XFP/QSFP by identify ID, 
-    //     06h : XFP , 0Dh : QSFP+ , 11h : QSFP28 ,03h: SFP+
+    //     03h : SFP+     8472i
+    //     06h : XFP ,    8077i
+    //     0dh : QSFP+ ,  8436i
+    //     11h : QSFP28   8438i
     //  2. Identify which Std. should be used. 
     //  3. Store raw data.  
     // ------------------------------------------------------------------
@@ -879,7 +887,7 @@ namespace acc_onlp_helper {
         {    
             int id = in_eeprom[0]; 
     
-            //printf("store_eeprom id[0x%02X]\r\n", id);
+            printf("store_eeprom id[0x%02X]\r\n", id);
     
             if(!get_support())
             {
@@ -1031,6 +1039,56 @@ namespace acc_onlp_helper {
     
                     return true;
                 }					
+                else if(id == 0x0d)
+                { 
+                    int size = m_8436i.size();
+                    Json::Value tmp_std;
+    
+                    for(int i = 1; i <= size; i++)
+                    {
+                        tmp_std =  m_8436i[std::make_pair(0x0d, i)];
+                        std::string C_PN= tmp_std["C_PN"].asString();
+                        std::string STD_PN = "8436";
+    
+                        printf("8436 C_PN[%s]\r\n", C_PN.c_str());
+    
+                        Json::Value Att_Json = tmp_std["Attributes"];
+    
+                        Json::Value PN_Json = get_attri_by_name("Vendor_PN" , Att_Json);
+    
+                        int PN_Base = PN_Json["Vendor_PN"]["Byte_Address"].asInt();
+                        printf("PN_Base offset[%d]\r\n", PN_Base);
+    
+                        unsigned int PN_Size = PN_Json["Vendor_PN"]["Size"].asInt();
+                        printf("PN_Base Size[%d]\r\n", PN_Size);
+    
+                        if(C_PN.size() < PN_Size)
+                        {
+                            char tmp_PN[64] = {0}; 
+                            memcpy(tmp_PN,in_eeprom + PN_Base, C_PN.size());
+                            printf("8436 tmp_PN[%s]\r\n", tmp_PN);
+                            std::string tstring = tmp_PN;
+    
+                            if(tstring == C_PN)
+                            {
+                                m_std = tmp_std;
+                                printf("8436 Use C_PN[%s] !!!!\r\n", C_PN.c_str());
+                                set_support(true);
+                                memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
+                                return true;
+                            }
+                        }
+                    }
+    
+                    // Use 8436 as default //
+                    std::string STD_PN = "8436";
+                    m_std = tmp_std;
+                    printf("Cannot get customer's define. Use Std[%s] one.\r\n", STD_PN.c_str());
+                    set_support(true);
+                    memcpy(m_eeprom, in_eeprom, SIZE_EEPROM);
+    
+                    return true;
+                }					
                 else
                 {
                     printf("Not support Std.\r\n");
@@ -1144,7 +1202,10 @@ namespace acc_onlp_helper {
 
     // ------------------------------------------------------------------
     //  1. Decide XFP/QSFP by identify ID, 
-    //     06h : XFP , 0Dh : QSFP+ , 11h : QSFP28
+    //     03h : SFP+     8472i
+    //     06h : XFP ,    8077i
+    //     0dh : QSFP+ ,  8436i
+    //     11h : QSFP28   8438i
     //  2. Take customer PN to compare first.
     //  3. If not find PN in customer PN, use std instead
     // ------------------------------------------------------------------
@@ -1153,10 +1214,12 @@ namespace acc_onlp_helper {
     {
         try 
         {     
-            //New Transceiver Type need Added here//
+            //New Transceiver Type need Added here begin//
             int count_8077i = 0;
             int count_8472 = 0;
             int count_8438i = 0; 
+            int count_8436i = 0; 
+            //New Transceiver Type need Added here end//
     		
             std::string ME_S_DIR(STD_SEC_PATH);
             struct dirent *entry;
@@ -1199,6 +1262,7 @@ namespace acc_onlp_helper {
                     //New Transceiver Type need Added here//
                     if(isJsonOK)
                     {
+//New Transceiver Type need Added here begin//
                         int id = std::stoi(std_s["Identifer"].asString(), 0, 16);
                         if(id == 0x06) 
                         {
@@ -1221,12 +1285,16 @@ namespace acc_onlp_helper {
                             //printf("Set id[%d] count_std[%d] TRANS_TYPE_8438\r\n", id, count_8438i);
                             m_8438i[std::make_pair(id, count_8438i)]=std_s;
                         } 					
-                        else if(id == 0x0D)
+                        else if(id == 0x0d) 
                         {
-                            printf("Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
+                            count_8436i ++ ;
+                            printf("0x0d Identifer[%s]\r\n",std_s["Identifer"].asString().c_str());
+                            printf("Set id[%d] count_std[%d] TRANS_TYPE_8436\r\n", id, count_8436i);
+                            m_8436i[std::make_pair(id, count_8436i)]=std_s;
                         }
                         else
                             printf("Can't identifiy!!\r\n");
+//New Transceiver Type need Added here end//
                     }
                     else
                     {

@@ -65,11 +65,12 @@ namespace acc_onlp_helper
 
         Json::Value get_attri_by_name(std::string att_name , Json::Value in);
 
-        // Collection of support Std. New Transceiver Type need Added here//
+        // Collection of support Std. New Transceiver Type need Added here begin//
         std::map<std::pair<int,int>, Json::Value> m_8077i ={};
         std::map<std::pair<int,int>, Json::Value> m_8472  ={};
         std::map<std::pair<int,int>, Json::Value> m_8438i ={};
-
+        std::map<std::pair<int,int>, Json::Value> m_8436i ={};
+        // Collection of support Std. New Transceiver Type need Added here end//
         void refresh_vendor_info();		
         void refresh_temp();		
         void refresh_voltage();		
