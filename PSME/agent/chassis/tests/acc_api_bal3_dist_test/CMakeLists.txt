@@ -20,20 +20,20 @@ if (NOT GTEST_FOUND)
     return()
 endif()
 
-add_gtest(acc_api_bal30_dist_test psme-chassis
-    acc_api_bal30_dist_test.cpp
+add_gtest(acc_api_bal3_dist_test psme-chassis
+    acc_api_bal3_dist_test.cpp
     test_runner.cpp
 )
 
 include_directories(
-    ${ACC_BAL30_API_DIST_HELPER_INCLUDE_DIRS}
+    ${ACC_BAL3_API_DIST_HELPER_INCLUDE_DIRS}
     ${JSONCPP_INCLUDE_DIRS}
 )
 
 TARGET_LINK_LIBRARIES(${test_target}
-    ${ACC_BAL30_API_DIST_HELPER_LIBRARIES}
+    ${ACC_BAL3_API_DIST_HELPER_LIBRARIES}
     ${JSONCXX_LIBRARIES}
-    ${LIBBAL30_API_DIST}
+    ${LIBBAL3_API_DIST}
     jsoncpp
     dl 
 )

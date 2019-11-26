@@ -65,7 +65,7 @@ constexpr const size_t G_PON_MAX_NNI_PORT_NUM = 10;
 constexpr const size_t G_PON_TOTAL_INTF_NUM (G_PON_MAX_PON_PORT_NUM+G_PON_MAX_NNI_PORT_NUM);
 
 
-namespace acc_bal30_api_dist_helper 
+namespace acc_bal3_api_dist_helper 
 {
     using namespace std;
 
@@ -170,7 +170,7 @@ namespace acc_bal30_api_dist_helper
 
             Olt_Device(const Olt_Device & a){this->fHandle = a.fHandle;};
 
-            Olt_Device & operator=(const acc_bal30_api_dist_helper::Olt_Device& a){this->fHandle = a.fHandle; return *this;};
+            Olt_Device & operator=(const acc_bal3_api_dist_helper::Olt_Device& a){this->fHandle = a.fHandle; return *this;};
 			
         protected:
             int  m_pon_ports_num     = {0};

@@ -31,8 +31,8 @@ IF("${CUSE_ACC_BAL_DISTLIB}" STREQUAL "TRUE" )
     add_subdirectory(acc_api_bal_dist_test)
 ENDIF()
 
-IF("${CUSE_ACC_BAL30_DISTLIB}" STREQUAL "TRUE" )
-    add_subdirectory(acc_api_bal30_dist_test)
+IF("${CUSE_ACC_BAL3_DISTLIB}" STREQUAL "TRUE" )
+    add_subdirectory(acc_api_bal3_dist_test)
 ENDIF()
 
 add_subdirectory(md5)

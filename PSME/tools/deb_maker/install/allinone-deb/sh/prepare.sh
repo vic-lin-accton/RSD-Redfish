@@ -118,7 +118,7 @@ if [ "$1" = "arm" ];then
 else
     cp $PSME_PROJ_PATH/bin/tests/unittest_psme-chassis_onlp $ITEM_PATH/usr/local/bin
     cp $PSME_PROJ_PATH/bin/tests/unittest_psme-chassis_acc_api_bal_dist_test $ITEM_PATH/usr/local/bin
-    cp $PSME_PROJ_PATH/bin/tests/unittest_psme-chassis_acc_api_bal30_dist_test $ITEM_PATH/broadcom
+    cp $PSME_PROJ_PATH/bin/tests/unittest_psme-chassis_acc_api_bal3_dist_test $ITEM_PATH/broadcom
     cp ${PSME_ACC_SW_DIR}/onu_cfg                         $ITEM_PATH/usr/local/bin
     cp ${PSME_ACC_SW_DIR}/onu_cfg                         $ITEM_PATH/broadcom
     cp ${PSME_ACC_SW_DIR}/xgspon_unit_test_onu_cfg        $ITEM_PATH/broadcom

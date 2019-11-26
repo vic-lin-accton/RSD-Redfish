@@ -105,10 +105,10 @@ target_link_libraries(psme-rest-server
 )
 ENDIF()
 
-IF("${CUSE_ACC_BAL30_DISTLIB}" STREQUAL "TRUE" )
+IF("${CUSE_ACC_BAL3_DISTLIB}" STREQUAL "TRUE" )
 target_link_libraries(psme-rest-server
-    ${ACC_BAL30_API_DIST_HELPER_LIBRARIES}
-    ${LIBBAL30_API_DIST}
+    ${ACC_BAL3_API_DIST_HELPER_LIBRARIES}
+    ${LIBBAL3_API_DIST}
     dl 
 )
 ENDIF()

@@ -17,16 +17,16 @@
 # </license_header>
 
 cmake_minimum_required(VERSION 2.8)
-project(acc_bal30_api_dist_helper CXX)
+project(acc_bal3_api_dist_helper CXX)
 
-set(ACC_BAL30_API_DIST_HELPER_LIBRARIES
-    acc_bal30_api_dist_helper 
-    CACHE PATH "acc_bal30_api_dist_helper libraries"
+set(ACC_BAL3_API_DIST_HELPER_LIBRARIES
+    acc_bal3_api_dist_helper 
+    CACHE PATH "acc_bal3_api_dist_helper libraries"
 )
 
-set(ACC_BAL30_API_DIST_HELPER_INCLUDE_DIRS
+set(ACC_BAL3_API_DIST_HELPER_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    CACHE PATH "acc_bal30_api_dist_helper include directory"
+    CACHE PATH "acc_bal3_api_dist_helper include directory"
 )
 #include current include path
 include_directories(
@@ -39,10 +39,10 @@ include_directories(SYSTEM
     ${MD5_INCLUDE_DIRS}
     ${JSONCPP_INCLUDE_DIRS}
     ${JSONRPCCPP_INCLUDE_DIRS}
-    ${ACC_BAL30_API_DIST_HELPER_INCLUDE_DIRS}
+    ${ACC_BAL3_API_DIST_HELPER_INCLUDE_DIRS}
 )
 
-#include bal30 api include  path
+#include bal3 api include  path
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asfvolt16-bal/host_driver/bal/bal_include/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asfvolt16-bal/host_driver/topology/
@@ -82,18 +82,18 @@ include_directories(
 )
 
 
-add_library(acc_bal30_api_dist_helper STATIC
-    src/acc_bal30_api_dist_helper.cpp
+add_library(acc_bal3_api_dist_helper STATIC
+    src/acc_bal3_api_dist_helper.cpp
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES GNU|Clang)
   set_source_files_properties(
-    src/acc_bal30_api_dist_helper.cpp
+    src/acc_bal3_api_dist_helper.cpp
     PROPERTIES COMPILE_FLAGS "-Wno-conversion"
     )
 endif()
 
-install(TARGETS acc_bal30_api_dist_helper 
+install(TARGETS acc_bal3_api_dist_helper 
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

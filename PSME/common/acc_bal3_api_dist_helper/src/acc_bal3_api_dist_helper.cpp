@@ -1,8 +1,8 @@
-#include "../include/acc_bal30_api_dist_helper/acc_bal30_api_dist_helper.hpp"
+#include "../include/acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp"
 #include <dlfcn.h>
 #include <stdlib.h>
 
-using namespace acc_bal30_api_dist_helper;
+using namespace acc_bal3_api_dist_helper;
 
 #ifdef __cplusplus
 extern "C"
@@ -11,7 +11,7 @@ extern "C"
 #include <bcmolt_api.h>
 #include <bcmolt_host_api.h>
 #include <bcmolt_api_model_supporting_enums.h>
-#include <bal_version.h>
+//#include <bal_version.h>
 #include <bcmolt_api_conn_mgr.h>
 #include <bcmcli_session.h>
 #include <bcmcli.h>
@@ -26,7 +26,7 @@ bcmolt_oltid dev_id = 0;
 
 const uint32_t tm_upstream_sched_id_start   = 600;
 const uint32_t tm_downstream_sched_id_start = 800;
-#ifdef BAL31 
+#if defined BAL31 || defined BAL32 
 #define TM_Q_SET_ID (bcmolt_tm_queue_set_id)32768U
 #endif
 const std::string upstream     = "upstream";
@@ -477,7 +477,7 @@ static void OltOnuO5(short unsigned int olt , bcmolt_msg *msg)
 }
 
 
-namespace acc_bal30_api_dist_helper
+namespace acc_bal3_api_dist_helper
 {
     static Olt_Device * g_Olt_Device = NULL;
 
@@ -589,8 +589,15 @@ namespace acc_bal30_api_dist_helper
 
             switch(dev_cfg.data.chip_family) 
             {
+//For BAL3.2
+#ifdef BAL32     
+                case BCMOLT_CHIP_FAMILY_CHIP_FAMILY_6862_X: m_chip_family = "Maple"; break;
+                case BCMOLT_CHIP_FAMILY_CHIP_FAMILY_6865_X: m_chip_family = "Aspen"; break;
+#else
                 case BCMOLT_CHIP_FAMILY_CHIP_FAMILY_6862_X_: m_chip_family = "Maple"; break;
                 case BCMOLT_CHIP_FAMILY_CHIP_FAMILY_6865_X_: m_chip_family = "Aspen"; break;
+
+#endif
             }
 
             printf("topology nni:%d pon:%d maple dev number :%d pon number per device :%d family: %s\n",
@@ -1409,8 +1416,7 @@ bool CreateDefaultSchedQueue(uint32_t intf_id, const std::string direction)
         bcmolt_tm_queue_key tm_queue_key = {};
         tm_queue_key.id = queue_id;
         tm_queue_key.sched_id = get_default_tm_sched_id(intf_id, direction);
-        //For BAL3.1
-#ifdef BAL31        
+#if defined(BAL31) || defined(BAL32)
         tm_queue_key.tm_q_set_id = TM_Q_SET_ID;
 #endif
         BCMOLT_CFG_INIT(&tm_queue_cfg, tm_queue, tm_queue_key);
@@ -1620,12 +1626,12 @@ bool XGS_PON_Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendo
     memcpy(serial_number.vendor_id.arr, vendor_id, 4);
     memcpy(serial_number.vendor_specific.arr, vendor_specific, 4);
     BCMOLT_CFG_INIT(&onu_cfg, onu, onu_key);
-#ifndef BAL31 	
+#if !defined(BAL31) && !defined(BAL32)
     BCMOLT_MSG_FIELD_SET(&onu_cfg, onu_rate, BCMOLT_ONU_RATE_RATE_10G_DS_10G_US);
 #endif
     BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.serial_number, serial_number);
     BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.auto_learning, BCMOS_TRUE);
-#ifdef BAL31 
+#if defined(BAL31)|| defined(BAL32)
     BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.xgpon.ranging_burst_profile, 2);
 #else
     BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.xgpon.ranging_burst_profile, 0);
