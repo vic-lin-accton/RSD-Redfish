@@ -22,10 +22,7 @@ endif()
 
 add_subdirectory(loader)
 add_subdirectory(session_test)
-
-IF(${CUSEONLPLIB} STREQUAL "TRUE")
-    add_subdirectory(onlp_test)
-ENDIF()
+add_subdirectory(onlp_test)
 
 IF("${CUSE_ACC_BAL_DISTLIB}" STREQUAL "TRUE" )
     add_subdirectory(acc_api_bal_dist_test)

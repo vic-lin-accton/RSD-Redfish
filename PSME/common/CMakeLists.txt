@@ -32,10 +32,7 @@ add_subdirectory(net)
 add_subdirectory(ssdp)
 add_subdirectory(acc_net_helper)
 add_subdirectory(acc_sys_helper)
-
-IF(${CUSEONLPLIB} STREQUAL "TRUE")
-    add_subdirectory(acc_onlp_helper)
-ENDIF()
+add_subdirectory(acc_onlp_helper)
 
 IF("${CUSE_ACC_BAL_DISTLIB}" STREQUAL "TRUE" )
     add_subdirectory(acc_bal_api_dist_helper)

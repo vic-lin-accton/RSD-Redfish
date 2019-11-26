@@ -22,34 +22,9 @@ message(STATUS "Current cmake is ${CMAKE_VERSION}")
 project("PSME FW Build" C CXX)
 
 ###############################################################################
-set(CUSEONLPLIB "TRUE")
-
-IF(${CUSEONLPLIB} STREQUAL "FALSE")
-
-message(STATUS "NO USE ONLP .......")
-#For Enable All 
-#add_definitions(-DCOMCAST -DCOCP -DCSYSTEMS -DCNTASK -DCSERVICES -DCSESSIONS -DCFABRICS -DCSTORAGE -DCPROCESSORS -DCACCOUNT -DCSESSION)
-#For Comcast/OCP Define
-add_definitions(-DCOMCAST -DCOCP -DTHERMAL_PSU -DCSYSTEMS -DCSUBSYSTEM -DCSTORAGE -DCACCOUNT -DCSESSION)
-ELSE()
-
-message(STATUS "USE ONLP .......")
-#For Enable All 
-#add_definitions(-DCOMCAST -DCOCP -DCSYSTEMS -DCNTASK -DCSERVICES -DCSESSIONS -DCFABRICS -DCSTORAGE -DCPROCESSORS -DCACCOUNT -DCSESSION -DBAL32 -DBCMOS_MSG_QUEUE_DOMAIN_SOCKET -DBCMOS_MSG_QUEUE_UDP_SOCKET -DBCMOS_MEM_CHECK  -DBCMOS_SYS_UNITTEST -DENABLE_LOG -DENABLE_CLI -DONLP)
-set(CUSE_ACC_BAL3_DISTLIB "TRUE")
-#For Comcast/OCP Define
-add_definitions(-DCOMCAST -DCOCP -DTHERMAL_PSU -DCSYSTEMS -DCSUBSYSTEM -DCSTORAGE -DCACCOUNT -DCSESSION -DBAL32 -DBCMOS_MSG_QUEUE_DOMAIN_SOCKET -DBCMOS_MSG_QUEUE_UDP_SOCKET -DBCMOS_MEM_CHECK  -DBCMOS_SYS_UNITTEST -DENABLE_LOG -DENABLE_CLI -DONLP)
-set(CUSE_ACC_BAL3_DISTLIB "TRUE") 
-ENDIF()
+add_definitions(-DCOMCAST -DCOCP -DTHERMAL_PSU -DCSYSTEMS -DCSUBSYSTEM -DCSTORAGE -DCACCOUNT -DCSESSION -DONLP)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wno-missing-field-initializers")
-
-#For Intel_RSD_TOR_SW 
-#add_definitions()
-
-#For Intel_RSD AS5081 Server 
-#add_definitions(-DCSYSTEMS -DCSUBSYSTEM -DCSTORAGE)
-###############################################################################
 
 string(TIMESTAMP BUILD_TIME "%H:%M:%S, %d-%m-%Y")
 
@@ -78,10 +53,8 @@ ELSE()
    set(LIBBAL3_API_DIST "${CMAKE_BINARY_DIR}/../../../../../libbal_host_api.so")
 ENDIF()
 
-IF(CUSEONLPLIB STREQUAL "TRUE")
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_BINARY_DIR}/../../../../OpenNetworkLinux/packages/base/amd64/onlp/builds/onlp/BUILD/jessie/x86_64-linux-gnu/bin/ ${CMAKE_BINARY_DIR}/../../../../OpenNetworkLinux/packages/base/amd64/onlp/builds/onlp-platform/BUILD/jessie/x86_64-linux-gnu/bin/ ${CMAKE_BINARY_DIR}/../../../../OpenNetworkLinux/packages/base/amd64/onlp/builds/onlp-platform-defaults/BUILD/jessie/x86_64-linux-gnu/bin/
 ")
-ENDIF()
 # Path to folder with all cmake scripts
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -89,7 +62,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 IF(CMAKE_CROSSCOMPILING)
     set(CMAKE_PKG_CONFIG_DIR "${CMAKE_BINARY_DIR}/pkgconfig/")
 ELSE()
-set(CMAKE_PKG_CONFIG_DIR ${CMAKE_BINARY_DIR}/pkg-config)
+    set(CMAKE_PKG_CONFIG_DIR ${CMAKE_BINARY_DIR}/pkg-config)
 ENDIF()
 
 file(MAKE_DIRECTORY "${CMAKE_PKG_CONFIG_DIR}")
