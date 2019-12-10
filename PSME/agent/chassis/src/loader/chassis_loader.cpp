@@ -22,26 +22,18 @@
  * @section DESCRIPTION
  *
  * */
-
 #include "loader/chassis_loader.hpp"
 #include "configuration/configuration.hpp"
 #include "logger/logger_factory.hpp"
-
-
 #include "agent-framework/module/network_components.hpp"
 #include "agent-framework/module/compute_components.hpp"
 #include "agent-framework/module/chassis_components.hpp"
 #include "agent-framework/module/common_components.hpp"
 #include "agent-framework/module/model/processor.hpp"
-
 #include "agent-framework/version.hpp"
 #include "agent-framework/service_uuid.hpp"
-
 #include <chrono>
 #include <thread>
-
-
-
 using namespace agent::chassis::loader;
 using namespace agent_framework::generic;
 using namespace agent_framework::model;
@@ -652,10 +644,7 @@ std::cerr << "service uuid uuid[" << ServiceUuid::get_instance()->get_service_uu
 	make_storages(manager, system.get_uuid(), chassis_uuid);
 #endif		
 }
-
-
 ChassisLoader::~ChassisLoader() { }
-
 
 class LoadManagers {
 public:
@@ -666,7 +655,6 @@ public:
             read_manager(manager, elem);
         }
     }
-
 
     void read_managers(const std::string& parent, const json::Value& json) {
 	

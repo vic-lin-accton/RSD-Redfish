@@ -28,7 +28,7 @@ add_gtest(session psme-chassis
 target_link_libraries(${test_target}
     ${AGENT_CHASSIS_LIBRARIES}
     chassis-utils
-    chassis-ipmb
+    chassis-onlp
     ${AGENT_FRAMEWORK_LIBRARIES}
     ${UUID_LIBRARIES}
     ${LOGGER_LIBRARIES}

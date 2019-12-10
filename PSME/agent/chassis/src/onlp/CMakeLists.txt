@@ -17,7 +17,16 @@
 # </license_header>
 
 set(SOURCES
-    chassis_loader.cpp
+    watcher/watcher.cpp
+    watcher/task.cpp
+    watcher/onlp_sensor_task.cpp
 )
 
-add_library(chassis-loader OBJECT ${SOURCES})
+set_property (
+    SOURCE network_utils.cpp
+    APPEND
+    PROPERTY COMPILE_FLAGS
+    "-Wno-effc++"
+)
+
+add_library(onlp-service OBJECT ${SOURCES})

@@ -33,9 +33,7 @@ IF("${CUSE_ACC_BAL3_DISTLIB}" STREQUAL "TRUE" )
 ENDIF()
 
 add_subdirectory(md5)
-add_subdirectory(network_utils)
 add_subdirectory(tree_stability)
-add_subdirectory(ipmb)
 
 add_custom_target(unittest_psme-chassis
                   make

@@ -18,14 +18,14 @@
  * limitations under the License.
  *
  * @file command/get_chassis_info.cpp
- * @brief GetChassisInfo sdv implementation
+ * @brief GetChassisInfo acc-chassis implementation
  * */
 
 #include "agent-framework/module/chassis_components.hpp"
 #include "agent-framework/module/common_components.hpp"
 #include "agent-framework/command-ref/registry.hpp"
 #include "agent-framework/command-ref/chassis_commands.hpp"
-#include "agent-framework/command-ref/compute_commands.hpp"  //Nick Added
+#include "agent-framework/command-ref/compute_commands.hpp"
 #include "agent-framework/module/compute_components.hpp"
 
 using namespace agent_framework::command_ref;
@@ -41,8 +41,6 @@ REGISTER_COMMAND(GetChassisInfo,
 
 using agent_framework::module::ChassisComponents;
 
-/*Nick Added Begin: */
-//Step 2.
 REGISTER_COMMAND(GetFanInfo,
     [] (const GetFanInfo::Request& req, GetFanInfo::Response& rsp) {
          log_debug(GET_LOGGER("rpc"), "GetFanInfo with parameters: Fan "
@@ -58,7 +56,6 @@ REGISTER_COMMAND(GetThermalZoneInfo,
         rsp = ChassisComponents::get_instance()->get_thermal_zone_manager().get_entry(req.get_thermal_zone());
     }
 );
-
 
 REGISTER_COMMAND(GetPowerZoneInfo,
     [] (const GetPowerZoneInfo::Request& req, GetPowerZoneInfo::Response& rsp) {
@@ -112,9 +109,6 @@ REGISTER_COMMAND(GetDriveInfo,
     }
 );
 
-
 #endif
-
-/*Nick Added End  : */
 
 

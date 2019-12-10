@@ -26,28 +26,19 @@
 #include "agent-framework/module/compute_components.hpp"
 #include "agent-framework/module/common_components.hpp"
 #include "agent-framework/module/chassis_components.hpp"
-
-
 #include "agent-framework/eventing/event_data.hpp"
 #include "agent-framework/eventing/events_queue.hpp"
-
 #include "agent-framework/command-ref/command_server.hpp"
 
 #include "loader/chassis_loader.hpp"
-#include "loader/state_machine_action_loader.hpp"
-#include "status/status_manager.hpp"
-#include "status/state_machine_action.hpp"
 
 #include "configuration/configuration.hpp"
 #include "configuration/configuration_validator.hpp"
 #include "default_configuration.hpp"
 #include "acc_net_helper/acc_net_helper.hpp"
 
-#include "ipmb/service.hpp"
-#include "ipmb/watcher/thermal_sensor_task.hpp"
-#include "ipmb/watcher/drawer_power_task.hpp"
-#include "ipmb/mux.hpp"
-#include "ipmb/watcher/watcher.hpp"
+#include "onlp/watcher/onlp_sensor_task.hpp"
+#include "onlp/watcher/watcher.hpp"
 
 #include <jsonrpccpp/server/connectors/httpserver.h>
 #include <csignal>
@@ -75,7 +66,7 @@ using namespace agent_framework::state_machine;
 using namespace logger_cpp;
 using namespace configuration;
 using namespace agent::chassis;
-using namespace agent::chassis::ipmb;
+using namespace agent::chassis::onlp;
 using namespace agent_framework::eventing;
 
 
@@ -90,12 +81,10 @@ using agent_framework::module::CommonComponents;
 
 static constexpr unsigned int DEFAULT_SERVER_PORT = 7780;
 
-void add_state_machine_entries(StateMachineThread* machine_thread, StateMachineThreadAction& action);
 const json::Value& init_configuration(int argc, const char** argv);
 bool check_configuration(const json::Value& json);
 
 void seg_fault_handler(int sig) ;
-
 
 void seg_fault_handler(int sig) 
 {
@@ -111,18 +100,12 @@ void seg_fault_handler(int sig)
     return;
 }
 
-
 /*!
  * @brief Generic Agent main method.
  * */
 int main(int argc, const char* argv[]) {
-    using agent::chassis::StateMachineAction;
-    using StateMachineActionUnique = unique_ptr<StateMachineAction>;
 
     unsigned int server_port = DEFAULT_SERVER_PORT;
-
-    StateMachineThreadUniquePtr state_machine_thread_u_ptr = nullptr;
-    StateMachineActionUnique state_action = nullptr;
 
     /* Initialize configuration */
     const json::Value& configuration = ::init_configuration(argc, argv);
@@ -192,30 +175,6 @@ int main(int argc, const char* argv[]) {
     return 0;
 }
 
-void add_state_machine_entries(StateMachineThread* machine_thread, StateMachineThreadAction& action) {
-    auto drawer_keys = CommonComponents::get_instance()->
-        get_module_manager().get_keys("");
-
-    if (drawer_keys.empty()) {
-        log_error(GET_LOGGER("agent"), "No drawer manager found!");
-        std::exit(-1);
-    }
-
-    log_debug(GET_LOGGER("agent"), "Drawer: " << drawer_keys.front());
-
-    /* Process Blade manager */
-    auto blade_keys = CommonComponents::get_instance()->
-        get_module_manager().get_keys(drawer_keys.front());
-
-    for (const auto& key : blade_keys) {
-        auto entry = CommonComponents::get_instance()->get_module_manager().get_entry(key);
-        auto status_manager = std::make_shared<::agent::chassis::status::StatusManager>(
-                entry.get_slot(),entry.get_connection_data().get_ip_address());
-        auto state_thread_entry = std::make_shared<StateThreadEntry>(key, status_manager);
-        auto module_thread = std::make_shared<StateMachineModuleThread>(state_thread_entry, action);
-        machine_thread->add_module_thread(module_thread);
-    }
-}
 const json::Value& init_configuration(int argc, const char** argv) {
     log_info(GET_LOGGER("agent"),
             agent_framework::generic::Version::build_info());

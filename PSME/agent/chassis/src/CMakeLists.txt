@@ -17,25 +17,22 @@
 # </license_header>
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-add_subdirectory(ipmb)
+add_subdirectory(onlp)
 add_subdirectory(command)
-add_subdirectory(status)
 add_subdirectory(loader)
 add_subdirectory(tree_stability)
 
 add_library(chassis-commands STATIC
-    $<TARGET_OBJECTS:chassis-command-sdv>
+    $<TARGET_OBJECTS:chassis-command-acc>
 )
 
 add_library(chassis-utils
-    $<TARGET_OBJECTS:chassis-status-impl>
     $<TARGET_OBJECTS:chassis-loader>
     $<TARGET_OBJECTS:chassis-tree-stability>
 )
 
-add_library(chassis-ipmb
-    $<TARGET_OBJECTS:ipmb-service>
-    $<TARGET_OBJECTS:ipmb-service-command>
+add_library(chassis-onlp
+    $<TARGET_OBJECTS:onlp-service>
 )
 
 add_executable(psme-chassis
@@ -45,17 +42,14 @@ add_executable(psme-chassis
 TARGET_LINK_LIBRARIES(psme-chassis
     ${AGENT_CHASSIS_LIBRARIES}
     chassis-utils
-    chassis-ipmb
+    chassis-onlp
     ${AGENT_FRAMEWORK_LIBRARIES}
     ${UUID_LIBRARIES}
     ${LOGGER_LIBRARIES}
-    ${PCA95XX_LIBRARIES}
     ${SAFESTRING_LIBRARIES}
     ${CONFIGURATION_LIBRARIES}
     ${JSONCXX_LIBRARIES}
-    ipmi
     ${BASE64_LIBRARIES}
-    ${IPMITOOL_LIBRARIES}
     pthread
     jsonrpccpp-server
     jsonrpccpp-client
@@ -63,8 +57,6 @@ TARGET_LINK_LIBRARIES(psme-chassis
     jsoncpp
     ${MICROHTTPD_LIBRARIES}
     ${CURL_LIBRARIES}
-    ${CY_USB_SERIAL_LIBRARIES}
-    ${NET_LIBRARIES}
     ${SAFESTRING_LIBRARIES}
     ${ACC_NET_HELPER_LIBRARIES}
     ${ACC_ONLP_HELPER_LIBRARIES}
