@@ -258,11 +258,27 @@ public:
     }
 
     /*!
+    * @brief Get Service Tag
+    * @return Service Tag
+    * */
+    const OptionalField<std::string>& get_service_tag() const {
+        return m_service_tag;
+    }
+
+    /*!
      * @brief Set Asset Tag
      * @param[in] asset_tag Asset Tag
      * */
     void set_asset_tag(const OptionalField<std::string>& asset_tag) {
         m_asset_tag = asset_tag;
+    }
+
+    /*!
+     * @brief Set Service Tag
+     * @param[in] service_tag Service Tag
+     * */
+    void set_service_tag(const OptionalField<std::string>& service_tag) {
+        m_service_tag = service_tag;
     }
 
     /*!
@@ -294,6 +310,7 @@ private:
     OptionalField<std::string> m_network_interface{};
     OptionalField<std::string> m_sku{};
     OptionalField<std::string> m_asset_tag{};
+    OptionalField<std::string> m_service_tag{};
     OptionalField<enums::IndicatorLed> m_indicator_led{};
     std::string m_parent_id{};
 

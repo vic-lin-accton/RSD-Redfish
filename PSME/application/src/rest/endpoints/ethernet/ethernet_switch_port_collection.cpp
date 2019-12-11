@@ -49,8 +49,10 @@ using namespace psme::rest::utils;
 using namespace psme::rest::validators;
 using namespace agent_framework::model;
 
-namespace {
-json::Value make_prototype() {
+namespace
+{
+json::Value make_prototype()
+{
     json::Value r(json::Value::Type::OBJECT);
 
     r[Common::ODATA_CONTEXT] = "/redfish/v1/$metadata#EthernetSwitchPortCollection.EthernetSwitchPortCollection";
@@ -64,23 +66,21 @@ json::Value make_prototype() {
     return r;
 }
 
-}
+} // namespace
 
-
-EthernetSwitchPortCollection::EthernetSwitchPortCollection(const std::string& path) : EndpointBase(path) {}
-
+EthernetSwitchPortCollection::EthernetSwitchPortCollection(const std::string &path) : EndpointBase(path) {}
 
 EthernetSwitchPortCollection::~EthernetSwitchPortCollection() {}
 
+void EthernetSwitchPortCollection::get(const server::Request &req, server::Response &res)
+{
 
-void EthernetSwitchPortCollection::get(const server::Request& req, server::Response& res) {
-
-    //For normal port 
+    //For normal port
     // Port status //
     char command[256] = {0};
-    char resultA[256] = {0};	
-    int    max_port = 0;		
-	
+    char resultA[256] = {0};
+    int max_port = 0;
+
     auto json = ::make_prototype();
 
     json[Common::ODATA_ID] = PathBuilder(req).build();
@@ -90,55 +90,55 @@ void EthernetSwitchPortCollection::get(const server::Request& req, server::Respo
                                                      req.params[PathParam::ETHERNET_SWITCH_ID]);
 
 #ifdef ONLP
-    auto& sonlp = acc_onlp_helper::Switch::get_instance();
+    auto &sonlp = acc_onlp_helper::Switch::get_instance();
     //Set PSU related info. //
     max_port = sonlp.get_port_num();
     json[Collection::ODATA_COUNT] = max_port;
-    
-    for(int i = 1; i <= max_port; i++)
-    {	
+
+    for (int i = 1; i <= max_port; i++)
+    {
         json::Value link_elem(json::Value::Type::OBJECT);
-        link_elem[Common::ODATA_ID] =  PathBuilder(req).append(i).build();
+        link_elem[Common::ODATA_ID] = PathBuilder(req).append(i).build();
         json[Collection::MEMBERS].push_back(std::move(link_elem));
     }
 #endif
-    //For LAG port 
+    //For LAG port
     // Port status //
-	
+
     sprintf(command, "trunk.sh get num");
-    memset(resultA,0x0, sizeof(resultA));
+    memset(resultA, 0x0, sizeof(resultA));
     exec_shell(command, resultA);
-    
-    if(strlen(resultA) != 0)
-    {  
+
+    if (strlen(resultA) != 0)
+    {
         int count = atoi(resultA);
 
         json[Collection::ODATA_COUNT] = max_port + count;
 
-        for(int i = 1; i <= count; i++)
-        {	
+        for (int i = 1; i <= count; i++)
+        {
             sprintf(command, "trunk.sh get num_index %d", i);
-            memset(resultA,0x0, sizeof(resultA));
+            memset(resultA, 0x0, sizeof(resultA));
             exec_shell(command, resultA);
-            if(strlen(resultA) != 0)
-            {           
+            if (strlen(resultA) != 0)
+            {
                 json::Value link_elem(json::Value::Type::OBJECT);
-                link_elem[Common::ODATA_ID] =  PathBuilder(req).append(max_port + atoi(resultA)).build();
+                link_elem[Common::ODATA_ID] = PathBuilder(req).append(max_port + atoi(resultA)).build();
                 json[Collection::MEMBERS].push_back(std::move(link_elem));
-      	     }
+            }
         }
     }
     set_response(res, json);
 }
 
-
-void EthernetSwitchPortCollection::post(const server::Request& req, server::Response& res) {
-//    using HandlerManager = psme::rest::model::handler::HandlerManager;
+void EthernetSwitchPortCollection::post(const server::Request &req, server::Response &res)
+{
+    //    using HandlerManager = psme::rest::model::handler::HandlerManager;
 
     auto json = JsonValidator::validate_request_body<schema::EthernetSwitchPortCollectionPostSchema>(req);
 
     auto port_members = LagUtils::get_port_members(json);
-    int size=(int)port_members.size();
+    int size = (int)port_members.size();
 
 #if 0	
     LagUtils::validate_port_members(port_members);
@@ -194,42 +194,41 @@ void EthernetSwitchPortCollection::post(const server::Request& req, server::Resp
 
 #else
 
-        std::string port_id =  json[constants::EthernetSwitchPort::PORT_ID].as_string();
-        char resultA[256] = {0};	
-        char command[256] = {0};
-        
-        int max_port = 0;	
-        int iTrunkID;
-        std::string fport = std::regex_replace(   port_id.c_str(),    std::regex("LAG"), "");
-        iTrunkID = atoi(fport.c_str());
+    std::string port_id = json[constants::EthernetSwitchPort::PORT_ID].as_string();
+    char resultA[256] = {0};
+    char command[256] = {0};
 
-				
-        sprintf(command, "psme.sh get max_port_num");
-        memset(resultA,0x0, sizeof(resultA));
-        exec_shell(command, resultA);
-        
-        if(strlen(resultA) != 0)
-        {
-            max_port=atoi(resultA);
-        }
-//Delete Trunk ID
-        sprintf(command, "trunk.sh set ID_del %d" , iTrunkID );  //LAG PORT ID == TRUNK ID //
-        memset(resultA,0x0, sizeof(resultA));
-        exec_shell(command, resultA);
-		
-//Add Trunk ID with port
-        for(int i = 0; i < size; i++)
-        {
-            std::string temp_mem = std::regex_replace(   port_members.at(i).c_str(),    std::regex("/redfish/v1/EthernetSwitches/1/Ports/"), "");
-            sprintf(command, "trunk.sh  set mem %d %s" , iTrunkID , temp_mem.c_str() );
-            memset(resultA,0x0, sizeof(resultA));
-            exec_shell(command, resultA);
-        }
+    int max_port = 0;
+    int iTrunkID;
+    std::string fport = std::regex_replace(port_id.c_str(), std::regex("LAG"), "");
+    iTrunkID = atoi(fport.c_str());
 
-        ::psme::rest::endpoint::utils::set_location_header(
-            res, PathBuilder(req).append(max_port + iTrunkID).build());
-		
-        res.set_status(server::status_2XX::CREATED);
+    sprintf(command, "psme.sh get max_port_num");
+    memset(resultA, 0x0, sizeof(resultA));
+    exec_shell(command, resultA);
+
+    if (strlen(resultA) != 0)
+    {
+        max_port = atoi(resultA);
+    }
+    //Delete Trunk ID
+    sprintf(command, "trunk.sh set ID_del %d", iTrunkID); //LAG PORT ID == TRUNK ID //
+    memset(resultA, 0x0, sizeof(resultA));
+    exec_shell(command, resultA);
+
+    //Add Trunk ID with port
+    for (int i = 0; i < size; i++)
+    {
+        std::string temp_mem = std::regex_replace(port_members.at(i).c_str(), std::regex("/redfish/v1/EthernetSwitches/1/Ports/"), "");
+        sprintf(command, "trunk.sh  set mem %d %s", iTrunkID, temp_mem.c_str());
+        memset(resultA, 0x0, sizeof(resultA));
+        exec_shell(command, resultA);
+    }
+
+    ::psme::rest::endpoint::utils::set_location_header(
+        res, PathBuilder(req).append(max_port + iTrunkID).build());
+
+    res.set_status(server::status_2XX::CREATED);
 
 #endif
 }

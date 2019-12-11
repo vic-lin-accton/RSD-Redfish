@@ -369,9 +369,9 @@ make_platform_info()
 }" > ${Config_File}
 }
 
-#if [ ! -f "${Config_File}" ];then
-
+if [ -f "${Config_File}" ];then
 `rm ${Config_File}`
+fi
 J_B_START
 J_O_START managers
 IPV4_ITEMS
@@ -383,4 +383,3 @@ J_O_END
 J_B_END
 
 #make_platform_info
-#fi

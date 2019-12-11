@@ -30,6 +30,6 @@ cp -a ${PSME_ACC_SW_DIR}/x_86_dmidecode/*.deb ${DEB_PACKAGE_DIR}/
 deb_tar_name="psme-bin-${ver}.tar.gz"
 cd $DEB_PACKAGE_DIR
 
-deb_commit_name="psme-allinone_${P_VER}_amd64.deb"
+deb_commit_name="psme_allinone_${P_VER}_amd64.deb"
 tar -zcf $PSME_RELEASE_DIR/$deb_tar_name *
 cp ${DEB_PACKAGE_DIR}/psme-allinone.deb ${DEB_PACKAGE_DIR}/${deb_commit_name}

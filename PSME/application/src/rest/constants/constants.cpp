@@ -109,6 +109,7 @@ const char MODEL[] = "Model";
 const char SERIAL[] = "SerialNumber";
 const char PART_NUMBER[] = "PartNumber";
 const char ASSET_TAG[] = "AssetTag";
+const char SERVICE_TAG[] = "ServiceTag";
 const char STATUS[] = "Status";
 const char STATE[] = "State";
 const char HEALTH[] = "Health";

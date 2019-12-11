@@ -125,6 +125,7 @@ extern const char MODEL[];
 extern const char SERIAL[];
 extern const char PART_NUMBER[];
 extern const char ASSET_TAG[];
+extern const char SERVICE_TAG[];
 extern const char STATUS[];
 extern const char STATE[];
 extern const char HEALTH[];

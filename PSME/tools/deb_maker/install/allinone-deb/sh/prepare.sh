@@ -79,7 +79,6 @@ cp ${PSME_ACC_SW_DIR}/rfsrvlog                  $ITEM_PATH/etc/logrotate.d/
 touch ${PSME_ACC_SW_DIR}/nosrvlog
 cp ${PSME_ACC_SW_DIR}/nosrvlog                  $ITEM_PATH/etc/psme/
 
-
 if [ "$1" = "AS5812-54" ];then
     mkdir -p $ITEM_PATH/etc/bcm_sdk
     cp ${PSME_ACC_SW_DIR}/x_86_bcm_sdk/AS5812-54/*.sh  $ITEM_PATH/etc/bcm_sdk
@@ -117,8 +116,15 @@ if [ "$1" = "arm" ];then
     cp $PSME_PROJ_PATH/lib/libuuid++.so.16               $ITEM_PATH/usr/local/lib
 else
     cp $PSME_PROJ_PATH/bin/tests/unittest_psme-chassis_onlp $ITEM_PATH/usr/local/bin
-    cp $PSME_PROJ_PATH/bin/tests/unittest_psme-chassis_acc_api_bal_dist_test $ITEM_PATH/usr/local/bin
-    cp $PSME_PROJ_PATH/bin/tests/unittest_psme-chassis_acc_api_bal3_dist_test $ITEM_PATH/broadcom
+
+    if [ -f "$PSME_PROJ_PATH/bin/tests/unittest_psme-chassis_acc_api_bal_dist_test" ];then
+        cp $PSME_PROJ_PATH/bin/tests/unittest_psme-chassis_acc_api_bal_dist_test $ITEM_PATH/usr/local/bin
+    fi
+
+    if [ -f "$PSME_PROJ_PATH/bin/tests/unittest_psme-chassis_acc_api_bal3_dist_test" ];then
+        cp $PSME_PROJ_PATH/bin/tests/unittest_psme-chassis_acc_api_bal3_dist_test $ITEM_PATH/broadcom
+    fi
+
     cp ${PSME_ACC_SW_DIR}/onu_cfg                         $ITEM_PATH/usr/local/bin
     cp ${PSME_ACC_SW_DIR}/onu_cfg                         $ITEM_PATH/broadcom
     cp ${PSME_ACC_SW_DIR}/xgspon_unit_test_onu_cfg        $ITEM_PATH/broadcom
