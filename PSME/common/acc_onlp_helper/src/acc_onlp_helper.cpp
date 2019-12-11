@@ -3033,15 +3033,15 @@ Switch &Switch::get_instance()
             getline(ifs, s, (char)ifs.eof());
 
             printf("Creating Olt_Device on platform [%s] size[%d]\r\n", s.c_str(), (int)s.size());
-            if (s.find("asxvolt16", 0) != 0)
+            if (s.find("asxvolt16", 0) !=std::string::npos)
             {
                 printf("x86-64-accton-asxvolt16\r\n");
-                g_Switch = new Switch();
+                g_Switch = new Asxvolt16();
             }
-            else if (s.find("asgvolt64", 0) != 0)
+            else if (s.find("asgvolt64", 0) !=std::string::npos)
             {
                 printf("x86-64-accton-asgvolt64\r\n");
-                g_Switch = new Switch();
+                g_Switch = new Asgvolt64();
             }
             else
             {

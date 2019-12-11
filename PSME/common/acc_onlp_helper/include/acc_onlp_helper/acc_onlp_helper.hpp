@@ -33,7 +33,6 @@
 #include <mutex>
 #include <acc_net_helper/acc_net_helper.hpp>
 
-//#define FF3(readin) (float(int(readin*1000))/1000.000);
 #define FF3(readin) float(int(readin*1000))
 namespace acc_onlp_helper
 {
@@ -521,6 +520,16 @@ private:
     unsigned long long m_pre_Port_Present_A64 = 0;
     unsigned long long m_Port_Present = 0;
     unsigned long long m_Port_Present_A64 = 0;
+};
+
+class Asxvolt16 : public Switch
+{
+public:
+};
+
+class Asgvolt64 : public Switch
+{
+public:
 };
 } // namespace acc_onlp_helper
 
