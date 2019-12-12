@@ -135,6 +135,7 @@ extern const char OEM[];
 extern const char RACKSCALE[];
 extern const char API_VERSION[];
 extern const char LOCATION[];
+extern const char ACT_OEM[];
 extern const char CONTAINED_BY[];
 extern const char MANAGED_BY[];
 extern const char COOLED_BY[];

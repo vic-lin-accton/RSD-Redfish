@@ -305,7 +305,8 @@ void endpoint::Chassis::get(const server::Request& req, server::Response& res) {
     r[Common::SERIAL]                       = sonlp.get_serial_number().c_str();
     r[Common::PART_NUMBER]                  = sonlp.get_part_number().c_str();
     r[Common::MODEL]                        = sonlp.get_platform_name().c_str(); 
-    r[Common::OEM][Common::SERVICE_TAG]     = sonlp.get_service_tag().c_str();
+    r[Common::OEM][Common::RACKSCALE][Common::ACT_OEM][Common::SERVICE_TAG]     
+                                            = sonlp.get_service_tag().c_str();
     r[Common::ASSET_TAG]                    = chassis.get_asset_tag();
     r[constants::Chassis::SKU]              = chassis.get_sku();
     r[constants::Chassis::CHASSIS_TYPE]     = chassis.get_type().to_string();

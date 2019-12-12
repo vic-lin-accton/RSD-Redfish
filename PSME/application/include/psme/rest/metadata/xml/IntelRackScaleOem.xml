@@ -56,6 +56,7 @@
      <ComplexType Name="Chassis" BaseType="Resource.OemObject">
         <Annotation Term="OData.AdditionalProperties" Bool="false"/>
         <Property Name="Location" Type="Intel.Oem.Location" />
+        <Property Name="Accton_Oem" Type="Intel.Oem.Accton_Oem" />
      </ComplexType>
 
      <ComplexType Name="RackChassis" BaseType="Resource.OemObject">
@@ -80,6 +81,15 @@
             <Annotation Term="OData.Permissions" EnumMember="OData.Permission/Read"/>
             <Annotation Term="OData.Description" String="String containing  physical location ID of parent chassis"/>
             <Annotation Term="OData.LongDescription" String="String containing  physical location ID of parent chassis" />
+        </Property>
+    </ComplexType>
+
+    <ComplexType Name="Accton_Oem">
+        <Annotation Term="OData.AdditionalProperties" Bool="false"/>
+        <Property Name="ServiceTag" Type="Edm.String">
+            <Annotation Term="OData.Permissions" EnumMember="OData.Permission/Read"/>
+            <Annotation Term="OData.Description" String="String containing service tag of this chassis"/>
+            <Annotation Term="OData.LongDescription" String="String containing service tag of this chassis" />
         </Property>
     </ComplexType>
 

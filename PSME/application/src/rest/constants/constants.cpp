@@ -119,6 +119,7 @@ const char OEM[] = "Oem";
 const char RACKSCALE[] = "Intel_RackScale";
 const char API_VERSION[] = "ApiVersion";
 const char LOCATION[] = "Location";
+const char ACT_OEM[] = "Accton_Oem";
 const char CONTAINED_BY[] = "ContainedBy";
 const char MANAGED_BY[] = "ManagedBy";
 const char COOLED_BY[] = "CooledBy";

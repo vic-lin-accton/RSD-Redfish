@@ -46,6 +46,8 @@ Verify Set Static IPv4 IP address
 
     ${payload}=  Evaluate  json.loads($IPV4)    json 
     Redfish.Patch  /redfish/v1/Managers/1/EthernetInterfaces/1  body=${payload}
+    # Wait IP get ready
+    Sleep  7s    
     ...  valid_status_codes=[${HTTP_OK}]
 
 
