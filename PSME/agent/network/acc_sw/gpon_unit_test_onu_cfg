@@ -1,4 +1,6 @@
 {
+    "Mode": "SM",
+    "Sleep": 7,
     "ONUs":[
     {
 	    "onu_id"          : 1,

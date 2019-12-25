@@ -202,9 +202,12 @@ void TestClass1::SetUp()
     ifstream    m_source_files= {};
     std::string t_path = ONU_CFG_NAME;
     int Onu_count = 0; 
+    int SleepSec  = 0; 
     Json::Value onus;	  
     Json::Value onu_cfg;	  
-
+    std::string TestMode = "SM"; 
+    //SM : (Simple Mode) 
+    //RM : (Rich Mode)
     m_source_files.open(t_path);
 
     if(m_source_files.good())
@@ -215,6 +218,8 @@ void TestClass1::SetUp()
         if(isJsonOK)
         {
             onus = onu_cfg["ONUs"];
+            TestMode = onu_cfg["Mode"].asString();
+            SleepSec = onu_cfg["Sleep"].asInt();
             Onu_count = onus.size(); 
             printf("////////////num[%d]\r\n", Onu_count);
         }
@@ -273,6 +278,8 @@ void TestClass1::SetUp()
 
     //Step 4. Enable ONU//
     int jj=0;
+    int gem_id = 0;
+    int flow_id = 0;
 
     for(jj = 0 ; jj< Onu_count; jj++)
     { 
@@ -313,12 +320,24 @@ void TestClass1::SetUp()
             int ii = 0;
             for (ii = 0 ; ii < aFlow_size ; ii++)
             {
+                if( TestMode == "RM" )
+                {
+                    //RM mode
+                    gem_id = a_Flow[ii].gemport_id + jj;
+                    flow_id = a_Flow[ii].flow_id + jj;
+                }
+                else
+                {   //SM mode
+                    gem_id = a_Flow[ii].gemport_id;
+                    flow_id = a_Flow[ii].flow_id;
+                }
+                
                 std::string sft(a_Flow[ii].flow_type); //Flow type //
                 std::string sptt(a_Flow[ii].packet_tag_type); //pack tag type //
 
                 OLT.flow_add(
-                        onu_id, a_Flow[ii].flow_id, sft  , sptt, pon_id , 
-                        nni_id, a_Flow[ii].gemport_id, a_Flow[ii].classifier, 
+                        onu_id, flow_id , sft  , sptt, pon_id , 
+                        nni_id, gem_id, a_Flow[ii].classifier, 
                         a_Flow[ii].action , a_Flow[ii].acton_cmd , a_Flow[ii].action_val_a_val, a_Flow[ii].class_val_c_val);                    
             }
         }
@@ -343,6 +362,31 @@ void TestClass1::SetUp()
         for (ij = 0 ; ij < bOMCI_size ; ij++)
         {
             printf("b1[%d] ", ij);
+            if( TestMode == "RM" )
+            {
+                if ((ij == 31) || (ij == 32))
+                {
+                    char m_raw_omci[256] = {0x0};
+                    char ID[8] = {0x0};
+                    sprintf(ID, "%04X", gem_id);
+                    memcpy(m_raw_omci, b_OMCI_1[ij].raw_omci, 90);
+                    if (ij == 31)
+                    {
+                        printf("Repalce Alloc ID = 0x%04X\r\n", gem_id);
+                        memcpy(&m_raw_omci[20], ID, 4);
+                    }
+                    if (ij == 32)
+                    {
+                        printf("Repalce GEM ID = 0x%04X\r\n", gem_id);
+                        memcpy(&m_raw_omci[16], ID, 4);
+                    }
+                    OLT.omci_msg_out(pon_id, onu_id, m_raw_omci);
+                    //OLT.omci_msg_out(pon_id, onu_id,b_OMCI_1[ij].raw_omci);
+                }
+                else
+                    OLT.omci_msg_out(pon_id, onu_id, b_OMCI_1[ij].raw_omci);
+            }
+            else
             OLT.omci_msg_out(pon_id, onu_id, b_OMCI_1[ij].raw_omci);
             usleep(300000);
         }
@@ -357,9 +401,10 @@ void TestClass1::SetUp()
             usleep(300000);
         }
 #endif
-
         if(Onu_count > 1 )
         {
+            if( TestMode == "SM" )
+            {
             do 
             {
                 printf("PRESS ANY KEY to NEXT ONU TEST\r\n");
@@ -376,6 +421,14 @@ void TestClass1::SetUp()
                 printf("Remove flow %d id %s\r\n", a_Flow[j].flow_id , sft.c_str());
                 OLT.flow_remove(a_Flow[j].flow_id, sft);
                 usleep(300000);
+            }
+        }
+            else
+            {
+                //If RM mode we will add all flows at one time //
+                printf("Wait %d seconds\r\n",SleepSec);
+                usleep(SleepSec*1000000);
+                printf("Ranging....Next......\r\n");
             }
         }
     }
