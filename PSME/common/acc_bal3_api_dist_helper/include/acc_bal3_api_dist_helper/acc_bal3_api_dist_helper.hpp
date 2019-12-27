@@ -68,6 +68,7 @@ constexpr const size_t G_PON_TOTAL_INTF_NUM (G_PON_MAX_PON_PORT_NUM+G_PON_MAX_NN
 namespace acc_bal3_api_dist_helper 
 {
     using namespace std;
+    #define MAG_BASE_VAL 1023
 
     struct port_statistic
     {

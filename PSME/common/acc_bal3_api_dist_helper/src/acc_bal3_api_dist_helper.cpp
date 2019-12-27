@@ -1646,7 +1646,7 @@ bool XGS_PON_Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendo
     }
     printf(" OK!!\r\n");
 
-    alloc_id_add(intf_id, onu_id, (1023+onu_id) );	
+    alloc_id_add(intf_id, onu_id, (MAG_BASE_VAL + onu_id) );	
     return true;
 }
 
@@ -1691,7 +1691,7 @@ bool G_PON_Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendor_
     }
     printf(" OK!!\r\n");
 
-    alloc_id_add(intf_id, onu_id, (1023+onu_id) );	
+    alloc_id_add(intf_id, onu_id, (MAG_BASE_VAL + onu_id));	
     return true;
 }
 

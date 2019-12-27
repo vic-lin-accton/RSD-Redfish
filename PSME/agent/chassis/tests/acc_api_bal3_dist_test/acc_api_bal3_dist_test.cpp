@@ -323,12 +323,14 @@ void TestClass1::SetUp()
                 if( TestMode == "RM" )
                 {
                     //RM mode
-                    gem_id = a_Flow[ii].gemport_id + jj;
+                    //gem_id = a_Flow[ii].gemport_id + jj;
+                    gem_id = onu_id + MAG_BASE_VAL; 
                     flow_id = a_Flow[ii].flow_id + jj;
                 }
                 else
                 {   //SM mode
-                    gem_id = a_Flow[ii].gemport_id;
+                    //gem_id = a_Flow[ii].gemport_id;
+                    gem_id = onu_id + MAG_BASE_VAL; 
                     flow_id = a_Flow[ii].flow_id;
                 }
                 
@@ -362,8 +364,6 @@ void TestClass1::SetUp()
         for (ij = 0 ; ij < bOMCI_size ; ij++)
         {
             printf("b1[%d] ", ij);
-            if( TestMode == "RM" )
-            {
                 if ((ij == 31) || (ij == 32))
                 {
                     char m_raw_omci[256] = {0x0};
@@ -381,10 +381,6 @@ void TestClass1::SetUp()
                         memcpy(&m_raw_omci[16], ID, 4);
                     }
                     OLT.omci_msg_out(pon_id, onu_id, m_raw_omci);
-                    //OLT.omci_msg_out(pon_id, onu_id,b_OMCI_1[ij].raw_omci);
-                }
-                else
-                    OLT.omci_msg_out(pon_id, onu_id, b_OMCI_1[ij].raw_omci);
             }
             else
             OLT.omci_msg_out(pon_id, onu_id, b_OMCI_1[ij].raw_omci);
