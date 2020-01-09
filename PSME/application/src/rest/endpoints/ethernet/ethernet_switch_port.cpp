@@ -47,11 +47,10 @@
 using namespace acc_onlp_helper;
 #endif
 
-#ifdef VOLT
-#include "acc_bal_api_dist_helper/acc_bal_api_dist_helper.hpp"
-using namespace acc_bal_api_dist_helper; 
+#if defined BAL31 || defined BAL32
+#include "acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp"
+using namespace acc_bal3_api_dist_helper;
 #endif    
-
 
 using namespace psme::rest;
 using namespace psme::rest::constants;
@@ -64,8 +63,10 @@ using namespace psme::rest::constants;
 
 using PatchMembersRequest = std::tuple<requests::AddEthernetSwitchPortMembers, requests::DeleteEthernetSwitchPortMembers>;
 
-namespace {
-json::Value make_prototype() {
+namespace
+{
+json::Value make_prototype()
+{
     json::Value r(json::Value::Type::OBJECT);
 
     r[Common::ODATA_CONTEXT] = "/redfish/v1/$metadata#EthernetSwitchPort.EthernetSwitchPort";
@@ -132,7 +133,7 @@ json::Value make_prototype() {
     links[Common::OEM][Common::RACKSCALE][constants::EthernetSwitchPort::NEIGHBOR_INTERFACE][Common::ODATA_ID] =json::Value::Type::NIL;
 #endif
 
-#ifdef VOLT
+#if defined BAL31 || defined BAL32
     json::Value status(json::Value::Type::OBJECT);
     status["rx_bytes"]         = 0; 
     status["rx_packets"]       = 0; 
@@ -158,15 +159,16 @@ json::Value make_prototype() {
     return r;
 }
 
-
-std::string get_switch(const server::Request& req) {
+std::string get_switch(const server::Request &req)
+{
     return endpoint::PathBuilder(PathParam::BASE_URL)
         .append(Root::ETHERNET_SWITCHES)
         .append(req.params[PathParam::ETHERNET_SWITCH_ID])
         .build();
 }
 
-void add_primary_vlan_link(json::Value& json, const std::string& vlan, const std::string& url) {
+void add_primary_vlan_link(json::Value &json, const std::string &vlan, const std::string &url)
+{
         json[Common::LINKS][constants::EthernetSwitchPort::PRIMARY_VLAN][Common::ODATA_ID] =
     endpoint::PathBuilder(url).append(constants::EthernetSwitchPort::VLANS).append(vlan).build();
 }
@@ -176,20 +178,18 @@ static const std::map<std::string, std::string> gami_to_rest_attributes = {
     {agent_framework::model::literals::EthernetSwitchPort::ADMINISTRATIVE_STATE, constants::EthernetSwitchPort::ADMINISTRATIVE_STATE},
     {agent_framework::model::literals::EthernetSwitchPort::FRAME_SIZE,           constants::EthernetSwitchPort::FRAME_SIZE},
     {agent_framework::model::literals::EthernetSwitchPort::AUTO_SENSE,           constants::EthernetSwitchPort::AUTOSENSE},
-    {agent_framework::model::literals::EthernetSwitchPort::DEFAULT_VLAN,         constants::EthernetSwitchPort::PRIMARY_VLAN}
-};
+    {agent_framework::model::literals::EthernetSwitchPort::DEFAULT_VLAN, constants::EthernetSwitchPort::PRIMARY_VLAN}};
 
-}
+} // namespace
 
 endpoint::EthernetSwitchPort::EthernetSwitchPort(const std::string& path) : EndpointBase(path) {}
-
 
 endpoint::EthernetSwitchPort::~EthernetSwitchPort() {}
 
 bool isValidIpAddress(char *ipAddress);
 
-void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Response& res) {
-
+void endpoint::EthernetSwitchPort::get(const server::Request &req, server::Response &res)
+{
     // Port status //
     char command[256] = {0};
     char resultA[256] = {0};	
@@ -198,10 +198,8 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
     auto r = ::make_prototype();
 
     r[Common::ODATA_ID] = PathBuilder(req).build();
-    auto switch_id = psme::rest::model::Find<agent_framework::model::EthernetSwitch>(
-        req.params[PathParam::ETHERNET_SWITCH_ID]).get_one()->get_id();
-    r[Common::ODATA_CONTEXT] = std::regex_replace(r[Common::ODATA_CONTEXT].as_string(),
-                                                  std::regex("__SWITCH_ID__"), std::to_string(switch_id));
+    auto switch_id = psme::rest::model::Find<agent_framework::model::EthernetSwitch>( req.params[PathParam::ETHERNET_SWITCH_ID]) .get_one() ->get_id();
+    r[Common::ODATA_CONTEXT] = std::regex_replace(r[Common::ODATA_CONTEXT].as_string(), std::regex("__SWITCH_ID__"), std::to_string(switch_id));
     r[Common::ID] = req.params[PathParam::SWITCH_PORT_ID];
     r[Common::NAME] = constants::EthernetSwitchPort::PORT + req.params[PathParam::SWITCH_PORT_ID];
 
@@ -212,70 +210,19 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
 
     int   port_id= std::stoi(req.params[PathParam::SWITCH_PORT_ID]);
 
-#ifdef VOLT
-    auto& pOLT = Olt_Device::Olt_Device::get_instance();
-#endif    
-
-#ifdef ONLP
-    auto& sonlp = acc_onlp_helper::Switch::get_instance();
-    max_port = sonlp.get_port_num();	
-#endif
-
-    if( port_id  >max_port )	
-    {
-        int TrunkID =   port_id   - max_port  ;
-
-        sprintf(command, "trunk.sh get mem_count %d", TrunkID);
-        memset(resultA,0x0, sizeof(resultA));
-        exec_shell(command, resultA);
-
-        for(int i = 1; i <= max_port; i++)
-        {
-            sprintf(command, "trunk.sh get mem_IN %d %d", TrunkID  ,i);
-            memset(resultA,0x0, sizeof(resultA));
-            exec_shell(command, resultA);
-            
-            if(strlen(resultA) != 0 && !strncmp(resultA, "1", 1))
-            {
-                json::Value link_elem(json::Value::Type::OBJECT);
-                link_elem[Common::ODATA_ID] =  endpoint::PathBuilder( get_switch(req)).append(constants::EthernetSwitch::PORTS).append(i).build();
-                r[Common::LINKS][constants::EthernetSwitchPort::PORT_MEMBERS].push_back(std::move(link_elem));
-            }
-        }       
-        
-        r[constants::EthernetSwitchPort::PORT_MODE] = "LinkAggregationStatic";
-    }
-    else
-    {
-        int iPort = std::stoi(req.params[PathParam::SWITCH_PORT_ID]);
-		
-#ifndef VOLT        
-        sprintf(command, "port_status.sh get  portname %d" , iPort);
-        memset(resultA,0x0, sizeof(resultA));
-        exec_shell(command, resultA);
-        
-        if(strlen(resultA) != 0)
-        {
-            resultA[strcspn(resultA, "\r\n")]=0;
-            r[constants::EthernetSwitchPort::PORT_ID] = resultA;			   
-        }
-        else
-#endif			
             r[constants::EthernetSwitchPort::PORT_ID] = port.get_port_identifier();
-        
         endpoint::status_to_json(port, r);
-        
         const json::Value config = configuration::Configuration::get_instance().to_json();
         
 #ifdef ONLP
-
+    int iPort = port_id; 
         auto network_components = agent_framework::module::NetworkComponents::get_instance();
         auto &port_manager = network_components->get_instance()->get_port_manager();
         auto port_uuids = port_manager.get_keys();
     
         for (const auto& port_uuid : port_uuids) 
         {
-            auto port_ = port_manager.get_entry_reference(port_uuid);  //Get Port object by psu_uuid//
+        auto port_ = port_manager.get_entry_reference(port_uuid);
             if (port_->get_port_id() == (unsigned int)port_id) 
             { 
                 if(port_->get_status().get_state()== enums::State::Enabled)
@@ -285,6 +232,21 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
                     r[Common::STATUS][Common::HEALTH_ROLLUP] = "OK";	
                     r[constants::EthernetSwitchPort::LINK_TYPE] = "Ethernet";	
                     r[constants::EthernetSwitchPort::TRANS_STATIC] = port_->get_trans_info_json();
+                //Show ONUs links under PON port.
+                /*
+                if (r[constants::EthernetSwitchPort::PORT_ID] == "PON port")
+                {
+                    r[constants::EthernetSwitchPort::TRANS_STATIC][literals::EthernetSwitchPort::RX_POWER][literals::EthernetSwitchPort::READING] = json::Value::Type::NIL; 
+                    r[constants::EthernetSwitchPort::TRANS_STATIC][literals::EthernetSwitchPort::RX_POWER][literals::EthernetSwitchPort::UPPER_THRESHOLD_FATAL] = json::Value::Type::NIL;
+                    r[constants::EthernetSwitchPort::TRANS_STATIC][literals::EthernetSwitchPort::RX_POWER][literals::EthernetSwitchPort::UPPER_THRESHOLD_CRITICAL] = json::Value::Type::NIL;
+                    r[constants::EthernetSwitchPort::TRANS_STATIC][literals::EthernetSwitchPort::RX_POWER][literals::EthernetSwitchPort::LOWER_THRESHOLD_CRITICAL] = json::Value::Type::NIL;
+                    r[constants::EthernetSwitchPort::TRANS_STATIC][literals::EthernetSwitchPort::RX_POWER][literals::EthernetSwitchPort::LOWER_THRESHOLD_FATAL] = json::Value::Type::NIL;
+                    r[constants::EthernetSwitchPort::TRANS_STATIC][literals::EthernetSwitchPort::RX_POWER][literals::EthernetSwitchPort::STATUS][literals::TransInfo::STATUS_STATE] = json::Value::Type::NIL;
+                    r[constants::EthernetSwitchPort::TRANS_STATIC][literals::EthernetSwitchPort::RX_POWER][literals::EthernetSwitchPort::STATUS][literals::TransInfo::STATUS_HEALTH] = json::Value::Type::NIL;
+                    r["TEST"] = port_->get_pon_trans_rx_pwr_info_json();
+                    r[constants::EthernetSwitchPort::ONUS][Common::ODATA_ID] = PathBuilder(req).append(constants::EthernetSwitchPort::ONUS).build();
+                }
+                */
                 }
                 else
                 {
@@ -293,17 +255,22 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
                     r[Common::STATUS][Common::HEALTH_ROLLUP] = "Warning";	
                 }
             }
-        }
 
-    #ifdef VOLT
-
+#if defined BAL31 || defined BAL32
+        auto &pOLT = Olt_Device::Olt_Device::get_instance();
         if(pOLT.is_bal_lib_init() == true)
+        {
             r["Statistics"] = pOLT.get_port_statistic(iPort); 
+        }
+        else
+        {
+            printf("bal lib not init !!\r\n");
+        }
     #endif    
 
 #endif
-        r[Common::STATUS][Common::HEALTH_ROLLUP] =
-        endpoint::HealthRollup<agent_framework::model::EthernetSwitchPort>().get(port.get_uuid());
+        r[Common::STATUS][Common::HEALTH_ROLLUP] = endpoint::HealthRollup<agent_framework::model::EthernetSwitchPort>().get(port.get_uuid());
+
 #ifdef CTS       
        if(1) //for CTS         
 #else
@@ -312,10 +279,8 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
 	{    
             r[constants::EthernetSwitchPort::LINK_TYPE] = "Ethernet";		
 #ifndef VOLT        
-            
             /*For link status*/
             sprintf(command, "port_status.sh get link %d", iPort );	
-            
             memset(resultA,0x0, sizeof(resultA));
             exec_shell(command, resultA);
 #ifdef CTS  
@@ -395,7 +360,6 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
                        resultA[strcspn(resultA, "\r\n")]=0;                   
                        r[constants::EthernetSwitchPort::NEIGHBOR_MAC] = resultA;
                    } 
-				   
                 }
                 else
                 {
@@ -451,16 +415,14 @@ void endpoint::EthernetSwitchPort::get(const server::Request& req, server::Respo
             }
         }
 #endif       
-        r[constants::EthernetSwitchPort::STATIC_MACS][Common::ODATA_ID] 
-        = PathBuilder(req).append(constants::EthernetSwitchPort::STATIC_MACS).build();
-
+        r[constants::EthernetSwitchPort::STATIC_MACS][Common::ODATA_ID] = PathBuilder(req).append(constants::EthernetSwitchPort::STATIC_MACS).build();
     }
     
     set_response(res, r);
 }
 
-
-void endpoint::EthernetSwitchPort::patch(const server::Request& request, server::Response& response) {
+void endpoint::EthernetSwitchPort::patch(const server::Request &request, server::Response &response)
+{
  //   using HandlerManager = psme::rest::model::handler::HandlerManager;
 
     auto json = JsonValidator::validate_request_body<schema::EthernetSwitchPortPatchSchema>(request);
@@ -488,7 +450,6 @@ void endpoint::EthernetSwitchPort::patch(const server::Request& request, server:
             linkspeed= (std::uint64_t )strtoull(resultA, NULL, 10);
     }
 	
-
     if (json.is_member(constants::EthernetSwitchPort::FRAME_SIZE)) 
     {
         fsize = json[constants::EthernetSwitchPort::FRAME_SIZE].as_uint64();
@@ -560,8 +521,8 @@ void endpoint::EthernetSwitchPort::patch(const server::Request& request, server:
     get(request, response);
 }
 
-
-void endpoint::EthernetSwitchPort::del(const server::Request& req, server::Response& res) {
+void endpoint::EthernetSwitchPort::del(const server::Request &req, server::Response &res)
+{
 
     const auto&  LAG_ID=req.params[PathParam::SWITCH_PORT_ID];
 

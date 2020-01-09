@@ -35,6 +35,7 @@
 
 #include <acc_net_helper/acc_net_helper.hpp>
 using namespace acc_net_helper;
+using namespace agent_framework::model::attribute;
 
 #ifdef ONLP
 #include "acc_onlp_helper/acc_onlp_helper.hpp"
@@ -48,11 +49,12 @@ using namespace agent::chassis;
 using namespace agent::chassis::onlp;
 using namespace agent::chassis::onlp::watcher;
 using namespace agent_framework::command_ref;
+using namespace agent_framework::model::enums;
+using namespace agent_framework::model::attribute;
 
 using agent_framework::module::ChassisComponents;
 using agent_framework::module::CommonComponents;
 using agent_framework::module::NetworkComponents;
-
 OnlpSensorTask::~OnlpSensorTask() {}
 
 /*! Drawer onlp sensor processing*/
@@ -70,6 +72,7 @@ public:
     void exec_shell(const char *cmd, char *result_a);
     void get_onlp_port_info();
     void get_onlp_port_oom_info();
+    void get_onlp_port_static_info();
 
 private:
     void get_onlp_info();
@@ -310,6 +313,8 @@ void GetOnlpInfo::get_onlp_info()
 
 [[noreturn]] void GetOnlpInfo::get_onlp_port_info() {
 #ifdef ONLP
+    get_onlp_port_static_info();
+
     auto &sonlp = Switch::Switch::get_instance();
 
     while (true)
@@ -366,7 +371,6 @@ void GetOnlpInfo::get_onlp_info()
     [[noreturn]] void GetOnlpInfo::get_onlp_port_oom_info()
 {
 #ifdef ONLP
-
     auto &sonlp = Switch::Switch::get_instance();
 
     while (true)
@@ -391,7 +395,7 @@ void GetOnlpInfo::get_onlp_info()
 
                     if (port_->get_port_id() == portid)
                     {
-                        int current_present = sonlp.get_port_info_by_(portid, Switch::Port_Content::Port_Present);
+                        bool current_present = sonlp.get_port_info_by_(portid, Switch::Port_Content::Port_Present);
 
                         if (current_present)
                         {
@@ -411,10 +415,8 @@ void GetOnlpInfo::get_onlp_info()
                         attribute::TransInfo tTransInfo;
 
                         r = sonlp.get_port_trans_info_by_(portid);
-
                         if (r != json::Value::Type::NIL)
                         {
-
                             tTransInfo.set_spf_vendor_name(r["SFP Vendor Name"]);
                             tTransInfo.set_part_number(r["Part Number"]);
                             tTransInfo.set_serial_number(r["Serial Number"]);
@@ -461,6 +463,18 @@ void GetOnlpInfo::get_onlp_info()
                             tTransInfo.set_rx_power_status_health(r["RxPower"]["Status"]["Health"]);
 
                             port_->set_trans_info(tTransInfo);
+
+                            attribute::Onu_Trans_Rx_Pwr_Info tOnu_Trans_Rx_Pwr_Info;
+
+                            tOnu_Trans_Rx_Pwr_Info.set_rx_power_reading(r["RxPower"]["Reading"]);
+                            tOnu_Trans_Rx_Pwr_Info.set_rx_power_upper_th_fatal(r["RxPower"]["UpperThresholdFatal"]);
+                            tOnu_Trans_Rx_Pwr_Info.set_rx_power_upper_th_critical(r["RxPower"]["UpperThresholdCritical"]);
+                            tOnu_Trans_Rx_Pwr_Info.set_rx_power_lower_th_critical(r["RxPower"]["LowerThresholdCritical"]);
+                            tOnu_Trans_Rx_Pwr_Info.set_rx_power_lower_th_fatal(r["RxPower"]["LowerThresholdFatal"]);
+                            tOnu_Trans_Rx_Pwr_Info.set_rx_power_status_state(r["RxPower"]["Status"]["State"]);
+                            tOnu_Trans_Rx_Pwr_Info.set_rx_power_status_health(r["RxPower"]["Status"]["Health"]);
+
+                            port_->set_trans_rx_pwr_info(tOnu_Trans_Rx_Pwr_Info);
                         }
                     }
                 }
@@ -471,6 +485,54 @@ void GetOnlpInfo::get_onlp_info()
             log_debug(LOGUSR, "get_onlp_port_oom_info - exception : " << e.what());
         }
         sleep(2);
+    }
+#endif
+}
+
+void GetOnlpInfo::get_onlp_port_static_info()
+{
+#ifdef ONLP
+    auto &sonlp = Switch::Switch::get_instance();
+    try
+    {
+        /*Get/Set Port info.*/
+        unsigned int port_num = sonlp.get_port_num();
+        unsigned int portid = 1;
+
+        auto network_components = agent_framework::module::NetworkComponents::get_instance();
+        auto &port_manager = network_components->get_instance()->get_port_manager();
+        auto port_uuids = port_manager.get_keys();
+
+        for (portid = 1; portid <= port_num; portid++)
+        {
+            for (const auto &port_uuid : port_uuids)
+            {
+                auto port_ = port_manager.get_entry_reference(port_uuid); //Get Port object by psu_uuid//
+
+                if (port_->get_port_id() == portid)
+                {
+                    if (sonlp.get_port_info_by_(portid, Switch::Port_Content::Port_Type) == acc_onlp_helper::Port_Info::Port_Type::PON_Port)
+                    {
+                        port_->set_port_type(PortType::Downstream);
+                        port_->set_port_identifier("PON port");
+                    }
+                    else if (sonlp.get_port_info_by_(portid, Switch::Port_Content::Port_Type) == acc_onlp_helper::Port_Info::Port_Type::XSFP_Port)
+                    {
+                        port_->set_port_type(PortType::MeshPort);
+                        port_->set_port_identifier("xFP port");
+                    }
+                    else
+                    {
+                        port_->set_port_type(PortType::MeshPort);
+                        port_->set_port_identifier("RJ45 port");
+                    }
+                }
+            }
+        }
+    }
+    catch (const std::exception &e)
+    {
+        log_debug(LOGUSR, "get_onlp_port_static_info - exception : " << e.what());
     }
 #endif
 }

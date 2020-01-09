@@ -137,6 +137,7 @@ constexpr const char EthernetSwitchPort::IPV4_ADDRESS[];
 constexpr const char EthernetSwitchPort::IPV6_ADDRESS[];
 constexpr const char EthernetSwitchPort::NEIGHBOR_INFO[];
 constexpr const char EthernetSwitchPort::TRANS_INFO[];
+constexpr const char EthernetSwitchPort::TRANS_PON_RX_PWR_INFO[];
 
 constexpr const char EthernetSwitchPort::SFP_VENDOR_NAME[];
 constexpr const char EthernetSwitchPort::PART_NUMBER[];

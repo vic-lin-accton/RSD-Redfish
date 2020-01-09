@@ -36,8 +36,10 @@ using namespace acc_net_helper;
 
 bool isValidIpAddress(char *ipAddress);
 
-namespace {
-json::Value make_prototype() {
+namespace
+{
+json::Value make_prototype()
+{
     json::Value r(json::Value::Type::OBJECT);
 
     r[Common::ODATA_CONTEXT] = "/redfish/v1/$metadata#EthernetInterface.EthernetInterface";
@@ -74,7 +76,6 @@ json::Value make_prototype() {
     r[NetworkInterface::IPv6_STATIC_ADDRESSES] = json::Value::Type::ARRAY;
     r[NetworkInterface::NAME_SERVERS] = json::Value::Type::ARRAY;
 
-
     json::Value links;
     links[Fabric::ENDPOINTS] = json::Value::Type::ARRAY;
     links[Common::OEM][Common::RACKSCALE][Common::ODATA_TYPE] = "#Intel.Oem.EthernetInterface";
@@ -82,7 +83,7 @@ json::Value make_prototype() {
 
     return r;
 }
-}
+} // namespace
 
 bool isValidIpAddress(char *ipAddress)
 {
@@ -101,7 +102,8 @@ endpoint::ManagerNetworkInterface::ManagerNetworkInterface(const std::string& pa
 
 endpoint::ManagerNetworkInterface::~ManagerNetworkInterface() {}
 
-void endpoint::ManagerNetworkInterface::get(const server::Request& req, server::Response& res) {
+void endpoint::ManagerNetworkInterface::get(const server::Request &req, server::Response &res)
+{
 	auto manager = psme::rest::model::Find<agent_framework::model::Manager>(req.params[PathParam::MANAGER_ID]).get();
 	auto switch_ids = agent_framework::module::NetworkComponents::get_instance()->get_switch_manager().get_ids(manager.get_uuid());
 
@@ -111,7 +113,8 @@ void endpoint::ManagerNetworkInterface::get(const server::Request& req, server::
 
 	/*Nick Added Begin: */	
 
-	try {
+	try
+	{
 		const json::Value config = configuration::Configuration::get_instance().to_json();
 		const auto& nic_name = config["server"]["network-interface-name"].as_string();
 
@@ -119,7 +122,7 @@ void endpoint::ManagerNetworkInterface::get(const server::Request& req, server::
 		char resultA[256] = {0};
 
 		json::Value ipv6_confg;
-		ipv6_confg[NetworkInterface::IPv6_DHCP_OPERATINMODE] =  json::Value::Type::NIL;;
+		ipv6_confg[NetworkInterface::IPv6_DHCP_OPERATINMODE] = json::Value::Type::NIL;
 		ipv6_confg[NetworkInterface::IPv6_DHCP_USE_DNS_SERVERS] = false;
 		ipv6_confg[NetworkInterface::IPv6_DHCP_USE_NTP_SERVERS] = false;
 		ipv6_confg[NetworkInterface::IPv6_DHCP_USE_RAPID_COMMIT] = false;					 
@@ -170,7 +173,6 @@ void endpoint::ManagerNetworkInterface::get(const server::Request& req, server::
                               json::Value ip_auto_confg;
                               ip_auto_confg[NetworkInterface::IPv6_AUTO_CONFIG_ENABLED] = true;
                               r[NetworkInterface::STATELESS_ADDRESS_AUTO_CONFIG]=ip_auto_confg;
-							  
                          }
                          else
                          {					 	
@@ -221,10 +223,9 @@ void endpoint::ManagerNetworkInterface::get(const server::Request& req, server::
 			r[Common::MAC_ADDRESS] = mac_address;
 
 			r[NetworkInterface::PERMANENT_MAC_ADDRESS] =mac_address;
-
-
 		}
-		else {
+		else
+		{
 			log_warning(GET_LOGGER("rest"),
 			"Empty IPv4 Address in the network interface read from the configuration file.");
 		}
@@ -309,16 +310,15 @@ void endpoint::ManagerNetworkInterface::get(const server::Request& req, server::
 					 	vlan[Vlan::VLAN_ENABLE] = false;
 
 					vlan[Vlan::VLAN_ID] = vlanid;									 
-					r[NetworkInterface::VLAN].push_back(std::move(vlan));;                                 
+					r[NetworkInterface::VLAN].push_back(std::move(vlan));
 				}								 
 			}
 			else if( count > 1 )
 			{
 				json::Value rl(json::Value::Type::OBJECT);
 				rl[Common::ODATA_ID] = PathBuilder(req).append(constants::EthernetSwitchPort::VLANS).build();
-				r[NetworkInterface::VLANS].push_back(std::move(rl));;  		
+				r[NetworkInterface::VLANS].push_back(std::move(rl));
 			}
-
 		}		 
 
 		/*For IPv6*/
@@ -333,8 +333,7 @@ void endpoint::ManagerNetworkInterface::get(const server::Request& req, server::
 			r[NetworkInterface::IPv6_DEFAULT_GATEWAY] = resultA;
 		}
 		else
-			r[NetworkInterface::IPv6_DEFAULT_GATEWAY] = json::Value::Type::NIL;;
-
+			r[NetworkInterface::IPv6_DEFAULT_GATEWAY] = json::Value::Type::NIL;
 
 		sprintf(command, "ipv6_status.sh get ipv6_count %s", nic_name.c_str());
 		memset(resultA,0x0, sizeof(resultA));
@@ -368,7 +367,7 @@ void endpoint::ManagerNetworkInterface::get(const server::Request& req, server::
 				else
 				    ipv6_address[IpAddress::ADDRESS_ORIGIN] =  tmp1[2];
 				
-				ipv6_address[IpAddress::ADDRESS_STATE] = json::Value::Type::NIL;;
+				ipv6_address[IpAddress::ADDRESS_STATE] = json::Value::Type::NIL;
 				r[constants::NetworkInterface::IPv6_ADDRESSES].push_back(std::move(ipv6_address));		
 
 				if(bstatic)
@@ -378,18 +377,19 @@ void endpoint::ManagerNetworkInterface::get(const server::Request& req, server::
 					ipv6_static_address[IpAddress::PREFIX_LENGTH] = prefix;
 					r[constants::NetworkInterface::IPv6_STATIC_ADDRESSES].push_back(std::move(ipv6_static_address));		
 				}
-
 			}
 		}		 
-	} catch (const std::exception& ex){
+	}
+	catch (const std::exception &ex)
+	{
 		log_warning(GET_LOGGER("rest"),"Read manage error!!");
 	}
 
 	set_response(res, r);
 }
 
-
-void endpoint::ManagerNetworkInterface::patch(const server::Request& request, server::Response& response){
+void endpoint::ManagerNetworkInterface::patch(const server::Request &request, server::Response &response)
+{
 
     auto json = JsonValidator::validate_request_body<schema::EthernetInterfacePatchSchema>(request);
    
@@ -488,5 +488,4 @@ void endpoint::ManagerNetworkInterface::patch(const server::Request& request, se
     }
 
     intf_ip.Restart();
-	
 }

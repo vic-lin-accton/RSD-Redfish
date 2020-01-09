@@ -564,6 +564,12 @@ const std::string Routes::STATIC_MAC_COLLECTION_PATH =
         .append(constants::EthernetSwitchPort::STATIC_MACS)
         .build();
 
+// "/redfish/v1/EthernetSwitches/{ethernetSwitchId:[0-9]+}/Ports/{portId:[0-9]+}/ONUs"
+const std::string Routes::ONUS_COLLECTION_PATH =
+    PathBuilder(ETHERNET_SWITCH_PORT_PATH)
+        .append(constants::EthernetSwitchPort::ONUS)
+        .build();
+
 // "/redfish/v1/EthernetSwitches/{ethernetSwitchId:[0-9]+}/Ports/{portId:[0-9]+}/staticMACs/{staticMacId:[0-9]+}"
 const std::string Routes::STATIC_MAC_PATH =
     PathBuilder(STATIC_MAC_COLLECTION_PATH)

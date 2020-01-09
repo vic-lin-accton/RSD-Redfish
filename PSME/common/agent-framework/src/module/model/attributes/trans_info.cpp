@@ -156,3 +156,39 @@ TransInfo TransInfo::from_json(const Json::Value& json) {
 	
     return trnas_info;
 }
+
+Onu_Trans_Rx_Pwr_Info::Onu_Trans_Rx_Pwr_Info() { }
+
+Onu_Trans_Rx_Pwr_Info::~Onu_Trans_Rx_Pwr_Info() { }
+
+Json::Value Onu_Trans_Rx_Pwr_Info::to_json() const {
+    Json::Value result;
+
+    result[literals::TransInfo::RX_POWER_READING] = get_rx_power_reading();
+    result[literals::TransInfo::RX_POWER_UPPER_THRESH_HOLD_FATAL] = get_rx_power_upper_th_fatal();
+    result[literals::TransInfo::RX_POWER_UPPER_THRESH_HOLD_CRITICAL] = get_rx_power_upper_th_critical();
+    result[literals::TransInfo::RX_POWER_UPPER_THRESH_HOLD_NON_CRITICAL] = get_rx_power_upper_th_non_critical();
+    result[literals::TransInfo::RX_POWER_LOWER_THRESH_HOLD_FATAL] = get_rx_power_lower_th_fatal();
+    result[literals::TransInfo::RX_POWER_LOWER_THRESH_HOLD_CRITICAL] = get_rx_power_lower_th_critical();
+    result[literals::TransInfo::RX_POWER_LOWER_THRESH_HOLD_NON_CRITICAL] = get_rx_power_lower_th_non_critical();
+    result[literals::TransInfo::RX_POWER_STATUS_STATE] = get_rx_power_status_state();
+    result[literals::TransInfo::RX_POWER_STATUS_HEALTH] = get_rx_power_status_health();
+	
+    return result;
+}
+
+Onu_Trans_Rx_Pwr_Info Onu_Trans_Rx_Pwr_Info::from_json(const Json::Value& json) {
+    attribute::Onu_Trans_Rx_Pwr_Info trnas_info;
+
+    trnas_info.set_rx_power_reading(json[literals::TransInfo::RX_POWER_READING]);
+    trnas_info.set_rx_power_upper_th_fatal(json[literals::TransInfo::RX_POWER_UPPER_THRESH_HOLD_FATAL]);
+    trnas_info.set_rx_power_upper_th_critical(json[literals::TransInfo::RX_POWER_UPPER_THRESH_HOLD_CRITICAL]);
+    trnas_info.set_rx_power_upper_th_non_critical(json[literals::TransInfo::RX_POWER_UPPER_THRESH_HOLD_NON_CRITICAL]);
+    trnas_info.set_rx_power_lower_th_fatal(json[literals::TransInfo::RX_POWER_LOWER_THRESH_HOLD_FATAL]);
+    trnas_info.set_rx_power_lower_th_critical(json[literals::TransInfo::RX_POWER_LOWER_THRESH_HOLD_CRITICAL]);
+    trnas_info.set_rx_power_lower_th_non_critical(json[literals::TransInfo::RX_POWER_LOWER_THRESH_HOLD_NON_CRITICAL]);
+    trnas_info.set_rx_power_status_state(json[literals::TransInfo::RX_POWER_STATUS_STATE]);
+    trnas_info.set_rx_power_status_health(json[literals::TransInfo::RX_POWER_STATUS_HEALTH]);	
+	
+    return trnas_info;
+}

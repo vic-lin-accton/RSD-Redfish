@@ -133,6 +133,7 @@ set(SOURCES
     endpoints/ethernet/ethernet_switch_collection.cpp
     endpoints/ethernet/ethernet_switch.cpp
     endpoints/ethernet/ethernet_switch_port_collection.cpp
+    endpoints/ethernet/ethernet_switch_port_onus_collection.cpp
     endpoints/ethernet/ethernet_switch_port.cpp
     endpoints/ethernet/acl.cpp
     endpoints/ethernet/acl_bind.cpp

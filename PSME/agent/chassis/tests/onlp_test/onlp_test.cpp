@@ -36,8 +36,8 @@ using namespace std;
 #include <ctime>  
 #include <thread>
 
-
-class TestClass1 : public ::testing::Test {
+class TestClass1 : public ::testing::Test
+{
 public:
     virtual ~TestClass1();
 
@@ -49,13 +49,11 @@ public:
 TestClass1::~TestClass1() 
 { 
     printf("TestClass1-deconstructor\r\n");
-
 }
 
 void TestClass1::SetUp() 
 {
     printf("TestClass1-SetUp-Begin InterfaceConfig TESTING/////////////////////\r\n");
-
 
     int iii = 10;
     while(iii !=0)
@@ -110,12 +108,10 @@ void TestClass1::SetUp()
         sonlp.get_port_oom_info();
         auto end = std::chrono::system_clock::now();
 
-
         std::chrono::duration<double> elapsed_seconds = end-start;
         std::time_t end_time = std::chrono::system_clock::to_time_t(end);
         std::cout << "finished computation at getting get_port_info info.. " << std::ctime(&end_time)
               << "elapsed time: " << elapsed_seconds.count() << "s\n";
-		
 		
         int port_max = sonlp.get_port_num();
     
@@ -170,7 +166,6 @@ void TestClass1::SetUp()
     
         int thermal_max = sonlp2.get_thermal_num();
     
-    
         for(int i = 1; i <= thermal_max; i++)	
         {
             printf("Thermal type %d [%d] \r\n", i, sonlp2.get_thermal_info_by_(i, acc_onlp_helper::Switch::Thermal_Type));    
@@ -199,16 +194,12 @@ void TestClass1::SetUp()
 	ii--;
     }
     printf("TestClass1-SetUp-End      Switch TESTING/////////////////////\r\n");
-	
 }
-
 
 void TestClass1::TearDown() 
 {
     printf("TestClass1-TearDown\r\n");
-
 }
-
 
 TEST_F(TestClass1, Test_Memo_1) 
 {

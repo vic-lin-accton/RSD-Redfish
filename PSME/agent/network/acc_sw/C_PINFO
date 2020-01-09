@@ -83,6 +83,11 @@ while [ "$i" -lt "${PORT_MAX}" ];do
         if [ "$ii" != "${PORT_MAX}" ];then
             echo "," >> ${Config_File}
         fi
+	elif [ "$type" == "PON" ];then
+		echo " \"port$ii\":\"PON\"   " >> ${Config_File} 
+        if [ "$ii" != "${PORT_MAX}" ];then
+	        echo "," >> ${Config_File}
+        fi
     else
         echo " \"port$ii\":\"XSFP\"   " >> ${Config_File}
         if [ "$ii" != "${PORT_MAX}" ];then

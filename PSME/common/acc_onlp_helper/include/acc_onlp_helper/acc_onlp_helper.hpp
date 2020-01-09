@@ -33,7 +33,7 @@
 #include <mutex>
 #include <acc_net_helper/acc_net_helper.hpp>
 
-#define FF3(readin) float(int(readin*1000))
+#define FF3(readin) float(int(readin * 1000))
 namespace acc_onlp_helper
 {
 
@@ -260,7 +260,7 @@ public:
     {
         Ether_Port = 1,
         XSFP_Port = 2,
-        XFP_Port = 3
+        PON_Port = 3
 
     };
     bool m_Present_Status = 0;
@@ -350,6 +350,7 @@ public:
     enum Port_Content
     {
         Port_Present = 1,
+        Port_Type = 2
     };
 
     void get_fan_info();
@@ -360,20 +361,41 @@ public:
     void update_thermal_present_event();
     void get_port_present_info();
     void get_port_oom_info();
+    void get_pon_port_oom_info();
     void update_port_present_event();
     void update_trasceivers_oom_event();
 
     int get_fan_info_by_(int fanid, Fan_Content id);
-    int get_fan_num() { return m_fan_max_num; };
+    int get_fan_num() { return m_fan_max_num + m_psu_max_num; };
     int get_psu_info_by_(int psuid, Psu_Content id);
     int get_psu_num() { return m_psu_max_num; };
     int get_thermal_info_by_(int thermalid, Thermal_Content id);
-    int get_thermal_num() { return m_thermal_sen_max_num; };
+    int get_thermal_num() { return m_thermal_sen_max_num + m_psu_max_num; };
     int get_port_info_by_(int portid, Port_Content id);
     int get_port_num() { return m_port_max_num; };
 
     static Switch &get_instance();
     static void cleanup();
+    static void increase_thermal_num()
+    {
+        m_thermal_sen_max_num++;
+        return;
+    };
+    static void increase_psu_num()
+    {
+        m_psu_max_num++;
+        return;
+    };
+    static void increase_fan_num()
+    {
+        m_fan_max_num++;
+        return;
+    };
+    static void increase_port_num()
+    {
+        m_port_max_num++;
+        return;
+    };
 
     std::string get_fan_info_by_(int fanid, std::string type);
     std::string get_psu_info_by_(int psuid, std::string type);
@@ -412,11 +434,11 @@ private:
     Json::Reader m_eeprom_j_reader = {};
     int m_MAC_Range = 0;
     int m_Device_Version = 0;
-    int m_fan_max_num = 0;
-    int m_port_max_num = 0;
-    int m_thermal_sen_max_num = 0;
-    int m_psu_max_num = 0;
-    int m_max_cpu_num = 0;
+    static int m_fan_max_num;
+    static int m_port_max_num;
+    static int m_thermal_sen_max_num;
+    static int m_psu_max_num;
+    static int m_max_cpu_num;
     int m_cpu_stepping = 0;
     int m_cpu_max_speed = 0;
     int m_cpu_total_core = 0;
@@ -505,9 +527,9 @@ private:
     unsigned int get_psu_present() { return m_Psu_Present; };
 
     vector<Thermal_Info *> m_vec_Thermal_Info = {};
-    vector<Port_Info *>    m_vec_Port_Info = {};
-    vector<Psu_Info *>     m_vec_Psu_Info = {};
-    vector<Fan_Info *>     m_vec_Fan_Info = {};
+    vector<Port_Info *> m_vec_Port_Info = {};
+    vector<Psu_Info *> m_vec_Psu_Info = {};
+    vector<Fan_Info *> m_vec_Fan_Info = {};
 
     unsigned int m_Thermal_Present = 0;
     unsigned int m_Psu_Present = 0;
@@ -521,7 +543,6 @@ private:
     unsigned long long m_Port_Present = 0;
     unsigned long long m_Port_Present_A64 = 0;
 };
-
 class Asxvolt16 : public Switch
 {
 public:

@@ -84,6 +84,7 @@ extern const char FULL_DUPLEX[];
 extern const char ACTIVE_ACLS[];
 extern const char NEIGHBOR_INTERFACE[];
 extern const char STATIC_MACS[];
+extern const char ONUS[];
 extern const char TRANS_STATIC[];
 
 }

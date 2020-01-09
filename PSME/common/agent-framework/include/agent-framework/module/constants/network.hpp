@@ -161,6 +161,7 @@ public:
     static constexpr const char COLLECTIONS[] = "collections";
     static constexpr const char OEM[] = "oem";
     static constexpr const char TRANS_INFO[] = "transInfo";
+    static constexpr const char TRANS_PON_RX_PWR_INFO[] = "transInfo_rx_pwr_info";
 
     static constexpr const char SFP_VENDOR_NAME[] = "SFP Vendor Name";
     static constexpr const char PART_NUMBER[] = "Part Number";

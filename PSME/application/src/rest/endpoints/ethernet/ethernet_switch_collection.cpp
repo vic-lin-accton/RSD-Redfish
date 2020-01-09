@@ -24,8 +24,6 @@
 using namespace psme::rest;
 using namespace psme::rest::constants;
 
-
-
 namespace {
 json::Value make_prototype() {
     json::Value r(json::Value::Type::OBJECT);

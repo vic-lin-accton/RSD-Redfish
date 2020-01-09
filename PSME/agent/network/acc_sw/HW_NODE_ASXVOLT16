@@ -41,8 +41,9 @@
 	SYSTEM_HALT_VALUE="0x01"
 	SYSTEM_RESTART_VALUE="0x02"
 
-        mapping=("XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
-                 "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP")
+        mapping=("PON" "PON" "PON" "PON" "PON" "PON" "PON" "PON" "PON" "PON"
+                 "PON" "PON" "PON" "PON" "PON" "PON" 
+                 "XSFP" "XSFP" "XSFP" "XSFP")
 
         fans_type=("S" "S" "S" "S" "S" "S" "P" "P")
 

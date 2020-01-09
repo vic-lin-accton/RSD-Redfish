@@ -30,6 +30,7 @@ include_directories(
     ${ACC_ONLP_HELPER_INCLUDE_DIRS}
     ${ACC_SYS_HELPER_INCLUDE_DIRS}
     ${ACC_BAL_API_DIST_HELPER_INCLUDE_DIRS}
+    ${ACC_BAL3_API_DIST_HELPER_INCLUDE_DIRS}
 )
 
 add_subdirectory(rest)

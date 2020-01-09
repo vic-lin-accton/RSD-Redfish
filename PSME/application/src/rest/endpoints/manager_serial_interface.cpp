@@ -64,27 +64,30 @@ endpoint::ManagerSerialInterface::ManagerSerialInterface(const std::string& path
 
 endpoint::ManagerSerialInterface::~ManagerSerialInterface() {}
 
-void endpoint::ManagerSerialInterface::get(const server::Request& req, server::Response& res) {
-
+void endpoint::ManagerSerialInterface::get(const server::Request &req, server::Response &res)
+{
     auto r = ::make_prototype();
     r[Common::ODATA_ID] = PathBuilder(req).build();
     r[Common::ID] = req.params[PathParam::SER_ID];
 
-    try {   
-
+        try
+        {
         char const *portname = "/dev/console";
         int fd;
     
         fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
-        if (fd < 0) {
+                if (fd < 0)
+                {
             printf("Error opening %s: %s\n", portname, strerror(errno));
             return;
         }
 
         struct termios tty;
     
-        if (tcgetattr(fd, &tty) < 0) {
+                if (tcgetattr(fd, &tty) < 0)
+                {
             printf("Error from tcgetattr: %s\n", strerror(errno));
+                        close(fd);
             return;
         }
         printf("tty.c_cflag[0x%04x]\r\n", tty.c_cflag);
@@ -95,7 +98,6 @@ void endpoint::ManagerSerialInterface::get(const server::Request& req, server::R
         int fstopb = (tty.c_cflag & CSTOPB  );
         int fdatab = (tty.c_cflag & (CS5|CS6|CS7|CS8));		
 
-		
         switch(fspeed)
         {
                 case B1200 :
@@ -153,11 +155,12 @@ void endpoint::ManagerSerialInterface::get(const server::Request& req, server::R
             r[SerialInterface::DATA_BIT] = "8";
        else
             r[SerialInterface::DATA_BIT] = json::Value::Type::NIL;
-    
-    } catch (const std::exception& ex){
+                close(fd);
+        }
+        catch (const std::exception &ex)
+        {
     	log_warning(GET_LOGGER("rest"),
     			"Read manage error!!");
-    
     }
     set_response(res, r);
 }

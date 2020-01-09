@@ -23,10 +23,10 @@ extern "C"
 }
 #endif
 
-#include <iostream>     
+#include <iostream>
 #include <istream>
 #include <ostream>
-#include <fstream>      
+#include <fstream>
 #include <dirent.h>
 #include <string.h>
 #include <chrono>
@@ -39,6 +39,48 @@ unsigned long get_value_from_pointer_u(unsigned char *ptr, int size);
 
 static constexpr const char STD_SEC_PATH[] = "/usr/local/bin/mod_conf/";
 static constexpr const char EEPROM_MAP_PATH[] = "/usr/local/bin/mod_conf/map/";
+int Switch::m_fan_max_num = 0;
+int Switch::m_port_max_num = 0;
+int Switch::m_thermal_sen_max_num = 0;
+int Switch::m_psu_max_num = 0;
+int Switch::m_max_cpu_num = 0;
+
+#define UNUSED(expr)  \
+    do                \
+    {                 \
+        (void)(expr); \
+    } while (0)
+
+static int iterate_oids_callback__(onlp_oid_t oid, void *cookie)
+{
+    int type = ONLP_OID_TYPE_GET(oid);
+    int id = ONLP_OID_ID_GET(oid);
+
+    static int thermal = 1;
+    static int fan = 1;
+    static int psu = 1;
+    UNUSED(cookie);
+
+    switch (type)
+    {
+    case ONLP_OID_TYPE_THERMAL:
+        printf("thermal,Thermal %d,%d\n", id, thermal++);
+        Switch::increase_thermal_num();
+        break;
+    case ONLP_OID_TYPE_FAN:
+        printf("fan,Fan %d,%d\n", id, fan++);
+        Switch::increase_fan_num();
+        break;
+    case ONLP_OID_TYPE_PSU:
+        printf("psu,PSU %d,%d\n", id, psu++);
+        Switch::increase_psu_num();
+        break;
+    default:
+        printf("non[%d] \r\n", type);
+        break;
+    }
+    return 0;
+}
 
 signed long get_value_from_pointer(signed char *ptr, int size)
 {
@@ -666,7 +708,6 @@ void e_oom::refresh_rx_pwr()
     
                Critical
     */
-
         if (((FF3(ff) >= m_current_status["RxPower"]["UpperThresholdCritical"]) && (FF3(ff) < m_current_status["RxPower"]["UpperThresholdFatal"])) || ((FF3(ff) >= m_current_status["RxPower"]["LowerThresholdFatal"]) && (FF3(ff) < m_current_status["RxPower"]["LowerThresholdCritical"])))
         {
             m_current_status["RxPower"]["Status"]["Health"] = "Warning";
@@ -714,7 +755,7 @@ bool e_oom::refresh_status()
         refresh_voltage();
         refresh_bias();
         refresh_tx_pwr();
-        //refresh_rx_pwr();
+        refresh_rx_pwr();
     }
     return true;
 }
@@ -726,7 +767,7 @@ bool e_oom::status_default()
     default_voltage();
     default_bias();
     default_tx_pwr();
-    //default_rx_pwr();
+    default_rx_pwr();
     return true;
 }
 
@@ -752,7 +793,7 @@ bool e_oom::get_eeprom_raw()
                 is.read(buffer, SIZE_EEPROM);
                 if (store_eeprom(buffer))
                 {
-#if 0            
+#if 0 //for debug usage            
                     int i = 0; 
                         while(i < SIZE_EEPROM)
                     {
@@ -853,11 +894,11 @@ Json::Value e_oom::get_attri_by_name(std::string att_name, Json::Value in)
 
 // ------------------------------------------------------------------
 //  New Transceiver Type need Added here
-//  1. Decide XFP/QSFP by identify ID,
-//     03h : SFP+     8472i
-//     06h : XFP ,    8077i
-//     0dh : QSFP+ ,  8436i
-//     11h : QSFP28   8438i
+//  1. Decide by identify ID,
+//     03h : SFP+  (10GPON) ,  8472i
+//     06h : XFP   (XGSPON) ,  8077i
+//     0dh : QSFP+ (40G)    ,  8436i
+//     11h : QSFP28(100G)   ,  8438i
 //  2. Identify which Std. should be used.
 //  3. Store raw data.
 // ------------------------------------------------------------------
@@ -1158,31 +1199,30 @@ void e_oom::set_proto()
     TxPwr["Status"]["State"] = json::Value::Type::NIL;
 
     m_current_status["TxPower"] = std::move(TxPwr);
-    /*
-           json::Value RxPwr(json::Value::Type::OBJECT);
 
-           RxPwr["Reading"] = json::Value::Type::NIL;
-           RxPwr["UpperThresholdFatal"] = json::Value::Type::NIL;
-           RxPwr["UpperThresholdCritical"] = json::Value::Type::NIL;
-           RxPwr["UpperThresholdNonCritical"] = json::Value::Type::NIL;
-           RxPwr["LowerThresholdNonCritical"] = json::Value::Type::NIL;
-           RxPwr["LowerThresholdCritical"] = json::Value::Type::NIL;
-           RxPwr["LowerThresholdFatal"] = json::Value::Type::NIL;
+    json::Value RxPwr(json::Value::Type::OBJECT);
 
-           RxPwr["Status"]["HealthRollup"] = json::Value::Type::NIL;
-           RxPwr["Status"]["Health"] = json::Value::Type::NIL;
-           RxPwr["Status"]["State"] = json::Value::Type::NIL;
+    RxPwr["Reading"] = json::Value::Type::NIL;
+    RxPwr["UpperThresholdFatal"] = json::Value::Type::NIL;
+    RxPwr["UpperThresholdCritical"] = json::Value::Type::NIL;
+    RxPwr["UpperThresholdNonCritical"] = json::Value::Type::NIL;
+    RxPwr["LowerThresholdNonCritical"] = json::Value::Type::NIL;
+    RxPwr["LowerThresholdCritical"] = json::Value::Type::NIL;
+    RxPwr["LowerThresholdFatal"] = json::Value::Type::NIL;
 
-           m_current_status["RxPower"] = std::move(RxPwr); 	
-           */
+    RxPwr["Status"]["HealthRollup"] = json::Value::Type::NIL;
+    RxPwr["Status"]["Health"] = json::Value::Type::NIL;
+    RxPwr["Status"]["State"] = json::Value::Type::NIL;
+
+    m_current_status["RxPower"] = std::move(RxPwr);
 }
 
 // ------------------------------------------------------------------
-//  1. Decide XFP/QSFP by identify ID,
-//     03h : SFP+     8472i
-//     06h : XFP ,    8077i
-//     0dh : QSFP+ ,  8436i
-//     11h : QSFP28   8438i
+//  1. Decide by identify ID,
+//     03h : SFP+  (10GPON) ,  8472i
+//     06h : XFP   (XGSPON) ,  8077i
+//     0dh : QSFP+ (40G)    ,  8436i
+//     11h : QSFP28(100G)   ,  8438i
 //  2. Take customer PN to compare first.
 //  3. If not find PN in customer PN, use std instead
 // ------------------------------------------------------------------
@@ -1321,17 +1361,14 @@ void Switch::get_board_info()
 
             if (isJsonOK)
             {
-
                 const Json::Value defValue; //used for default reference
                 const Json::Value s = content.get("managers", defValue);
 
-                m_fan_max_num = s[0]["onlp"]["fan_max_num"].asInt();
-
-                if (m_fan_max_num > 0)
+                if (get_fan_num() > 0)
                 {
                     int i = 0;
 
-                    for (i = 1; i <= m_fan_max_num; i++)
+                    for (i = 1; i <= get_fan_num(); i++)
                     {
                         Fan_Info *p = NULL;
                         std::string findex("fan");
@@ -1399,7 +1436,14 @@ void Switch::get_board_info()
                         else if (s[0]["onlp"]["ports"][findex + std::to_string(i)].asString() == "XSFP")
                         {
                             p->m_Type = Port_Info::XSFP_Port;
-                            /*Set XFP eeprom mapping path*/
+                            /*Set XSFP eeprom mapping path*/
+                            printf("set_eeprom_path port [%d] [%s]!!\r\n \r\n", i, mapping_s[std::to_string(i)].asString().c_str());
+                            p->set_eeprom_path(mapping_s[std::to_string(i)].asString());
+                        }
+                        else if (s[0]["onlp"]["ports"][findex + std::to_string(i)].asString() == "PON")
+                        {
+                            p->m_Type = Port_Info::PON_Port;
+                            /*Set PON eeprom mapping path*/
                             printf("set_eeprom_path port [%d] [%s]!!\r\n \r\n", i, mapping_s[std::to_string(i)].asString().c_str());
                             p->set_eeprom_path(mapping_s[std::to_string(i)].asString());
                         }
@@ -1410,12 +1454,10 @@ void Switch::get_board_info()
                     }
                 }
 
-                m_thermal_sen_max_num = s[0]["onlp"]["thermal_sen_max_num"].asInt();
-
-                if (m_thermal_sen_max_num > 0)
+                if (get_thermal_num() > 0)
                 {
                     int i = 0;
-                    for (i = 1; i <= m_thermal_sen_max_num; i++)
+                    for (i = 1; i <= get_thermal_num(); i++)
                     {
                         Thermal_Info *p = NULL;
 
@@ -1452,12 +1494,10 @@ void Switch::get_board_info()
                     }
                 }
 
-                m_psu_max_num = s[0]["onlp"]["psu_max_num"].asInt();
-
-                if (m_psu_max_num > 0)
+                if (get_psu_num() > 0)
                 {
                     int i = 0;
-                    for (i = 1; i <= m_psu_max_num; i++)
+                    for (i = 1; i <= get_psu_num(); i++)
                     {
                         Psu_Info *p = NULL;
                         p = new Psu_Info();
@@ -1485,10 +1525,10 @@ void Switch::get_board_info()
                 m_cpu_model_name = s[0]["onlp"]["cpu_model_name"].asString();
 
                 gADbg.acc_printf("/////////////////////\r\n");
-                gADbg.acc_printf("m_fan_max_num[%d]\r\n", m_fan_max_num);
+                gADbg.acc_printf("m_fan_max_num[%d]\r\n", get_fan_num());
                 gADbg.acc_printf("m_port_max_num[%d]\r\n", m_port_max_num);
-                gADbg.acc_printf("m_thermal_sen_max_num[%d]\r\n", m_thermal_sen_max_num);
-                gADbg.acc_printf("m_psu_max_num[%d]\r\n", m_psu_max_num);
+                gADbg.acc_printf("m_thermal_sen_max_num[%d]\r\n", get_thermal_num());
+                gADbg.acc_printf("m_psu_max_num[%d]\r\n", get_psu_num());
                 gADbg.acc_printf("m_cpu_stepping[%d]\r\n", m_cpu_stepping);
                 gADbg.acc_printf("m_cpu_max_speed[%d]\r\n", m_cpu_max_speed);
                 gADbg.acc_printf("m_cpu_total_core[%d]\r\n", m_cpu_total_core);
@@ -1538,7 +1578,7 @@ void Switch::get_port_present_info()
                         gADbg.acc_printf("s Ether Port ID: %d\r\n", (*pObj)->m_ID);
                         gADbg.acc_printf("s Port present status [%d]\r\n", 1);
                     }
-                    else if ((*pObj)->m_Type == Port_Info::XSFP_Port)
+                    else
                     {
                         int rindex = ii - 1; //Need start from 0//
                         int b = onlp_sfpi_is_present(rindex);
@@ -1547,13 +1587,13 @@ void Switch::get_port_present_info()
                         {
                             gADbg.acc_printf("SFP port [%d] present\r\n", ii);
                             set_port_present(ii, true);
-                            (*pObj)->set_info(ii, Port_Info::XSFP_Port, 1, true); // Type 1: XFP // Type 2 : ETHER
+                            (*pObj)->set_info(ii, (*pObj)->m_Type, 1, true);
                         }
                         else
                         {
                             gADbg.acc_printf("SFP port [%d] not present\r\n", ii);
                             set_port_present(ii, false);
-                            (*pObj)->set_info(ii, Port_Info::XSFP_Port, 0, false); // Type 1: XFP // Type 2 : ETHER
+                            (*pObj)->set_info(ii, (*pObj)->m_Type, 0, false);
                             (*pObj)->clean_trans_data();
                         }
                     }
@@ -1586,11 +1626,11 @@ void Switch::get_port_oom_info()
                     if ((*pObj)->m_Type == Port_Info::Ether_Port)
                     {
                         set_port_present(ii, true);
-                        (*pObj)->set_info(ii, Port_Info::Ether_Port, 1, true); // Type 1: XFP // Type 2 : ETHER
+                        (*pObj)->set_info(ii, Port_Info::Ether_Port, 1, true);
                         gADbg.acc_printf("s Ether Port ID: %d\r\n", (*pObj)->m_ID);
                         gADbg.acc_printf("s Port present status [%d]\r\n", 1);
                     }
-                    else if ((*pObj)->m_Type == Port_Info::XSFP_Port)
+                    else
                     {
                         int rindex = ii - 1; //Need start from 0//
                         int b = onlp_sfpi_is_present(rindex);
@@ -1599,24 +1639,21 @@ void Switch::get_port_oom_info()
                         {
                             gADbg.acc_printf("SFP port [%d] present\r\n", ii);
 #if 1
-                            if (1)
+                            auto start = std::chrono::system_clock::now();
+                            if (!(*pObj)->get_eeprom_raw())
                             {
-                                auto start = std::chrono::system_clock::now();
-                                if (!(*pObj)->get_eeprom_raw())
-                                {
-                                    gADbg.acc_printf("catch eeprom 8472 data error");
-                                }
-                                else
-                                {
-                                    gADbg.acc_printf("catch eeprom 8472 data ok");
-                                }
-
-                                auto end = std::chrono::system_clock::now();
-                                std::chrono::duration<double> elapsed_seconds = end - start;
-                                std::time_t end_time = std::chrono::system_clock::to_time_t(end);
-                                std::cout << "finished computation at getting get_eeprom_raw info.. " << std::ctime(&end_time)
-                                          << "elapsed time: " << elapsed_seconds.count() << "s\n";
+                                gADbg.acc_printf("catch eeprom 8472 data error");
                             }
+                            else
+                            {
+                                gADbg.acc_printf("catch eeprom 8472 data ok");
+                            }
+
+                            auto end = std::chrono::system_clock::now();
+                            std::chrono::duration<double> elapsed_seconds = end - start;
+                            std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+                            std::cout << "finished computation at getting get_eeprom_raw info.. " << std::ctime(&end_time)
+                                      << "elapsed time: " << elapsed_seconds.count() << "s\n";
 #else
                             //Use ONLP API to get EEPROM data, but only 256 bytes , not enough ..//
                             if (!(*pObj)->get_eeprom_raw(rindex))
@@ -1627,7 +1664,6 @@ void Switch::get_port_oom_info()
                             {
                                 gADbg.acc_printf("catch eeprom 8077I data ok");
                             }
-
 #endif
                         }
                         else
@@ -1656,7 +1692,7 @@ void Switch::get_thermal_info()
         onlp_thermal_info_t fv;
         int ii = 0;
 
-        for (ii = 1; ii <= m_thermal_sen_max_num; ii++)
+        for (ii = 1; ii <= get_thermal_num(); ii++)
         {
             unsigned int id = ONLP_THERMAL_ID_CREATE(ii);
             rv = onlp_thermal_info_get(id, &fv);
@@ -2238,7 +2274,7 @@ void Switch::get_psu_info()
         onlp_psu_info_t fv;
         int ii = 0;
 
-        for (ii = 1; ii <= m_psu_max_num; ii++)
+        for (ii = 1; ii <= get_psu_num(); ii++)
         {
             unsigned int id = ONLP_PSU_ID_CREATE(ii);
             rv = onlp_psu_info_get(id, &fv);
@@ -2308,7 +2344,7 @@ int Switch::get_psu_info_by_(int psuid, Psu_Content id)
     {
         int ii = 0;
 
-        for (ii = 1; ii <= m_psu_max_num; ii++)
+        for (ii = 1; ii <= get_psu_num(); ii++)
         {
             for (vector<Psu_Info *>::iterator pObj = m_vec_Psu_Info.begin(); pObj != m_vec_Psu_Info.end(); ++pObj)
             {
@@ -2362,7 +2398,7 @@ std::string Switch::get_psu_info_by_(int psuid, std::string type)
     {
         int ii = 0;
 
-        for (ii = 1; ii <= m_psu_max_num; ii++)
+        for (ii = 1; ii <= get_psu_num(); ii++)
         {
             for (vector<Psu_Info *>::iterator pObj = m_vec_Psu_Info.begin(); pObj != m_vec_Psu_Info.end(); ++pObj)
             {
@@ -2397,7 +2433,7 @@ std::string Switch::get_thermal_info_by_(int thermalid, std::string type)
     {
         int ii = 0;
 
-        for (ii = 1; ii <= m_thermal_sen_max_num; ii++)
+        for (ii = 1; ii <= get_thermal_num(); ii++)
         {
             for (vector<Thermal_Info *>::iterator pObj = m_vec_Thermal_Info.begin(); pObj != m_vec_Thermal_Info.end(); ++pObj)
             {
@@ -2428,7 +2464,7 @@ int Switch::get_thermal_info_by_(int thermalid, Thermal_Content id)
     {
         int ii = 0;
 
-        for (ii = 1; ii <= m_thermal_sen_max_num; ii++)
+        for (ii = 1; ii <= get_thermal_num(); ii++)
         {
             for (vector<Thermal_Info *>::iterator pObj = m_vec_Thermal_Info.begin(); pObj != m_vec_Thermal_Info.end(); ++pObj)
             {
@@ -2491,6 +2527,9 @@ int Switch::get_port_info_by_(int portid, Port_Content id)
                             return true;
                         else
                             return (*pObj)->m_Present_Status;
+                        break;
+                    case Port_Type:
+                        return (*pObj)->m_Type;
                         break;
                     default:
                         return 0;
@@ -2653,7 +2692,7 @@ void Switch::update_psu_present_event()
     {
         int id = 0;
 
-        for (id = 0; id < m_psu_max_num; id++)
+        for (id = 0; id < get_psu_num(); id++)
         {
 
             // Check PSU present //
@@ -2703,9 +2742,9 @@ void Switch::get_fan_info()
         onlp_fan_info_t fv;
         int ii = 0;
 
-        gADbg.acc_printf("get_fan_info m_fan_max_num[%d]/////////////////////\r\n", m_fan_max_num);
+        gADbg.acc_printf("get_fan_info m_fan_max_num[%d]/////////////////////\r\n", get_fan_num());
 
-        for (ii = 1; ii <= m_fan_max_num; ii++)
+        for (ii = 1; ii <= get_fan_num(); ii++)
         {
             unsigned int id = ONLP_FAN_ID_CREATE(ii);
             rv = onlp_fan_info_get(id, &fv);
@@ -2758,7 +2797,7 @@ int Switch::get_fan_info_by_(int fanid, Fan_Content id)
     {
         int ii = 0;
 
-        for (ii = 1; ii <= m_fan_max_num; ii++)
+        for (ii = 1; ii <= get_fan_num(); ii++)
         {
             for (vector<Fan_Info *>::iterator pObj = m_vec_Fan_Info.begin(); pObj != m_vec_Fan_Info.end(); ++pObj)
             {
@@ -2801,7 +2840,7 @@ std::string Switch::get_fan_info_by_(int fanid, std::string type)
     {
         int ii = 0;
 
-        for (ii = 1; ii <= m_fan_max_num; ii++)
+        for (ii = 1; ii <= get_fan_num(); ii++)
         {
             for (vector<Fan_Info *>::iterator pObj = m_vec_Fan_Info.begin(); pObj != m_vec_Fan_Info.end(); ++pObj)
             {
@@ -2831,7 +2870,7 @@ void Switch::update_fan_present_event()
     {
         int id = 0;
 
-        for (id = 0; id < m_fan_max_num; id++)
+        for (id = 0; id < get_fan_num(); id++)
         {
             // Check FAN present //
             unsigned long long m_bit = (1 << id);
@@ -2878,7 +2917,7 @@ void Switch::update_thermal_present_event()
     {
         int id = 0;
 
-        for (id = 0; id < m_thermal_sen_max_num; id++)
+        for (id = 0; id < get_thermal_num(); id++)
         {
 
             // Check Thermal present //
@@ -2918,6 +2957,11 @@ void Switch::get_basic_info()
     {
         int rv;
         onlp_init();
+        //Collect PSU/THERMAL/FAN number
+        onlp_oid_iterate(ONLP_OID_SYS, ONLP_OID_TYPE_PSU, iterate_oids_callback__, NULL);
+        onlp_oid_iterate(ONLP_OID_SYS, ONLP_OID_TYPE_THERMAL, iterate_oids_callback__, NULL);
+        onlp_oid_iterate(ONLP_OID_SYS, ONLP_OID_TYPE_FAN, iterate_oids_callback__, NULL);
+
         onlp_sys_info_t si;
         rv = onlp_sys_info_get(&si);
         if (rv < 0)
@@ -3033,12 +3077,12 @@ Switch &Switch::get_instance()
             getline(ifs, s, (char)ifs.eof());
 
             printf("Creating Olt_Device on platform [%s] size[%d]\r\n", s.c_str(), (int)s.size());
-            if (s.find("asxvolt16", 0) !=std::string::npos)
+            if (s.find("asxvolt16", 0) != std::string::npos)
             {
                 printf("x86-64-accton-asxvolt16\r\n");
                 g_Switch = new Asxvolt16();
             }
-            else if (s.find("asgvolt64", 0) !=std::string::npos)
+            else if (s.find("asgvolt64", 0) != std::string::npos)
             {
                 printf("x86-64-accton-asgvolt64\r\n");
                 g_Switch = new Asgvolt64();
