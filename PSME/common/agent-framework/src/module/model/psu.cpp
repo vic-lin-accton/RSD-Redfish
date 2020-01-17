@@ -55,6 +55,7 @@ Json::Value Psu::to_json() const {
     result[literals::Psu::VOLTAGE_OUTPUT]    = get_voltage_output();
     result[literals::Psu::VOLTAGE_INPUT]     = get_voltage_input();
     result[literals::Psu::PSU_SN]            = get_psu_sn();
+    result[literals::Psu::PSU_TYPE]          = get_psu_type();
     result[literals::Psu::PSU_MODULE]        = get_psu_module();
 /*Nick Added End  : */	
     }
