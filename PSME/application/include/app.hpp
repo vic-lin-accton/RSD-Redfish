@@ -100,7 +100,10 @@ private:
     void cleanup();
     void statics_cleanup();
     void wait_for_termination();
-
+#if defined BAL32 || defined BAL34
+    void init_bal();
+#endif    
+    void init_onlp();
     const json::Value& m_configuration;
     std::unique_ptr<psme::app::eventing::EventingServer> m_eventing_server{};
     std::unique_ptr<jsonrpc::HttpServer> m_reg_server_connector{};

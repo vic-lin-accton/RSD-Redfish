@@ -164,7 +164,7 @@ int main(int argc, const char *argv[])
     Configuration::cleanup();
     LoggerFactory::cleanup();
 #ifdef ONLP
-    Switch::cleanup();
+    //Switch::cleanup();
 #endif
 
 #ifdef VOLT

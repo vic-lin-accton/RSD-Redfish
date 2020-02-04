@@ -6,7 +6,6 @@ using namespace acc_bal3_api_dist_helper;
 #ifdef __cplusplus
 extern "C"
 {
-
 #include <bcmolt_api.h>
 #include <bcmolt_host_api.h>
 #include <bcmolt_api_model_supporting_enums.h>
@@ -21,12 +20,18 @@ extern "C"
 
 bcmolt_oltid dev_id = 0;
 
+#if defined BAL34
+const uint32_t tm_upstream_sched_id_start = 1;
+const uint32_t tm_downstream_sched_id_start = 201;
+#else
 const uint32_t tm_upstream_sched_id_start = 600;
 const uint32_t tm_downstream_sched_id_start = 800;
+#endif
+
 #define MAX_CHAR_LEN 20
 #define MAX_OMCI_MSG_LEN 44
 
-#if defined BAL31 || defined BAL32
+#if defined BAL31 || defined BAL32 || defined BAL34
 #define TM_Q_SET_ID (bcmolt_tm_queue_set_id)32768U
 #endif
 const std::string upstream = "upstream";
@@ -517,6 +522,19 @@ static void OltOnuO5(short unsigned int olt, bcmolt_msg *msg)
     return;
 }
 
+static bool OnuRssiMeasurement(int in_onu_id, int in_pon_id)
+{
+    bcmolt_onu_key onu_key = {.pon_ni = in_pon_id, .onu_id = in_onu_id};
+    bcmolt_onu_rssi_measurement rssi_oper;
+
+    BCMOLT_OPER_INIT(&rssi_oper, onu, rssi_measurement, onu_key);
+
+    if (bcmolt_oper_submit(dev_id, &rssi_oper.hdr) == BCM_ERR_OK)
+        return true;
+    else
+        return false;
+}
+
 namespace acc_bal3_api_dist_helper
 {
 static Olt_Device *g_Olt_Device = NULL;
@@ -623,8 +641,8 @@ int Olt_Device::get_board_basic_info()
 
         switch (dev_cfg.data.chip_family)
         {
-//For BAL3.2
-#ifdef BAL32
+//For BAL3.2 BAL3.4
+#if defined BAL32 || defined BAL34
         case BCMOLT_CHIP_FAMILY_CHIP_FAMILY_6862_X:
             m_chip_family = "Maple";
             break;
@@ -774,7 +792,7 @@ Olt_Device::~Olt_Device()
 
 Olt_Device::Olt_Device(int argc, char **argv)
 {
-#if defined(BAL31) || defined(BAL32)
+#if defined BAL31 || defined BAL32 || defined BAL34
     fHandle = dlopen("/lib/libbal_host_api.so", RTLD_LAZY);
     m_bal_lib_init = true;
 #else
@@ -965,7 +983,13 @@ void Olt_Device::register_callback()
     }
 }
 
-#if defined BAL31 || defined BAL32
+#if defined BAL31 || defined BAL32 || defined BAL34
+
+bool Olt_Device::rssi_measurement(int in_onu_id, int in_pon_id)
+{
+    return OnuRssiMeasurement(in_onu_id, in_pon_id);
+}
+
 json::Value Olt_Device::get_port_statistic(int port)
 {
     json::Value status(json::Value::Type::OBJECT);
@@ -1217,7 +1241,7 @@ bool CreateDefaultSchedQueue(uint32_t intf_id, const std::string direction)
             bcmolt_tm_queue_key tm_queue_key = {};
             tm_queue_key.id = queue_id;
             tm_queue_key.sched_id = get_default_tm_sched_id(intf_id, direction);
-#if defined(BAL31) || defined(BAL32)
+#if defined BAL31 || defined BAL32 || defined BAL34
             tm_queue_key.tm_q_set_id = TM_Q_SET_ID;
 #endif
             BCMOLT_CFG_INIT(&tm_queue_cfg, tm_queue, tm_queue_key);
@@ -1475,12 +1499,12 @@ bool XGS_PON_Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendo
         memcpy(serial_number.vendor_id.arr, vendor_id, 4);
         memcpy(serial_number.vendor_specific.arr, vendor_specific, 4);
         BCMOLT_CFG_INIT(&onu_cfg, onu, onu_key);
-#if !defined(BAL31) && !defined(BAL32)
+#if !defined BAL31 && !defined BAL32 && !defined BAL34
         BCMOLT_MSG_FIELD_SET(&onu_cfg, onu_rate, BCMOLT_ONU_RATE_RATE_10G_DS_10G_US);
 #endif
         BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.serial_number, serial_number);
         BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.auto_learning, BCMOS_TRUE);
-#if defined(BAL31) || defined(BAL32)
+#if defined BAL31 || defined BAL32 || defined BAL34
         BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.xgpon.ranging_burst_profile, 2);
 #else
         BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.xgpon.ranging_burst_profile, 0);

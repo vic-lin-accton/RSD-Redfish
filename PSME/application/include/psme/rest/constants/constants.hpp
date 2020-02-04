@@ -105,6 +105,7 @@ extern const char THERMAL_ID[];
 extern const char SESSION_ID[];
 extern const char SER_ID[];
 extern const char LOGSER_ID[];
+extern const char ONU_ID[];
 /*Nick Added End  : */
 }
 

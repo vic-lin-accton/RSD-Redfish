@@ -34,6 +34,7 @@
 #include "account_roles_collection.hpp"
 #include "account.hpp"
 #include "role.hpp"
+#include "olt.hpp"
 //viclin add end
 
 #include "task_service.hpp"
@@ -93,6 +94,7 @@
 #include "ethernet/ethernet_switch_port.hpp"
 #include "ethernet/pon_port_onus.hpp"
 #include "ethernet/ethernet_switch_port_collection.hpp"
+#include "ethernet/ethernet_switch_port_onus.hpp"
 #include "ethernet/ethernet_switch_port_onus_collection.hpp"
 #include "ethernet/vlan_network_interface.hpp"
 #include "ethernet/vlan_network_interface_collection.hpp"

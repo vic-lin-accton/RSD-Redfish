@@ -38,18 +38,14 @@ signed long get_value_from_pointer(signed char *ptr, int size);
 unsigned long get_value_from_pointer_u(unsigned char *ptr, int size);
 
 static constexpr const char STD_SEC_PATH[] = "/usr/local/bin/mod_conf/";
-static constexpr const char EEPROM_MAP_PATH[] = "/usr/local/bin/mod_conf/map/";
+static constexpr const char PORT_MAP_PATH[] = "/usr/local/bin/mod_conf/map/";
 int Switch::m_fan_max_num = 0;
 int Switch::m_port_max_num = 0;
 int Switch::m_thermal_sen_max_num = 0;
 int Switch::m_psu_max_num = 0;
 int Switch::m_max_cpu_num = 0;
 
-#define UNUSED(expr)  \
-    do                \
-    {                 \
-        (void)(expr); \
-    } while (0)
+#define UNUSED(x) (void)(x)
 
 static int iterate_oids_callback__(onlp_oid_t oid, void *cookie)
 {
@@ -1409,7 +1405,7 @@ void Switch::get_board_info()
                     m_onl_platinfo_name.resize(str_size);
                     printf("m_onl_platinfo_name[%s]\r\n", m_onl_platinfo_name.c_str());
 
-                    std::string mapping_file_path = EEPROM_MAP_PATH + m_onl_platinfo_name;
+                    std::string mapping_file_path = PORT_MAP_PATH + m_onl_platinfo_name;
                     printf("mapping_file_path[%s]\r\n", mapping_file_path.c_str());
 
                     std::ifstream map_files(mapping_file_path);
@@ -1741,6 +1737,114 @@ void Switch::get_thermal_info()
         return;
     }
 }
+
+int Switch::get_port_tx_status(int port)
+{
+    try
+    {
+        std::lock_guard<std::mutex> lock{m_data_mutex};
+        int ii = 0;
+        for (ii = 1; ii <= m_port_max_num; ii++)
+        {
+            for (vector<Port_Info *>::iterator pObj = m_vec_Port_Info.begin(); pObj != m_vec_Port_Info.end(); ++pObj)
+            {
+                if ((*pObj)->m_ID == port)
+                {
+                    std::string sysfs_path = (*pObj)->get_sysfile_path();
+                    return (*pObj)->get_tx_status(sysfs_path + m_sys_tx_name);
+                }
+            }
+        }
+        return -1;
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << "get_port_tx_status() - exception : " << e.what() << std::endl;
+        return -1;
+    }
+}
+
+void Switch::set_port_tx_status(int port, bool tx_status)
+{
+    try
+    {
+        std::lock_guard<std::mutex> lock{m_data_mutex};
+        int ii = 0;
+        for (ii = 1; ii <= m_port_max_num; ii++)
+        {
+            for (vector<Port_Info *>::iterator pObj = m_vec_Port_Info.begin(); pObj != m_vec_Port_Info.end(); ++pObj)
+            {
+                if ((*pObj)->m_ID == port)
+                {
+                    std::string sysfs_path = (*pObj)->get_sysfile_path();
+                    (*pObj)->set_tx(tx_status, sysfs_path + m_sys_tx_name);
+                    return;
+                }
+            }
+        }
+        return;
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << "set_port_tx_status() - exception : " << e.what() << std::endl;
+        return;
+    }
+}
+
+int Asgvolt64::get_port_tx_status(int port)
+{
+    try
+    {
+        std::lock_guard<std::mutex> lock{m_data_mutex};
+        int ii = 0;
+        for (ii = 1; ii <= m_port_max_num; ii++)
+        {
+            for (vector<Port_Info *>::iterator pObj = m_vec_Port_Info.begin(); pObj != m_vec_Port_Info.end(); ++pObj)
+            {
+                if ((*pObj)->m_ID == port)
+                {
+                    std::string sysfs_path = (*pObj)->get_sysfile_path();
+                    return (*pObj)->get_tx_status(sysfs_path + m_sys_tx_name + std::to_string(port));
+                }
+            }
+        }
+        return -1;
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << "get_port_tx_status() - exception : " << e.what() << std::endl;
+        return -1;
+    }
+}
+
+void Asgvolt64::set_port_tx_status(int port, bool tx_status)
+{
+    try
+    {
+        std::lock_guard<std::mutex> lock{m_data_mutex};
+        int ii = 0;
+        for (ii = 1; ii <= m_port_max_num; ii++)
+        {
+            for (vector<Port_Info *>::iterator pObj = m_vec_Port_Info.begin(); pObj != m_vec_Port_Info.end(); ++pObj)
+            {
+                if ((*pObj)->m_ID == port)
+                {
+                    std::string sysfs_path = (*pObj)->get_sysfile_path();
+                    (*pObj)->set_tx(tx_status, sysfs_path + m_sys_tx_name + std::to_string(port));
+                    return;
+                }
+            }
+        }
+        return;
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << "set_port_tx_status() - exception : " << e.what() << std::endl;
+        return;
+    }
+}
+
+
 
 void Psu_Info::set_info(int ID, std::string Model, std::string SN, int Vin, int Vout, int Iin, int Iout, int Pin, int Pout, onlp_psu_type_t type, bool present)
 {
@@ -2266,6 +2370,71 @@ void Port_Info::set_info(int ID, int Type, int Present_Status, bool present)
     m_Present = present;
 }
 
+void Port_Info::set_tx(bool status , std::string in_tx_sys_path)
+{
+    //std::string tx_sys_path = m_sysfile_path + "/sfp_tx_disable";
+    std::string tx_sys_path = in_tx_sys_path; 
+    std::ofstream os;
+    printf("set_tx[%s]\r\n", tx_sys_path.c_str());
+    try
+    {
+        if (os)
+        {
+            os.open(tx_sys_path);
+            if (status == false)
+                os << 1;
+            else
+                os << 0;
+            os.close();
+        }
+        else
+        {
+            std::cout << "sysfile open error" << std::endl;
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << "set tx exception : " << e.what() << std::endl;
+    }
+}
+
+int Port_Info::get_tx_status(std::string in_tx_sys_path)
+{
+    std::string tx_sys_path = in_tx_sys_path;// m_sysfile_path + "/sfp_tx_disable";
+    printf("get_tx_status[%s]\r\n", tx_sys_path.c_str());
+    std::ifstream is;
+    char stor[2];
+    is.rdbuf()->pubsetbuf(0, 0); // do not buffer //
+    try
+    {
+        if (is)
+        {
+            is.open(tx_sys_path);
+            is.read((char *)stor, sizeof(stor));
+            if (is.is_open() && atoi(stor) == 0)
+            {
+                is.close();
+                return 0;
+            }
+            else
+            {
+                is.close();
+                return 1;
+            }
+        }
+        else
+        {
+            std::cout << "sysfile open error" << std::endl;
+            return -1;
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << "get tx status exception : " << e.what() << std::endl;
+        return -1;
+    }
+}
+
 void Switch::get_psu_info()
 {
     try
@@ -2574,7 +2743,7 @@ json::Value Switch::get_port_trans_info_by_(int portid)
     }
 }
 
-void Switch::update_trasceivers_oom_event()
+void Switch::update_transceivers_oom_event()
 {
     try
     {
@@ -2593,7 +2762,7 @@ void Switch::update_trasceivers_oom_event()
     }
     catch (const std::exception &e)
     {
-        std::cout << "Switch update_trasceivers_oom_event() - exception : " << e.what() << std::endl;
+        std::cout << "Switch update_transceivers_oom_event() - exception : " << e.what() << std::endl;
         return;
     }
 }
@@ -3102,10 +3271,50 @@ Switch &Switch::get_instance()
     }
 }
 
+/*
 void Switch::cleanup()
 {
     delete g_Switch;
     g_Switch = NULL;
+}
+*/
+
+void Asgvolt64::get_per_port_sys_file()
+{
+    try
+    {
+        Json::Value mapping_s;
+        Json::Reader onulist_j_reader = {};
+        std::string mapping_file_path = PORT_MAP_PATH + m_onl_platinfo_name + "-sysfs";
+        printf("get_per_port_sys_file() mapping_file_path[%s]\r\n", mapping_file_path.c_str());
+
+        std::ifstream map_files(mapping_file_path);
+
+        bool isJson = (onulist_j_reader.parse(map_files, mapping_s));
+
+        if (isJson)
+        {
+            printf("Get sys_fs mapping file ok!!\r\n");
+            int ii = 0;
+            for (ii = 1; ii <= m_port_max_num; ii++)
+            {
+                for (vector<Port_Info *>::iterator pObj = m_vec_Port_Info.begin(); pObj != m_vec_Port_Info.end(); ++pObj)
+                {
+                    if ((*pObj)->m_ID == ii)
+                    {
+                        (*pObj)->set_sysfile_path(mapping_s[std::to_string(ii)].asString());
+                        break;
+                    }
+                }
+            }
+        }
+        else
+            printf("Get sys fs mapping file error!!\r\n");
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << "Asgvolt64 get_per_port_sys_file() - exception : " << e.what() << std::endl;
+    }
 }
 
 std::vector<std::string> Dev_Info::m_Event_Resouce_Alert = {};
@@ -3167,7 +3376,7 @@ std::vector<std::string> Switch::get_Event_Port_Resouce_Alert()
     return Dev_Info::get_Event_Resouce_Alert();
 }
 
-void Switch::clean_Event_Rresouce_Event()
+void Switch::clean_Event_Resource_Event()
 {
     m_Event_Resouce_Add.clear();
     m_Event_Resouce_Remove.clear();
@@ -3175,7 +3384,7 @@ void Switch::clean_Event_Rresouce_Event()
     return;
 }
 
-void Switch::clean_Event_Port_Rresouce_Event()
+void Switch::clean_Event_Port_Resource_Event()
 {
     m_Event_Port_Resouce_Add.clear();
     m_Event_Port_Resouce_Remove.clear();

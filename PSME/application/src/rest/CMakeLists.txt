@@ -134,6 +134,7 @@ set(SOURCES
     endpoints/ethernet/ethernet_switch.cpp
     endpoints/ethernet/ethernet_switch_port_collection.cpp
     endpoints/ethernet/ethernet_switch_port_onus_collection.cpp
+    endpoints/ethernet/ethernet_switch_port_onus.cpp
     endpoints/ethernet/ethernet_switch_port.cpp
     endpoints/ethernet/acl.cpp
     endpoints/ethernet/acl_bind.cpp
@@ -175,6 +176,8 @@ set(SOURCES
     endpoints/fabric/zones_collection.cpp
 
     endpoints/endpoint_builder.cpp
+
+    endpoints/olt.cpp
 
     eventing/event.cpp
     eventing/event_service.cpp

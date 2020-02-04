@@ -36,6 +36,10 @@ if [ "$1" != "C" ];then
 	echo "Build for bal sdk 3.2 platform!"
 	cp ../CMakeLists.txt ../CMakeLists.txt-org
 	`sed -i 's/-DONLP)/-DBAL32 -DBCMOS_MSG_QUEUE_DOMAIN_SOCKET -DBCMOS_MSG_QUEUE_UDP_SOCKET -DBCMOS_MEM_CHECK  -DBCMOS_SYS_UNITTEST -DENABLE_LOG -DENABLE_CLI &\nset(CUSE_ACC_BAL3_DISTLIB "TRUE")/' ../CMakeLists.txt`
+    elif [ "$1" == "bal34" ];then
+	echo "Build for bal sdk 3.4 platform!"
+	cp ../CMakeLists.txt ../CMakeLists.txt-org
+	`sed -i 's/-DONLP)/-DBAL34 -DBCMOS_MSG_QUEUE_DOMAIN_SOCKET -DBCMOS_MSG_QUEUE_UDP_SOCKET -DBCMOS_MEM_CHECK  -DBCMOS_SYS_UNITTEST -DENABLE_LOG -DENABLE_CLI &\nset(CUSE_ACC_BAL3_DISTLIB "TRUE")/' ../CMakeLists.txt`
     fi
 
     cmake ../

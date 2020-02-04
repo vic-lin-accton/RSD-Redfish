@@ -44,6 +44,7 @@ const jsonrpc::ProcedureValidator& EthernetSwitchPortPatchSchema::get_procedure(
         "ethernet_switch_port_patch",
         jsonrpc::PARAMS_BY_NAME,
         constants::EthernetSwitchPort::ADMINISTRATIVE_STATE, VALID_OPTIONAL(VALID_ENUM(enums::AdministrativeState)),
+        constants::EthernetSwitchPort::OPERATIONAL_STATE, VALID_OPTIONAL(VALID_ENUM(enums::OperationalState)),
         // per Metadata, these values have signed int64 type, so this is the type that PATCH command has to accept
         constants::EthernetSwitchPort::LINK_SPEED, VALID_OPTIONAL(VALID_NUMERIC_TYPED(INT64)),
         constants::EthernetSwitchPort::FRAME_SIZE, VALID_OPTIONAL(VALID_NUMERIC_TYPED(INT64)),

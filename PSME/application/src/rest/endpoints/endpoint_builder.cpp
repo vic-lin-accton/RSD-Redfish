@@ -23,15 +23,11 @@
 #include "psme/rest/server/multiplexer.hpp"
 #include "psme/rest/server/utils.hpp"
 
-
-
 using namespace psme::rest;
 using namespace psme::rest::endpoint;
 using namespace psme::rest::server;
 
-
 EndpointBuilder::~EndpointBuilder() {}
-
 
 void EndpointBuilder::build_endpoints(psme::rest::server::Multiplexer& mp) {
     mp.use_before([this](const Request&, Response& res) {
@@ -56,6 +52,11 @@ void EndpointBuilder::build_endpoints(psme::rest::server::Multiplexer& mp) {
     // "/redfish/v1/metadata/{metadata_file:*}"
     mp.register_handler(Metadata::UPtr(new Metadata(constants::Routes::METADATA_PATH)), AccessType::ALL);
 
+#if defined BAL32 || defined BAL34
+    // "/redfish/v1/Olt
+    mp.register_handler(Olt::UPtr( new Olt(constants::Routes::OLT_PATH)), AccessType::ALL);
+#endif
+
     // "/redfish/v1/EventService"
     mp.register_handler(EventService::UPtr(new EventService(constants::Routes::EVENT_SERVICE_PATH)));
 
@@ -70,7 +71,6 @@ void EndpointBuilder::build_endpoints(psme::rest::server::Multiplexer& mp) {
     mp.register_handler(
         TestEventSubscription::UPtr(new TestEventSubscription(constants::Routes::TEST_EVENT_SUBSCRIPTION_PATH)));
 
-//viclin add begin
 // "/redfish/v1/AccountService"
     mp.register_handler(AccountService::UPtr(new AccountService(constants::Routes::ACCOUNT_SERVICE_PATH)));
     
@@ -89,8 +89,6 @@ void EndpointBuilder::build_endpoints(psme::rest::server::Multiplexer& mp) {
         // "/redfish/v1/AccountService/Roles/{roleId:[0-9]+}"
     mp.register_handler(
         Role::UPtr(new Role(constants::Routes::ROLE_PATH)));      
-
-//viclin add end
 
     // "/redfish/v1/Registries"
     mp.register_handler(MessageRegistryFileCollection::UPtr(
@@ -344,6 +342,10 @@ void EndpointBuilder::build_endpoints(psme::rest::server::Multiplexer& mp) {
     mp.register_handler(EthernetSwitchPortOnusCollection::UPtr(
         new EthernetSwitchPortOnusCollection(constants::Routes::ONUS_COLLECTION_PATH)));
 
+    // "/redfish/v1/EthernetSwitches/{ethernetSwitchId:[0-9]+}/Ports/{portId:[0-9]+}/ONUs/{Id:[0-9]+}"
+    mp.register_handler(EthernetSwitchPortOnus::UPtr(
+        new EthernetSwitchPortOnus(constants::Routes::ONUS_COLLECTION_ONUS_PATH)));
+
     // "/redfish/v1/EthernetSwitches/{ethernetSwitchId:[0-9]+}/Ports/{portId:[0-9]+}/staticMACs/{staticMacId:[0-9]+}"
     mp.register_handler(StaticMac::UPtr(new StaticMac(constants::Routes::STATIC_MAC_PATH)));
 
@@ -430,4 +432,5 @@ void EndpointBuilder::build_endpoints(psme::rest::server::Multiplexer& mp) {
     // "/redfish/v1/Fabrics/{fabricId}/Switches/{switchId}/Ports/{portId:[0-9]+}/Actions/Port.Reset"
     mp.register_handler(PortReset::UPtr(new PortReset(constants::Routes::PORT_RESET_PATH)));
 #endif	
+
 }

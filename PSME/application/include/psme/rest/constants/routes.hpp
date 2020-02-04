@@ -90,6 +90,9 @@ public:
     static const std::string MANAGER_LOG_SERVICE_ENTRIES_PATH;	
     static const std::string MANAGER_LOG_SERVICE_RESET_PATH;
 	
+    static const std::string ONUS_COLLECTION_PATH;
+    static const std::string ONUS_COLLECTION_ONUS_PATH;
+    static const std::string OLT_PATH;
 /*Nick Added End  : */
     static const std::string THERMAL_ZONE_COLLECTION_PATH;
     static const std::string THERMAL_ZONE_PATH;
@@ -130,7 +133,6 @@ public:
     static const std::string ETHERNET_SWITCH_PORT_COLLECTION_PATH;
     static const std::string ETHERNET_SWITCH_PORT_PATH;
     static const std::string STATIC_MAC_COLLECTION_PATH;
-    static const std::string ONUS_COLLECTION_PATH;
     static const std::string STATIC_MAC_PATH;
     static const std::string VLAN_NETWORK_INTERFACE_COLLECTION_PATH;
     static const std::string VLAN_NETWORK_INTERFACE_PATH;

@@ -95,13 +95,11 @@ struct sFLOW
 
     bcmolt_classifier_id classifier;
     class_val class_val_c_val;	
-
 };
 
 static struct sFLOW a_Flow[] =
 {
-    {
-        .interface_id         = 0,
+        {.interface_id = 0,
         .onu_id               = 1,
         .flow_id              = 16,
         .flow_type            = "upstream",
@@ -135,11 +133,8 @@ static struct sFLOW a_Flow[] =
             .ip_proto   = 0,
             .src_port   = 0,
             .dst_port   = 0,
-        }
-    }
-    ,
-        {
-            .interface_id         = 0,
+         }},
+        {.interface_id = 0,
             .onu_id               = 1,
             .flow_id              = 16,
             .flow_type            = "downstream",
@@ -173,10 +168,7 @@ static struct sFLOW a_Flow[] =
                 .ip_proto   = 0,
                 .src_port   = 0,
                 .dst_port   = 0,
-            }
-        }	
-};
-
+         }}};
 
 class TestClass1 : public ::testing::Test 
 {
@@ -191,7 +183,6 @@ class TestClass1 : public ::testing::Test
 TestClass1::~TestClass1() 
 { 
     printf("TestClass1-deconstructor\r\n");
-
 }
 
 void TestClass1::SetUp() 
@@ -298,8 +289,8 @@ void TestClass1::SetUp()
         char cs_vendor_spec[8] = {0x0};
         uint16_t idx1 = 0;
         uint16_t idx2 = 0;
-        char str1[20]= {0x0};;
-        char str2[20]= {0x0};;
+        char str1[20] = {0x0};
+        char str2[20] = {0x0};
         memset(&cs_vendor_spec, 0, buflen);
 
         for (idx1=0,idx2=0; idx1< buflen ; idx1++,idx2++) 
@@ -436,7 +427,6 @@ void TestClass1::SetUp()
 void TestClass1::TearDown() 
 {
     printf("TestClass1-TearDown\r\n");
-
 }
 
 TEST_F(TestClass1, Test_Memo_1) 

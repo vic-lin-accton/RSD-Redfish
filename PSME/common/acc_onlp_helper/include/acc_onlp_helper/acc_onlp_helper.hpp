@@ -267,6 +267,7 @@ public:
     void set_info(int ID, int Type, int Present_Status, bool present);
 
     e_oom m_port_oom;
+    std::string m_sysfile_path;
 
     bool get_eeprom_raw()
     {
@@ -287,7 +288,24 @@ public:
     {
         m_port_oom.set_support(false);
     };
-    void set_eeprom_path(std::string in) { m_port_oom.set_eeprom_path(in); };
+
+    void set_sysfile_path(std::string in) 
+    { 
+        m_sysfile_path = in; 
+    };
+
+    std::string get_sysfile_path()
+    {
+        return m_sysfile_path;
+    }
+
+    void set_eeprom_path(std::string in)
+    {
+        m_port_oom.set_eeprom_path(in);
+        set_sysfile_path(in.substr(0, in.rfind('/')));
+    };
+    void set_tx(bool status, std::string in_tx_sysfs);
+    int get_tx_status(std::string in_tx_sysfs);
 };
 
 class Switch
@@ -312,8 +330,8 @@ public:
     static std::vector<std::string> get_Event_Resouce_Alert();
     static std::vector<std::string> get_Event_Port_Resouce_Alert();
 
-    static void clean_Event_Rresouce_Event();
-    static void clean_Event_Port_Rresouce_Event();
+    static void clean_Event_Resource_Event();
+    static void clean_Event_Port_Resource_Event();
 
     ~Switch();
 
@@ -363,7 +381,7 @@ public:
     void get_port_oom_info();
     void get_pon_port_oom_info();
     void update_port_present_event();
-    void update_trasceivers_oom_event();
+    void update_transceivers_oom_event();
 
     int get_fan_info_by_(int fanid, Fan_Content id);
     int get_fan_num() { return m_fan_max_num + m_psu_max_num; };
@@ -375,7 +393,7 @@ public:
     int get_port_num() { return m_port_max_num; };
 
     static Switch &get_instance();
-    static void cleanup();
+    //static void cleanup();
     static void increase_thermal_num()
     {
         m_thermal_sen_max_num++;
@@ -410,7 +428,10 @@ public:
 
     json::Value get_port_trans_info_by_(int portid);
 
-private:
+    virtual void set_port_tx_status(int port, bool tx_status);
+    virtual int get_port_tx_status(int port);
+
+protected:
     unsigned char m_MAC[6] = {};
     std::string m_Product_Name = {};
     std::string m_Part_Number = {};
@@ -430,6 +451,7 @@ private:
     std::string m_platinfo_path = {"/etc/psme/platform_info.conf"};
     std::string m_onl_platinfo_path = {"/etc/onl/platform"};
     std::string m_onl_platinfo_name = {"na"};
+    std::string m_sys_tx_name={"/sfp_tx_disable"};
 
     Json::Reader m_eeprom_j_reader = {};
     int m_MAC_Range = 0;
@@ -458,7 +480,7 @@ private:
 
     void set_port_present(int ID, bool status)
     {
-        // bitwise mapping : 0x1 means port 1 , 0x2 means port2, 0x3 meane port 1 port2 //
+        // bitwise mapping : 0x1 means port 1 , 0x2 means port2, 0x3 means port 1 port2 //
         if (((ID - 1) >= 0) && ((ID - 1) < 64))
         {
             if (status)
@@ -485,7 +507,7 @@ private:
 
     void set_thermal_present(int ID, bool status)
     {
-        // bitwise mapping : 0x1 means port 1 , 0x2 means port2, 0x3 meane port 1 port2 //
+        // bitwise mapping : 0x1 means port 1 , 0x2 means port2, 0x3 means port 1 port2 //
         if (ID - 1 >= 0)
         {
             if (status)
@@ -543,14 +565,29 @@ private:
     unsigned long long m_Port_Present = 0;
     unsigned long long m_Port_Present_A64 = 0;
 };
-class Asxvolt16 : public Switch
+class Asxvolt16 : virtual public Switch
 {
 public:
+    Asxvolt16()
+    {
+        printf("//////Asxvolt16//////\r\n");
+    };
+    ~Asxvolt16(){;};
 };
 
-class Asgvolt64 : public Switch
+class Asgvolt64 : virtual public Switch
 {
 public:
+    Asgvolt64()
+    {
+        printf("//////Asgvolt64//////\r\n");
+        get_per_port_sys_file();
+    };
+    void get_per_port_sys_file();
+    int get_port_tx_status(int port);
+    void set_port_tx_status(int port, bool tx_status);
+    std::string m_sys_tx_name={"/module_tx_disable_"};
+    ~Asgvolt64(){;};
 };
 } // namespace acc_onlp_helper
 

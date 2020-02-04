@@ -302,7 +302,7 @@ void GetOnlpInfo::get_onlp_info()
             edat.set_event_content(t_ea);
             agent_framework::eventing::EventsQueue::get_instance()->push_back(edat);
         }
-        sonlp.clean_Event_Rresouce_Event(); //Reset event //
+        sonlp.clean_Event_Resource_Event(); //Reset event //
     }
     catch (const std::exception &e)
     {
@@ -357,7 +357,7 @@ void GetOnlpInfo::get_onlp_info()
                 edat.set_event_content(t_ea);
                 agent_framework::eventing::EventsQueue::get_instance()->push_back(edat);
             }
-            sonlp.clean_Event_Port_Rresouce_Event(); //Reset event //
+            sonlp.clean_Event_Port_Resource_Event(); //Reset event //
         }
         catch (const std::exception &e)
         {

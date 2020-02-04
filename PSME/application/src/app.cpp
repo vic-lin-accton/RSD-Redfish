@@ -44,6 +44,16 @@
 #include <iostream>
 #include <string>
 
+#if defined BAL32 || defined BAL34
+#include "acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp"
+using namespace acc_bal3_api_dist_helper;
+#endif   
+
+#ifdef ONLP
+#include "acc_onlp_helper/acc_onlp_helper.hpp"
+using namespace acc_onlp_helper;
+#endif
+
 namespace {
 const json::Value& load_configuration(int argc, const char** argv) {
     /* Initialize configuration */
@@ -214,6 +224,22 @@ void App::init() {
         cleanup();
         exit(-1);
     }
+}
+#if defined BAL32 || defined BAL34
+void App::init_bal()
+{
+    auto &pOLT = Olt_Device::Olt_Device::get_instance();
+    if (pOLT.is_bal_lib_init() != true)
+    {
+        log_error(GET_LOGGER("app"), "Failed to find BAL LIB in lib/ !!!");
+    }
+    else
+        log_info(GET_LOGGER("app"), "BAL API exist.");
+}
+#endif
+void App::init_onlp()
+{
+    auto &pOnlp = Switch::Switch::get_instance();
 }
 
 void App::run() {

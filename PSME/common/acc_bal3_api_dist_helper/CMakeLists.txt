@@ -53,6 +53,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asfvolt16-bal/host_driver/conn_mgr/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asfvolt16-bal/host_driver/api/host/topology/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asfvolt16-bal/host_driver/transport/
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asfvolt16-bal/host_driver/metadata
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asfvolt16-bal/host_customized/os_abstraction/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asfvolt16-bal/host_customized/os_abstraction/posix/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asfvolt16-bal/host_customized/config/
@@ -70,6 +71,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asgvolt64-bal/host_driver/conn_mgr/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asgvolt64-bal/host_driver/api/host/topology/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asgvolt64-bal/host_driver/transport/
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asgvolt64-bal/host_driver/metadata
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asgvolt64-bal/host_customized/os_abstraction/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asgvolt64-bal/host_customized/os_abstraction/posix/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asgvolt64-bal/host_customized/config/

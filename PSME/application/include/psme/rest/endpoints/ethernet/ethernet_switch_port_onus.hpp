@@ -21,40 +21,32 @@
 #pragma once
 #include "psme/rest/endpoints/endpoint_base.hpp"
 
-
-namespace psme {
-namespace rest {
-namespace endpoint {
-
-
-
+namespace psme
+{
+namespace rest
+{
+namespace endpoint
+{
 
 /*!
- * A class representing the rest api EthernetSwitchPort endpoint
+ * A class representing the rest api EthernetSwitchPortOnus endpoint
  */
-class EthernetSwitchPort : public EndpointBase {
+class EthernetSwitchPortOnus : public EndpointBase
+{
 public:
+    /*!
+     * @brief The constructor for EthernetSwitchPortOnus class
+     */
+    explicit EthernetSwitchPortOnus(const std::string &path);
 
     /*!
-     * @brief The constructor for EthernetSwitchPort class
+     * @brief EthernetSwitchPortOnus class destructor
      */
-    explicit EthernetSwitchPort(const std::string& path);
+    virtual ~EthernetSwitchPortOnus();
 
-    /*!
-     * @brief EthernetSwitchPort class destructor
-     */
-    virtual ~EthernetSwitchPort();
-
-    void get(const server::Request& request, server::Response& response) override;
-
-    void del(const server::Request& request, server::Response& response) override;
-
-    void patch(const server::Request& request, server::Response& response) override;
-
-    bool trigger_rssi(int pon_id);
+    void get(const server::Request &request, server::Response &response) override;
 };
 
-}
-}
-}
-
+} // namespace endpoint
+} // namespace rest
+} // namespace psme

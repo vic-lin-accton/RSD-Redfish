@@ -92,6 +92,7 @@ const char THERMAL_ID[] = "ThermalId";
 const char SESSION_ID[] = "SessionId";
 const char SER_ID[] = "serId";
 const char LOGSER_ID[] = "logserId";
+const char ONU_ID[] = "onuId";
 /*Nick Added End  : */
 }
 

@@ -84,6 +84,11 @@ const char ONUS[] = "ONUs";
 const char TRANS_STATIC[] = "TransceiverStatistics";
 }
 
+namespace OLT
+{
+const char OLT[] = "Olt";
+}
+
 namespace Vlan {
 const char VLAN[] = "VLAN";
 const char VLAN_ENABLE[] = "VLANEnable";

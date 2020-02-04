@@ -86,7 +86,10 @@ extern const char NEIGHBOR_INTERFACE[];
 extern const char STATIC_MACS[];
 extern const char ONUS[];
 extern const char TRANS_STATIC[];
-
+}
+namespace OLT 
+{
+extern const char OLT[];
 }
 
 /*!

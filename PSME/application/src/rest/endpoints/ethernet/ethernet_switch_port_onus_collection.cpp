@@ -72,29 +72,47 @@ EthernetSwitchPortOnusCollection::~EthernetSwitchPortOnusCollection() {}
 
 void EthernetSwitchPortOnusCollection::get(const server::Request &req, server::Response &res)
 {
-    //For normal port
-    // Port status //
-    int max_port = 0;
-
-    auto json = ::make_prototype();
-
-    json[Common::ODATA_ID] = PathBuilder(req).build();
-
-    json[Common::ODATA_CONTEXT] = std::regex_replace(json[Common::ODATA_CONTEXT].as_string(),
-                                                     std::regex("__SWITCH_ID__"),
-                                                     req.params[PathParam::ETHERNET_SWITCH_ID]);
-#ifdef ONLP
-    auto &sonlp = acc_onlp_helper::Switch::get_instance();
-    //Set PSU related info. //
-    max_port = sonlp.get_port_num();
-    json[Collection::ODATA_COUNT] = max_port;
-
-    for (int i = 1; i <= max_port; i++)
+    try
     {
+        int port_id = std::stoi(req.params[PathParam::SWITCH_PORT_ID]);
+        Json::Reader onu_list_j_reader = {};
+        Json::Value j_return_value;
+        std::string onu_list_file_path = "/tmp/pon_" + std::to_string(port_id -1) +"_onu_list";
+        printf("EthernetSwitchPortOnusCollection() onu_list_file_path[%s]\r\n", onu_list_file_path.c_str());
+
+        std::ifstream if_onu_list_files(onu_list_file_path);
+
+        bool isJson = (onu_list_j_reader.parse(if_onu_list_files, j_return_value));
+
+        if (isJson)
+        {
+            printf("Get onu file list file ok!!\r\n");
+            cout << "total_count: " << j_return_value["total_count"].asInt() << endl;
+            int max_onus = j_return_value["total_count"].asInt();
+
+            auto json = ::make_prototype();
+            json[Common::ODATA_ID] = PathBuilder(req).build();
+            json[Common::ODATA_CONTEXT] = std::regex_replace(json[Common::ODATA_CONTEXT].as_string(), std::regex("__SWITCH_ID__"), req.params[PathParam::ETHERNET_SWITCH_ID]);
+            json[Collection::ODATA_COUNT] = max_onus;
+
+            for (int i = 1; i <= max_onus; i++)
+    {
+                char onu_id[32] = {};
+                sprintf(onu_id, "onu_%d_id", i);
+                int id = j_return_value[onu_id].asInt();
         json::Value link_elem(json::Value::Type::OBJECT);
-        link_elem[Common::ODATA_ID] = PathBuilder(req).append(i).build();
+                link_elem[Common::ODATA_ID] = PathBuilder(req).append(id).build();
         json[Collection::MEMBERS].push_back(std::move(link_elem));
     }
-#endif
     set_response(res, json);
+}
+        else
+            printf("Get sys fs mapping file error!!\r\n");
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << "EthernetSwitchPortOnusCollection get() - exception : " << e.what() << std::endl;
+    }
+
+
 }

@@ -564,11 +564,6 @@ const std::string Routes::STATIC_MAC_COLLECTION_PATH =
         .append(constants::EthernetSwitchPort::STATIC_MACS)
         .build();
 
-// "/redfish/v1/EthernetSwitches/{ethernetSwitchId:[0-9]+}/Ports/{portId:[0-9]+}/ONUs"
-const std::string Routes::ONUS_COLLECTION_PATH =
-    PathBuilder(ETHERNET_SWITCH_PORT_PATH)
-        .append(constants::EthernetSwitchPort::ONUS)
-        .build();
 
 // "/redfish/v1/EthernetSwitches/{ethernetSwitchId:[0-9]+}/Ports/{portId:[0-9]+}/staticMACs/{staticMacId:[0-9]+}"
 const std::string Routes::STATIC_MAC_PATH =
@@ -708,4 +703,22 @@ const std::string Routes::PORT_RESET_PATH =
     PathBuilder(PORT_PATH)
         .append(constants::Common::ACTIONS)
         .append(constants::Port::PORT_RESET_ENDPOINT)
+        .build();
+
+// "/redfish/v1/Olt"
+const std::string Routes::OLT_PATH =
+    PathBuilder(constants::PathParam::BASE_URL)
+        .append(constants::OLT::OLT)
+        .build();
+
+// "/redfish/v1/EthernetSwitches/{ethernetSwitchId:[0-9]+}/Ports/{portId:[0-9]+}/ONUs"
+const std::string Routes::ONUS_COLLECTION_PATH =
+    PathBuilder(ETHERNET_SWITCH_PORT_PATH)
+        .append(constants::EthernetSwitchPort::ONUS)
+        .build();
+
+// "/redfish/v1/EthernetSwitches/{ethernetSwitchId:[0-9]+}/Ports/{portId:[0-9]+}/ONUs/{Id:[0-9]+}"
+const std::string Routes::ONUS_COLLECTION_ONUS_PATH =
+    PathBuilder(ONUS_COLLECTION_PATH)
+        .append_regex(constants::PathParam::ONU_ID, constants::PathParam::ID_REGEX)
         .build();
