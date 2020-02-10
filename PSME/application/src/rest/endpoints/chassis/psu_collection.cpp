@@ -116,12 +116,12 @@ void PsuCollection::get(const server::Request &req, server::Response &res)
 
             json::Value jsonVoltages;
             {
+                int id = psu_.get_psu_id(); 
                 jsonVoltages[Common::ODATA_ID] = endpoint::PathBuilder(PathParam::BASE_URL).append(Common::CHASSIS).append(chassis.get_id()).append("Power").build();
-
                 jsonVoltages[Common::MEMBER_ID] = std::to_string(psu_.get_psu_id());
                 jsonVoltages[Common::NAME] = "Voltage";
-                jsonVoltages["SensorNumber"] = psu_.get_psu_id();
-                jsonVoltages["ReadingVolts"] = json::Value::Type::NIL;
+                jsonVoltages["SensorNumber"] = id; 
+                jsonVoltages["ReadingVolts"] = (psu_.get_voltage_output() * 0.001); 
                 jsonVoltages["UpperThresholdNonCritical"] = json::Value::Type::NIL;
                 jsonVoltages["UpperThresholdCritical"] = json::Value::Type::NIL;
                 jsonVoltages["UpperThresholdFatal"] = json::Value::Type::NIL;

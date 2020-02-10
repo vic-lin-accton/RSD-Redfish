@@ -51,7 +51,6 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../OpenNetworkLinux/packages/base/armel/faultd/builds/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../OpenNetworkLinux/packages/base/any/onlp/src/onlplib/module/inc/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../OpenNetworkLinux/packages/base/any/onlp/src/onlp/module/inc/
-    #    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../OpenNetworkLinux/packages/base/any/onlp/src/sff/module/inc/    
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../OpenNetworkLinux/packages/base/amd64/onlp/builds/onlp-platform-defaults/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../OpenNetworkLinux/sm/bigcode/modules/IOF/module/inc/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../OpenNetworkLinux/sm/bigcode/modules/cjson_util/module/inc/
@@ -67,11 +66,17 @@ include_directories(
 
 add_library(acc_onlp_helper STATIC
     src/acc_onlp_helper.cpp
+    src/asxvolt16.cpp
+    src/asgvolt64.cpp
+    src/as5916_54xks.cpp
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES GNU|Clang)
   set_source_files_properties(
     src/acc_onlp_helper.cpp
+    src/asxvolt16.cpp
+    src/asgvolt64.cpp
+    src/as5916_54xks.cpp
     PROPERTIES COMPILE_FLAGS "-Wno-conversion"
     )
 endif()

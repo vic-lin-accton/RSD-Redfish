@@ -41,7 +41,8 @@ using namespace std;
 using namespace acc_net_helper;
 
 static constexpr const int SIZE_EEPROM = 600;
-
+static constexpr const char STD_SEC_PATH[] = "/usr/local/bin/mod_conf/";
+static constexpr const char PORT_MAP_PATH[] = "/usr/local/bin/mod_conf/map/";
 class e_oom
 {
     bool get_conf();
@@ -385,12 +386,12 @@ public:
 
     int get_fan_info_by_(int fanid, Fan_Content id);
     int get_fan_num() { return m_fan_max_num + m_psu_max_num; };
-    int get_psu_info_by_(int psuid, Psu_Content id);
     int get_psu_num() { return m_psu_max_num; };
     int get_thermal_info_by_(int thermalid, Thermal_Content id);
     int get_thermal_num() { return m_thermal_sen_max_num + m_psu_max_num; };
     int get_port_info_by_(int portid, Port_Content id);
     int get_port_num() { return m_port_max_num; };
+
 
     static Switch &get_instance();
     //static void cleanup();
@@ -416,7 +417,6 @@ public:
     };
 
     std::string get_fan_info_by_(int fanid, std::string type);
-    std::string get_psu_info_by_(int psuid, std::string type);
     std::string get_thermal_info_by_(int thermalid, std::string type);
     std::string get_product_name() { return m_Product_Name; };
     std::string get_platform_name() { return m_Platform_Name; };
@@ -430,6 +430,8 @@ public:
 
     virtual void set_port_tx_status(int port, bool tx_status);
     virtual int get_port_tx_status(int port);
+    virtual int get_psu_info_by_(int psuid, Psu_Content id);
+    std::string get_psu_info_by_(int psuid, std::string type);
 
 protected:
     unsigned char m_MAC[6] = {};
@@ -564,30 +566,6 @@ protected:
     unsigned long long m_pre_Port_Present_A64 = 0;
     unsigned long long m_Port_Present = 0;
     unsigned long long m_Port_Present_A64 = 0;
-};
-class Asxvolt16 : virtual public Switch
-{
-public:
-    Asxvolt16()
-    {
-        printf("//////Asxvolt16//////\r\n");
-    };
-    ~Asxvolt16(){;};
-};
-
-class Asgvolt64 : virtual public Switch
-{
-public:
-    Asgvolt64()
-    {
-        printf("//////Asgvolt64//////\r\n");
-        get_per_port_sys_file();
-    };
-    void get_per_port_sys_file();
-    int get_port_tx_status(int port);
-    void set_port_tx_status(int port, bool tx_status);
-    std::string m_sys_tx_name={"/module_tx_disable_"};
-    ~Asgvolt64(){;};
 };
 } // namespace acc_onlp_helper
 
