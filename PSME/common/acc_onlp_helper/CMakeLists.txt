@@ -69,6 +69,7 @@ add_library(acc_onlp_helper STATIC
     src/asxvolt16.cpp
     src/asgvolt64.cpp
     src/as5916_54xks.cpp
+    src/as5916_54xk.cpp
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES GNU|Clang)
@@ -77,6 +78,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES GNU|Clang)
     src/asxvolt16.cpp
     src/asgvolt64.cpp
     src/as5916_54xks.cpp
+    src/as5916_54xk.cpp
     PROPERTIES COMPILE_FLAGS "-Wno-conversion"
     )
 endif()

@@ -52,7 +52,8 @@ cp ${PSME_ACC_SW_DIR}/Kafka_PM_agent.py         $ITEM_PATH/usr/local/bin
 cp -rf ${PSME_ACC_SW_DIR}/mod_conf              $ITEM_PATH/usr/local/bin
 cp ${PSME_ACC_SW_DIR}/HW_NODE_VM                $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS5916_54XM       $ITEM_PATH/etc/psme
-cp ${PSME_ACC_SW_DIR}/HW_NODE_AS5916_54XKS       $ITEM_PATH/etc/psme
+cp ${PSME_ACC_SW_DIR}/HW_NODE_AS5916_54XKS      $ITEM_PATH/etc/psme
+cp ${PSME_ACC_SW_DIR}/HW_NODE_AS5916_54XK       $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS7712_32X        $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS6812_32X        $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS6712_32X        $ITEM_PATH/etc/psme

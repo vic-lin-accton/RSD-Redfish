@@ -270,7 +270,6 @@ void endpoint::EthernetSwitchPort::get(const server::Request &req, server::Respo
                     {
                         printf("bal lib not init !!\r\n");
                     }
-
                     if (Onlp.get_port_tx_status(port_id) == 1)
                         r[constants::EthernetSwitchPort::OPERATIONAL_STATE] = "Down";
                     else

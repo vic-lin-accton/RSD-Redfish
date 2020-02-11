@@ -2,6 +2,7 @@
 #include "acc_onlp_helper/asxvolt16.hpp"
 #include "acc_onlp_helper/asgvolt64.hpp"
 #include "acc_onlp_helper/as5916_54xks.hpp"
+#include "acc_onlp_helper/as5916_54xk.hpp"
 
 using namespace acc_onlp_helper;
 
@@ -1797,6 +1798,8 @@ void Psu_Info::set_info(int ID, std::string Model, std::string SN, int Vin, int 
     try
     {
         m_ID = ID;
+        if (!Model.empty() && Model[Model.size() - 1] == '\n')
+            Model.erase(Model.size() - 1);
         m_Model = Model;
         m_SN = SN;
         m_Vin = Vin;
@@ -3190,7 +3193,6 @@ Switch &Switch::get_instance()
             ifstream ifs("/etc/onl/platform");
             std::string s;
             getline(ifs, s, (char)ifs.eof());
-
             printf("Creating Olt_Device on platform [%s] size[%d]\r\n", s.c_str(), (int)s.size());
 
             if (s.find("asxvolt16", 0) != std::string::npos)
@@ -3207,6 +3209,11 @@ Switch &Switch::get_instance()
             {
                 printf("x86-64-accton-as5916-54xks\r\n");
                 g_Switch = new As5916_54xks();
+            }
+            else if (s.find("as5916-54xk", 0) != std::string::npos)
+            {
+                printf("x86-64-accton-as5916-54xk\r\n");
+                g_Switch = new As5916_54xk();
             }
             else
             {
