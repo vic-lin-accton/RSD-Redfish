@@ -21,6 +21,9 @@
   <edmx:Reference Uri="VLanNetworkInterfaceCollection.xml">
     <edmx:Include Namespace="VLanNetworkInterfaceCollection"/>
   </edmx:Reference>
+  <edmx:Reference Uri="EthernetSwitchONUCollection.xml">
+    <edmx:Include Namespace="EthernetSwitchONUCollection"/>
+  </edmx:Reference>
   <edmx:Reference Uri="VLanNetworkInterface.xml">
     <edmx:Include Namespace="VLanNetworkInterface.v1_0_0"/>
   </edmx:Reference>
@@ -163,6 +166,12 @@
                             ContainsTarget="true">
           <Annotation Term="OData.AutoExpandReferences"/>
         </NavigationProperty>
+
+        <NavigationProperty Name="ONUs" Type="EthernetSwitchONUCollection.EthernetSwitchONUCollection"
+                            ContainsTarget="true">
+          <Annotation Term="OData.AutoExpandReferences"/>
+        </NavigationProperty>
+
         <NavigationProperty Name="StaticMACs" Type="EthernetSwitchStaticMACCollection.EthernetSwitchStaticMACCollection"
                             ContainsTarget="true">
           <Annotation Term="OData.AutoExpandReferences"/>

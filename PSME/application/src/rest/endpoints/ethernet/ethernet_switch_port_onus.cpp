@@ -53,9 +53,9 @@ namespace
 json::Value make_prototype()
 {
     json::Value r(json::Value::Type::OBJECT);
-    r[Common::ODATA_CONTEXT] = "/redfish/v1/$metadata#EthernetSwitchPortOnus.EthernetSwitchPortOnus";
+    r[Common::ODATA_CONTEXT] = "/redfish/v1/$metadata#EthernetSwitchONU.EthernetSwitchONU";
     r[Common::ODATA_ID] = json::Value::Type::NIL;
-    r[Common::ODATA_TYPE] = "#EthernetSwitchPort.EthernetSwitchPortOnus";
+    r[Common::ODATA_TYPE] = "#EthernetSwitchONU.v1_0_0.EthernetSwitchONU";
     r[Common::NAME] = "PON Port Onus info.";
     r[Common::DESCRIPTION] = "Onu info.";
     return r;
@@ -72,7 +72,8 @@ void EthernetSwitchPortOnus::get(const server::Request &req, server::Response &r
     auto json = ::make_prototype();
     int port_id = std::stoi(req.params[PathParam::SWITCH_PORT_ID]);
     int onu_id = std::stoi(req.params[PathParam::ONU_ID]);
-    printf("port_id[%d] onu_id[%d]\r\n", port_id, onu_id);
+    json[Common::ODATA_ID] = PathBuilder(req).build();
+    json[Common::ID] = req.params[PathParam::ONU_ID]; 
 
 #if defined BAL31 || defined BAL32 || defined BAL34
     auto &pOLT = Olt_Device::Olt_Device::get_instance();

@@ -217,6 +217,15 @@
     <edmx:Include Namespace="EthernetSwitchACLCollection"/>
    </edmx:Reference>
 
+   <edmx:Reference Uri="EthernetSwitchONUCollection.xml">
+    <edmx:Include Namespace="EthernetSwitchONUCollection"/>
+   </edmx:Reference>
+
+   <edmx:Reference Uri="EthernetSwitchONU.xml">
+    <edmx:Include Namespace="EthernetSwitchONU"/>
+    <edmx:Include Namespace="EthernetSwitchONU.v1_0_0"/>
+   </edmx:Reference>
+
    <edmx:Reference Uri="VLanNetworkInterfaceCollection.xml">
     <edmx:Include Namespace="VLanNetworkInterfaceCollection"/>
    </edmx:Reference>

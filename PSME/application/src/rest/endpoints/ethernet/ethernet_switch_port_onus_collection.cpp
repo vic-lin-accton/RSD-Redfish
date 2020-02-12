@@ -54,9 +54,9 @@ namespace
 json::Value make_prototype()
 {
     json::Value r(json::Value::Type::OBJECT);
-    r[Common::ODATA_CONTEXT] = "/redfish/v1/$metadata#EthernetSwitchPortOnusCollection.EthernetSwitchPortOnusCollection";
+    r[Common::ODATA_CONTEXT] = "/redfish/v1/$metadata#EthernetSwitchONUCollection.EthernetSwitchONUCollection";
     r[Common::ODATA_ID] = json::Value::Type::NIL;
-    r[Common::ODATA_TYPE] = "#EthernetSwitchPortCollection.EthernetSwitchPortOnusCollection";
+    r[Common::ODATA_TYPE] = "#EthernetSwitchONUCollection.EthernetSwitchONUCollection";
     r[Common::NAME] = "PON Port Onus Collection";
     r[Common::DESCRIPTION] = "Collection of PON Port Onus";
     r[Collection::ODATA_COUNT] = json::Value::Type::NIL;
@@ -77,7 +77,7 @@ void EthernetSwitchPortOnusCollection::get(const server::Request &req, server::R
         int port_id = std::stoi(req.params[PathParam::SWITCH_PORT_ID]);
         Json::Reader onu_list_j_reader = {};
         Json::Value j_return_value;
-        std::string onu_list_file_path = "/tmp/pon_" + std::to_string(port_id -1) +"_onu_list";
+        std::string onu_list_file_path = "/tmp/pon_" + std::to_string(port_id - 1) + "_onu_list";
         printf("EthernetSwitchPortOnusCollection() onu_list_file_path[%s]\r\n", onu_list_file_path.c_str());
 
         std::ifstream if_onu_list_files(onu_list_file_path);
@@ -96,16 +96,16 @@ void EthernetSwitchPortOnusCollection::get(const server::Request &req, server::R
             json[Collection::ODATA_COUNT] = max_onus;
 
             for (int i = 1; i <= max_onus; i++)
-    {
+            {
                 char onu_id[32] = {};
                 sprintf(onu_id, "onu_%d_id", i);
                 int id = j_return_value[onu_id].asInt();
-        json::Value link_elem(json::Value::Type::OBJECT);
+                json::Value link_elem(json::Value::Type::OBJECT);
                 link_elem[Common::ODATA_ID] = PathBuilder(req).append(id).build();
-        json[Collection::MEMBERS].push_back(std::move(link_elem));
-    }
-    set_response(res, json);
-}
+                json[Collection::MEMBERS].push_back(std::move(link_elem));
+            }
+            set_response(res, json);
+        }
         else
             printf("Get sys fs mapping file error!!\r\n");
     }
@@ -113,6 +113,4 @@ void EthernetSwitchPortOnusCollection::get(const server::Request &req, server::R
     {
         std::cout << "EthernetSwitchPortOnusCollection get() - exception : " << e.what() << std::endl;
     }
-
-
 }
