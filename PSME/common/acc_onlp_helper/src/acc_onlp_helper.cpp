@@ -1768,6 +1768,7 @@ int Switch::get_port_tx_status(int port)
 
 void Switch::set_port_tx_status(int port, bool tx_status)
 {
+    printf("Switch::set_port_tx_status port[%d] tx_status[%d]\r\n", port, tx_status);
     try
     {
         std::lock_guard<std::mutex> lock{m_data_mutex};
@@ -2324,7 +2325,7 @@ void Port_Info::set_tx(bool status , std::string in_tx_sys_path)
     //std::string tx_sys_path = m_sysfile_path + "/sfp_tx_disable";
     std::string tx_sys_path = in_tx_sys_path; 
     std::ofstream os;
-    printf("set_tx[%s]\r\n", tx_sys_path.c_str());
+    printf("set_tx[%s] status[%d]\r\n", tx_sys_path.c_str(), status);
     try
     {
         if (os)
@@ -3230,13 +3231,43 @@ Switch &Switch::get_instance()
     }
 }
 
-/*
-void Switch::cleanup()
+void Switch::get_per_port_sys_file()
 {
-    delete g_Switch;
-    g_Switch = NULL;
+    try
+    {
+        Json::Value mapping_s;
+        Json::Reader onulist_j_reader = {};
+        std::string mapping_file_path = PORT_MAP_PATH + m_onl_platinfo_name + "-sysfs";
+        printf("get_per_port_sys_file() mapping_file_path[%s]\r\n", mapping_file_path.c_str());
+
+        std::ifstream map_files(mapping_file_path);
+
+        bool isJson = (onulist_j_reader.parse(map_files, mapping_s));
+
+        if (isJson)
+        {
+            printf("Get sys_fs mapping file ok!!\r\n");
+            int ii = 0;
+            for (ii = 1; ii <= m_port_max_num; ii++)
+            {
+                for (vector<Port_Info *>::iterator pObj = m_vec_Port_Info.begin(); pObj != m_vec_Port_Info.end(); ++pObj)
+                {
+                    if ((*pObj)->m_ID == ii)
+                    {
+                        (*pObj)->set_sysfile_path(mapping_s[std::to_string(ii)].asString());
+                        break;
+                    }
+                }
+            }
+        }
+        else
+            printf("Get sys fs mapping file error!!\r\n");
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << "Switch get_per_port_sys_file() - exception : " << e.what() << std::endl;
+    }
 }
-*/
 
 std::vector<std::string> Dev_Info::m_Event_Resouce_Alert = {};
 

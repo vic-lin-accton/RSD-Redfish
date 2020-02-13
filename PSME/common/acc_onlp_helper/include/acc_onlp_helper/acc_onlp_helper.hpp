@@ -373,15 +373,16 @@ public:
     };
 
     void get_fan_info();
-    void update_fan_present_event();
     void get_psu_info();
-    void update_psu_present_event();
     void get_thermal_info();
-    void update_thermal_present_event();
-    void get_port_present_info();
     void get_port_oom_info();
+    void get_per_port_sys_file();
+    void get_port_present_info();
     void get_pon_port_oom_info();
+    void update_fan_present_event();
+    void update_psu_present_event();
     void update_port_present_event();
+    void update_thermal_present_event();
     void update_transceivers_oom_event();
 
     int get_fan_info_by_(int fanid, Fan_Content id);
@@ -394,7 +395,7 @@ public:
 
 
     static Switch &get_instance();
-    //static void cleanup();
+
     static void increase_thermal_num()
     {
         m_thermal_sen_max_num++;

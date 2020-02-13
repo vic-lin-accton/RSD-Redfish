@@ -48,6 +48,8 @@ using namespace acc_onlp_helper;
 #if defined BAL31 || defined BAL32 || defined BAL34
 #include "acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp"
 using namespace acc_bal3_api_dist_helper;
+#else
+#define UNUSED(x) (void)(x)
 #endif
 
 using namespace psme::rest;
@@ -160,15 +162,15 @@ bool isValidIpAddress(char *ipAddress);
 
 bool endpoint::EthernetSwitchPort::trigger_rssi(int pon_id)
 {
+#if defined BAL31 || defined BAL32 || defined BAL34
+    //For OLT BAL API usage only
     //Send RSSI trigger command
     //Get ONUs list
     Json::Reader onu_list_j_reader = {};
     Json::Value j_return_value;
     std::string onu_list_file_path = "/tmp/pon_" + std::to_string(pon_id - 1) + "_onu_list";
     printf("EthernetSwitchPort get_onus_list() onu_list_file_path[%s]\r\n", onu_list_file_path.c_str());
-
     std::ifstream if_onu_list_files(onu_list_file_path);
-
     bool isJson = (onu_list_j_reader.parse(if_onu_list_files, j_return_value));
 
     if (isJson)
@@ -178,25 +180,18 @@ bool endpoint::EthernetSwitchPort::trigger_rssi(int pon_id)
         {
             //Always get onu id 1 RSSI value//
             int id = j_return_value["onu_1_id"].asInt();
-#if defined BAL31 || defined BAL32 || defined BAL34
             auto &pOLT = Olt_Device::Olt_Device::get_instance();
             if (pOLT.is_bal_lib_init() == true)
             {
                 return pOLT.rssi_measurement(id, pon_id - 1);
             }
-#else
-            char command[512] = {0};
-            char resultA[2048] = {0};
-            sprintf(command, "echo \"/a/o object=onu sub=rssi_measurement pon_ni=%d onu_id=%d\" \
-         > /broadcom/rssi_trigger_cmd;/broadcom/example_user_appl <  /broadcom/rssi_trigger_cmd",
-                    pon_id - 1, id);
-            memset(resultA, 0x0, sizeof(resultA));
-            exec_shell(command, resultA);
-            return true;
-#endif
         }
     }
     return false;
+#else
+    UNUSED(pon_id);
+    return true;
+#endif
 }
 
 void endpoint::EthernetSwitchPort::get(const server::Request &req, server::Response &res)
@@ -220,7 +215,6 @@ void endpoint::EthernetSwitchPort::get(const server::Request &req, server::Respo
     endpoint::status_to_json(port, r);
     const json::Value config = configuration::Configuration::get_instance().to_json();
 
-    int iPort = port_id;
     auto network_components = agent_framework::module::NetworkComponents::get_instance();
     auto &port_manager = network_components->get_instance()->get_port_manager();
     auto port_uuids = port_manager.get_keys();
@@ -243,7 +237,7 @@ void endpoint::EthernetSwitchPort::get(const server::Request &req, server::Respo
                 if (r[constants::EthernetSwitchPort::PORT_ID] == "PON port")
                 {
                     //Show ONUs links under PON port//
-                    if (trigger_rssi(iPort))
+                    if (trigger_rssi(port_id))
                         printf("RSSI M OK\r\n");
                     else
                         printf("RSSI M NG\r\n");
@@ -254,7 +248,7 @@ void endpoint::EthernetSwitchPort::get(const server::Request &req, server::Respo
 
                 if (pOLT.is_bal_lib_init() == true)
                 {
-                    r["Statistics"] = pOLT.get_port_statistic(iPort);
+                    r["Statistics"] = pOLT.get_port_statistic(port_id);
                 }
                 else
                 {

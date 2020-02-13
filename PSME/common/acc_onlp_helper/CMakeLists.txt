@@ -66,8 +66,9 @@ include_directories(
 
 add_library(acc_onlp_helper STATIC
     src/acc_onlp_helper.cpp
-    src/asxvolt16.cpp
     src/asgvolt64.cpp
+    src/switch_sys_mode.cpp
+    src/asxvolt16.cpp
     src/as5916_54xks.cpp
     src/as5916_54xk.cpp
 )
@@ -75,8 +76,9 @@ add_library(acc_onlp_helper STATIC
 if (CMAKE_CXX_COMPILER_ID MATCHES GNU|Clang)
   set_source_files_properties(
     src/acc_onlp_helper.cpp
-    src/asxvolt16.cpp
     src/asgvolt64.cpp
+    src/switch_sys_mode.cpp
+    src/asxvolt16.cpp
     src/as5916_54xks.cpp
     src/as5916_54xk.cpp
     PROPERTIES COMPILE_FLAGS "-Wno-conversion"

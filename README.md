@@ -34,7 +34,7 @@ $ sudo usermod -aG docker $(whoami)
 $ cd ~
 $ git clone https://github.com/opencomputeproject/OpenNetworkLinux.git 
 $ cd OpenNetworkLinux
-$ git checkout 05a8ab5 
+$ git checkout 72b95a7 
 $ sudo docker/tools/onlbuilder -8
 $ apt-cacher-ng
 $ source setup.env

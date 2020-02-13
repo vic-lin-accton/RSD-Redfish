@@ -71,23 +71,14 @@ void EthernetSwitchPortOnus::get(const server::Request &req, server::Response &r
 {
     auto json = ::make_prototype();
     int port_id = std::stoi(req.params[PathParam::SWITCH_PORT_ID]);
-    int onu_id = std::stoi(req.params[PathParam::ONU_ID]);
     json[Common::ODATA_ID] = PathBuilder(req).build();
     json[Common::ID] = req.params[PathParam::ONU_ID]; 
 
 #if defined BAL31 || defined BAL32 || defined BAL34
+    int onu_id = std::stoi(req.params[PathParam::ONU_ID]);
     auto &pOLT = Olt_Device::Olt_Device::get_instance();
     if (pOLT.is_bal_lib_init() == true)
         pOLT.rssi_measurement(onu_id, port_id - 1);
-#else
-    //Send RSSI trigger command
-    char command[512] = {0};
-    char resultA[2048] = {0};
-    sprintf(command, "echo \"/a/o object=onu sub=rssi_measurement pon_ni=%d onu_id=%d\" \
-         > /broadcom/rssi_trigger_cmd;/broadcom/example_user_appl <  /broadcom/rssi_trigger_cmd",
-            port_id - 1, onu_id);
-    memset(resultA, 0x0, sizeof(resultA));
-    exec_shell(command, resultA);
 #endif
 
     auto network_components = agent_framework::module::NetworkComponents::get_instance();
