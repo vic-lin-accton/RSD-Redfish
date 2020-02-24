@@ -269,6 +269,7 @@ void TestClass1::SetUp()
     int jj = 0;
     int gem_id = 0;
     int flow_id = 0;
+    bool state_one = false;
 
     for (jj = 0; jj < Onu_count; jj++)
     {
@@ -338,9 +339,8 @@ void TestClass1::SetUp()
         //VOLTAH 1.7
         //Step 1 for EPOA packet
         int bOMCI_size = 0;
-        if (TestMode == "RM")
+        if (TestMode == "RM" || state_one == false)
         {
-
             bOMCI_size = (sizeof(b_OMCI_1) / sizeof(b_OMCI_1[0]));
             ij = 0;
             for (ij = 0; ij < bOMCI_size; ij++)
@@ -368,6 +368,7 @@ void TestClass1::SetUp()
                     OLT.omci_msg_out(pon_id, onu_id, b_OMCI_1[ij].raw_omci);
                 usleep(300000);
             }
+            state_one = true;
         }
         //Step 2 for vlan action
 
@@ -415,8 +416,8 @@ void TestClass1::SetUp()
 //char cs_vendor_spec[4] = {0x71,0xE8,0x01,0x10};
 #ifdef BALCLI
     OLT.enable_cli();
-#endif
     OLT.enter_cmd_shell();
+#endif
 }
 void TestClass1::TearDown()
 {

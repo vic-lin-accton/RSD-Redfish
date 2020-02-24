@@ -25,5 +25,14 @@
 	"vendor_id": "ISKT",
 	"vendor_specific": "428DA0E7"
   }
+  ,
+  {
+	"onu_id": 3,
+	"interface_id": 3,
+	"nni_id": 0,
+	"vendor_id": "CIGG",
+	"vendor_specific": "F85AF40A"
+  }
+
  ]
 }
