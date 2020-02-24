@@ -20,23 +20,7 @@ cd build
 
 if [ "$1" != "C" ];then
     echo "Build all"
-    if [ "$0" == "bal26" ];then
-	echo "Build for bal sdk 2.6 platform!"
-	cp ../CMakeLists.txt ../CMakeLists.txt-org
-	`sed -i 's/-DONLP)/-DVOLT -DBCMOS_MSG_QUEUE_DOMAIN_SOCKET -DBCMOS_MSG_QUEUE_UDP_SOCKET -DBCMOS_MEM_CHECK &\nset(CUSE_ACC_BAL_DISTLIB "TRUE")/' ../CMakeLists.txt`
-    elif [ "$1" == "bal30" ];then
-	echo "Build for bal sdk 3.0 platform!"
-	cp ../CMakeLists.txt ../CMakeLists.txt-org
-	`sed -i 's/-DONLP)/-DBCMOS_MSG_QUEUE_DOMAIN_SOCKET -DBCMOS_MSG_QUEUE_UDP_SOCKET -DBCMOS_MEM_CHECK  -DBCMOS_SYS_UNITTEST -DENABLE_LOG -DENABLE_CLI &\nset(CUSE_ACC_BAL3_DISTLIB "TRUE")/' ../CMakeLists.txt`
-    elif [ "$1" == "bal31" ];then
-	echo "Build for bal sdk 3.1 platform!"
-	cp ../CMakeLists.txt ../CMakeLists.txt-org
-	`sed -i 's/-DONLP)/-DBAL31 -DBCMOS_MSG_QUEUE_DOMAIN_SOCKET -DBCMOS_MSG_QUEUE_UDP_SOCKET -DBCMOS_MEM_CHECK  -DBCMOS_SYS_UNITTEST -DENABLE_LOG -DENABLE_CLI &\nset(CUSE_ACC_BAL3_DISTLIB "TRUE")/' ../CMakeLists.txt`
-    elif [ "$1" == "bal32" ];then
-	echo "Build for bal sdk 3.2 platform!"
-	cp ../CMakeLists.txt ../CMakeLists.txt-org
-	`sed -i 's/-DONLP)/-DBAL32 -DBCMOS_MSG_QUEUE_DOMAIN_SOCKET -DBCMOS_MSG_QUEUE_UDP_SOCKET -DBCMOS_MEM_CHECK  -DBCMOS_SYS_UNITTEST -DENABLE_LOG -DENABLE_CLI &\nset(CUSE_ACC_BAL3_DISTLIB "TRUE")/' ../CMakeLists.txt`
-    elif [ "$1" == "bal34" ];then
+    if [ "$1" == "bal34" ];then
 	echo "Build for bal sdk 3.4 platform!"
 	cp ../CMakeLists.txt ../CMakeLists.txt-org
 	`sed -i 's/-DONLP)/-DBAL34 -DBCMOS_MSG_QUEUE_DOMAIN_SOCKET -DBCMOS_MSG_QUEUE_UDP_SOCKET -DBCMOS_MEM_CHECK  -DBCMOS_SYS_UNITTEST -DENABLE_LOG -DENABLE_CLI &\nset(CUSE_ACC_BAL3_DISTLIB "TRUE")/' ../CMakeLists.txt`

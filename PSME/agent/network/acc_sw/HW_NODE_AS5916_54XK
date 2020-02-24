@@ -32,3 +32,10 @@ get_upper_cpu_th_thermal_temp()
 	echo "82000 82000 104000"
     fi
 }
+
+get_max_fan_num()
+{
+    echo "${CURRENT_FAN_NUM}"
+}
+
+

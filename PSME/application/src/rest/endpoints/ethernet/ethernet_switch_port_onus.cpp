@@ -34,12 +34,10 @@
 
 #include "psme/core/agent/agent_manager.hpp"
 #include <regex>
-
-#if defined BAL31 || defined BAL32 || defined BAL34
+#ifdef BAL34
 #include "acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp"
 using namespace acc_bal3_api_dist_helper;
-#endif 
-
+#endif
 using namespace psme::rest;
 using namespace psme::rest::constants;
 using namespace psme::rest::endpoint;
@@ -73,14 +71,12 @@ void EthernetSwitchPortOnus::get(const server::Request &req, server::Response &r
     int port_id = std::stoi(req.params[PathParam::SWITCH_PORT_ID]);
     json[Common::ODATA_ID] = PathBuilder(req).build();
     json[Common::ID] = req.params[PathParam::ONU_ID]; 
-
-#if defined BAL31 || defined BAL32 || defined BAL34
+#ifdef BAL34
     int onu_id = std::stoi(req.params[PathParam::ONU_ID]);
     auto &pOLT = Olt_Device::Olt_Device::get_instance();
     if (pOLT.is_bal_lib_init() == true)
         pOLT.rssi_measurement(onu_id, port_id - 1);
 #endif
-
     auto network_components = agent_framework::module::NetworkComponents::get_instance();
     auto &port_manager = network_components->get_instance()->get_port_manager();
     auto port_uuids = port_manager.get_keys();

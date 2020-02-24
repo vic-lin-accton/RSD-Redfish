@@ -33,7 +33,7 @@ include_directories(
 TARGET_LINK_LIBRARIES(${test_target}
     ${ACC_BAL3_API_DIST_HELPER_LIBRARIES}
     ${JSONCXX_LIBRARIES}
-    ${LIBBAL3_API_DIST}
+    #    ${LIBBAL3_API_DIST}
     jsoncpp
     dl 
-)
+    )

@@ -152,7 +152,7 @@ endif()
 
 find_package(Curl REQUIRED)
 
-find_package(Microhttpd REQUIRED)
+install_third_party(Microhttpd)
 
 
 IF(NOT CMAKE_CROSSCOMPILING)

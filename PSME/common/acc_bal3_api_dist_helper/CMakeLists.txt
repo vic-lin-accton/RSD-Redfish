@@ -44,6 +44,9 @@ include_directories(SYSTEM
 
 #include bal3 api include  path
 include_directories(
+    #${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../bal-api/include/
+    #${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../bal-api/include/object_model/
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../common/json-cxx/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asfvolt16-bal/host_driver/bal/bal_include/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asfvolt16-bal/host_driver/topology/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asfvolt16-bal/host_driver/utils/
@@ -79,10 +82,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asgvolt64-bal/host_reference/api_cli/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asgvolt64-bal/host_reference/dev_log/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../asgvolt64-bal/host_reference/host_api/
- 
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../common/json-cxx/include/
 )
-
 
 add_library(acc_bal3_api_dist_helper STATIC
     src/acc_bal3_api_dist_helper.cpp

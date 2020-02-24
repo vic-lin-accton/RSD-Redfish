@@ -10,10 +10,8 @@
 #include <limits.h>
 #include <stdio.h>
 #include <unistd.h>
-#if defined BAL31 || defined BAL32 || defined BAL34
 #include "json/json.hpp"
 #include <mutex>
-#endif
 #include <string.h>
 
 typedef enum acc_bcmbal_state
@@ -147,13 +145,11 @@ public:
     int virtual get_total_port_num() = 0;
     int virtual get_maple_num() = 0;
     std::string virtual get_platform() = 0;
-#if defined BAL31 || defined BAL32 || defined BAL34
     mutable std::mutex m_data_mutex{};
     json::Value get_port_statistic(int port);
     port m_pon_port[MAX_PON_PORT_VALUES] = {};
     port m_nni_port[MAX_NNI_PORT_VALUES] = {};
     bool rssi_measurement(int onu_id, int pon_id);
-#endif
     void *fHandle = 0;
     Olt_Device(const Olt_Device &a) { this->fHandle = a.fHandle; };
     Olt_Device &operator=(const acc_bal3_api_dist_helper::Olt_Device &a)
@@ -182,10 +178,8 @@ private:
     bool m_bal_lib_init = {false};
     bool m_subscribed = {false};
 
-#if defined BAL31 || defined BAL32 || defined BAL34
     json::Value get_pon_statistic(int port);
     json::Value get_nni_statistic(int port);
-#endif
 };
 
 class XGS_PON_Olt_Device : public Olt_Device

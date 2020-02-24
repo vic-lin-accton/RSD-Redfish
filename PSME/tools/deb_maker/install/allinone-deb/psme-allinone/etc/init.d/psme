@@ -9,7 +9,8 @@
 ### END INIT INFO
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
-
+USER="root"
+GROUP="root"
 
 #Added for acc_sw psme module
 PSMED_REST_DAEMON=/usr/local/bin/psme-rest-server 
@@ -53,6 +54,7 @@ start_daemon() {
         fi
     fi
    
+    export USER=$USER
     echo -n "Starting daemon server: $2 \n"
     start-stop-daemon --start --quiet --make-pidfile --pidfile /var/run/$2.pid --background --exec $1
 }
@@ -70,6 +72,7 @@ start_daemon_with_param() {
         fi
     fi
    
+    export USER=$USER
     echo -n "Starting daemon server: $2 \n"
     start-stop-daemon --start --quiet --make-pidfile --pidfile /var/run/$2.pid --background --exec $1 -- $3
 }

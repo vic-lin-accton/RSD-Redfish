@@ -67,17 +67,11 @@ TARGET_LINK_LIBRARIES(psme-chassis
     md5
     )
 
-IF("${CUSE_ACC_BAL_DISTLIB}" STREQUAL "TRUE" )
-    target_link_libraries(psme-chassis
-	${ACC_BAL_API_DIST_HELPER_LIBRARIES}
-        dl	
-	)
-ENDIF()
 
 IF("${CUSE_ACC_BAL3_DISTLIB}" STREQUAL "TRUE" )
     target_link_libraries(psme-chassis
 	${ACC_BAL3_API_DIST_HELPER_LIBRARIES}
-        ${LIBBAL3_API_DIST}
+	#        ${LIBBAL3_API_DIST}
         dl	
 	)
 ENDIF()

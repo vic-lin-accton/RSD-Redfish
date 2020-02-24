@@ -3,33 +3,33 @@
 # Support Platform  type
 #################################################################################
 # Define currnt using variable depend on platform #
-	CURRENT_FAN_NUM="15"
-	CURRENT_THERMAL_NUM="11"
-	CURRENT_PORT_NUM="55"
-	CURRENT_PSU_NUM="3"
+CURRENT_FAN_NUM="15"
+CURRENT_THERMAL_NUM="11"
+CURRENT_PORT_NUM="55"
+CURRENT_PSU_NUM="3"
 
-	I2C_BUS="0"
-	I2C_CPLD_OFFSET="0"
-	SYSTEM_RESET_OFFSET="0"
+I2C_BUS="0"
+I2C_CPLD_OFFSET="0"
+SYSTEM_RESET_OFFSET="0"
 
-	SYSTEM_HALT_VALUE="0"
-	SYSTEM_RESTART_VALUE="0"
+SYSTEM_HALT_VALUE="0"
+SYSTEM_RESTART_VALUE="0"
 
-        mapping=("XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
-	         "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
-	         "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
-	         "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
-	         "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
-	         "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" 
-		 ) 
+mapping=("XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
+"XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
+"XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
+"XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
+"XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP"
+"XSFP" "XSFP" "XSFP" "XSFP" "XSFP" 
+) 
 
-        fans_type=("S" "S" "S" "S" "S" "S" "S" "S" "S" "S" "S" "S" "P" "P" "P")
+fans_type=("S" "S" "S" "S" "S" "S" "S" "S" "S" "S" "S" "S" "P" "P" "P")
 
-        thermals_type=("C" "S" "S" "S" "S" "S" "S" "S" "S" "S" "S")
+thermals_type=("C" "S" "S" "S" "S" "S" "S" "S" "S" "S" "S")
 
-        psus_type=("S" "S" "S")
+psus_type=("S" "S" "S")
 
 get_max_fan_num()
 {
-	echo "${CURRENT_FAN_NUM}"
+    echo "${CURRENT_FAN_NUM}"
 }

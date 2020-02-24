@@ -4,33 +4,34 @@
 #################################################################################
 # Define currnt using variable depend on platform #
 
-	CURRENT_FAN_NODE_PATH="/sys/devices/platform/as5712_54x_fan/"
-	CURRENT_PSU1_FAN_NODE_PATH="/sys/bus/i2c/devices/57-003c/"
-	CURRENT_PSU2_FAN_NODE_PATH="/sys/bus/i2c/devices/58-003f/"
+CURRENT_FAN_NODE_PATH="/sys/devices/platform/as5712_54x_fan/"
+CURRENT_PSU1_FAN_NODE_PATH="/sys/bus/i2c/devices/57-003c/"
+CURRENT_PSU2_FAN_NODE_PATH="/sys/bus/i2c/devices/58-003f/"
 
-	eval CURRENT_THERMAL_NODE1_PATH="/sys/devices/platform/coretemp.0/hwmon/hwmon0/temp2_input"
-	eval CURRENT_THERMAL_NODE2_PATH="/sys/bus/i2c/devices/61-0048/hwmon/hwmon10/temp1_input"
-	eval CURRENT_THERMAL_NODE3_PATH="/sys/bus/i2c/devices/62-0049/hwmon/hwmon11/temp1_input"
-	eval CURRENT_THERMAL_NODE4_PATH="/sys/bus/i2c/devices/63-004a/hwmon/hwmon12/temp1_input"
-	eval CURRENT_THERMAL_NODE5_PATH="/sys/bus/i2c/devices/57-003c/psu_temp1_input"
-	eval CURRENT_THERMAL_NODE6_PATH="/sys/bus/i2c/devices/58-003f/psu_temp1_input"
-	CURRENT_THERMAL_NUM="6"
-	CURRENT_PORT_NUM="54"
-        CURRENT_PSU_NUM="2"	
+eval CURRENT_THERMAL_NODE1_PATH="/sys/devices/platform/coretemp.0/hwmon/hwmon0/temp2_input"
+eval CURRENT_THERMAL_NODE2_PATH="/sys/bus/i2c/devices/61-0048/hwmon/hwmon10/temp1_input"
+eval CURRENT_THERMAL_NODE3_PATH="/sys/bus/i2c/devices/62-0049/hwmon/hwmon11/temp1_input"
+eval CURRENT_THERMAL_NODE4_PATH="/sys/bus/i2c/devices/63-004a/hwmon/hwmon12/temp1_input"
+eval CURRENT_THERMAL_NODE5_PATH="/sys/bus/i2c/devices/57-003c/psu_temp1_input"
+eval CURRENT_THERMAL_NODE6_PATH="/sys/bus/i2c/devices/58-003f/psu_temp1_input"
+CURRENT_THERMAL_NUM="6"
+CURRENT_PORT_NUM="54"
+CURRENT_PSU_NUM="2"	
+CURRENT_FAN_NUM="7"
 
-	I2C_BUS="0"
-	I2C_CPLD_OFFSET="0"
-	SYSTEM_RESET_OFFSET="0"
+I2C_BUS="0"
+I2C_CPLD_OFFSET="0"
+SYSTEM_RESET_OFFSET="0"
 
-	SYSTEM_HALT_VALUE="0"
-	SYSTEM_RESTART_VALUE="0"
+SYSTEM_HALT_VALUE="0"
+SYSTEM_RESTART_VALUE="0"
 
-        fans_type=("S" "S" "S" "S" "S" "P" "P")
+fans_type=("S" "S" "S" "S" "S" "P" "P")
 
-        thermals_type=("C" "S" "S" "S" "P" "P")
+thermals_type=("C" "S" "S" "S" "P" "P")
 
-        psus_type=("S" "S")
-	
+psus_type=("S" "S")
+
 	
 get_sfp_port_path()
 {
@@ -43,3 +44,10 @@ get_sfp_port_path()
 		echo "error port number"
 	fi
 }
+
+get_max_fan_num()
+{
+    echo "${CURRENT_FAN_NUM}"
+}
+
+

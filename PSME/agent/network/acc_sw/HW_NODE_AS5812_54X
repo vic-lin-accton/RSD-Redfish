@@ -18,6 +18,7 @@
 	CURRENT_THERMAL_NUM="6"
 	CURRENT_PORT_NUM="54"
         CURRENT_PSU_NUM="2"	
+	CURRENT_FAN_NUM="7"
 
 	I2C_BUS="0"
 	I2C_CPLD_OFFSET="0"
@@ -60,3 +61,10 @@ get_upper_cpu_th_thermal_temp()
         echo "82000 82000 104000"
     fi
 }
+
+get_max_fan_num()
+{
+    echo "${CURRENT_FAN_NUM}"
+}
+
+

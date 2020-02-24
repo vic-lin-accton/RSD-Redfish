@@ -43,12 +43,10 @@
 #include <csignal>
 #include <iostream>
 #include <string>
-
-#if defined BAL32 || defined BAL34
+#ifdef BAL34
 #include "acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp"
 using namespace acc_bal3_api_dist_helper;
-#endif   
-
+#endif
 #ifdef ONLP
 #include "acc_onlp_helper/acc_onlp_helper.hpp"
 using namespace acc_onlp_helper;
@@ -225,9 +223,9 @@ void App::init() {
         exit(-1);
     }
 }
-#if defined BAL32 || defined BAL34
 void App::init_bal()
 {
+#ifdef BAL34
     auto &pOLT = Olt_Device::Olt_Device::get_instance();
     if (pOLT.is_bal_lib_init() != true)
     {
@@ -235,8 +233,8 @@ void App::init_bal()
     }
     else
         log_info(GET_LOGGER("app"), "BAL API exist.");
-}
 #endif
+}
 void App::init_onlp()
 {
     auto &pOnlp = Switch::Switch::get_instance();

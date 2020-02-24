@@ -6,34 +6,65 @@ using namespace acc_bal3_api_dist_helper;
 #ifdef __cplusplus
 extern "C"
 {
+#if defined BAL34
 #include <bcmolt_api.h>
 #include <bcmolt_host_api.h>
 #include <bcmolt_api_model_supporting_enums.h>
 #include <bcmolt_api_conn_mgr.h>
+#if defined BALCLI
 #include <bcmcli_session.h>
 #include <bcmcli.h>
 #include <bcm_api_cli.h>
+#endif
 #include <bcmos_common.h>
 #include <bcm_config.h>
+#endif
+#if 0 // BALBAI Include usage //
+#include <bcmolt_api_macros.h>
+#include <bcmolt_api.h>
+#include <bcmolt_host_api.h>
+#include <bcmos_common.h>
+#include <bcmolt_api_model_supporting_enums.h>
+#include <bcmolt_api_conn_mgr.h>
+#endif 
 }
 #endif
 
 bcmolt_oltid dev_id = 0;
+bcmos_errno (*d_bcmbal_cfg_get)(bcmolt_oltid olt, bcmolt_cfg *objinfo) = NULL;
+bcmos_errno (*d_bcmbal_cfg_set)(bcmolt_oltid olt, bcmolt_cfg *objinfo) = NULL;
+bcmos_errno (*d_bcmbal_cfg_clear)(bcmolt_oltid olt, bcmolt_cfg *objinfo) = NULL;
+bcmos_errno (*d_bcmbal_stat_get)(bcmolt_oltid olt, bcmolt_stat *stat, bcmolt_stat_flags flags) = NULL;
+bcmos_errno (*d_bcmbal_oper_submit)(bcmolt_oltid olt, bcmolt_oper *oper) = NULL;
+bcmos_errno (*d_bcmbal_ind_subscribe)(bcmolt_oltid olt, bcmolt_rx_cfg *rx_cfg) = NULL;
+bcmos_errno (*d_bcmbal_host_init)(const bcmolt_host_init_parms *init_parms) = NULL;
+bcmos_bool (*d_bcmbal_api_conn_mgr_is_connected)(bcmolt_goid olt) = NULL;
+void (*d_bcmbal_msg_free)(bcmolt_msg *msg) = NULL;
+void (*d_bcmbal_api_set_prop_present)(bcmolt_msg *msg, const void *prop_ptr) = NULL;
+void (*d_bcmbal_usleep)(uint32_t us) = NULL;
 
-#if defined BAL34
+#undef BCMOLT_MSG_FIELD_SET
+#define BCMOLT_MSG_FIELD_SET(_msg_ptr, _fully_qualified_field_name, _field_value)                                   \
+    do                                                                                                              \
+    {                                                                                                               \
+        (_msg_ptr)->data._fully_qualified_field_name = (_field_value);                                              \
+        if (d_bcmbal_api_set_prop_present)                                                                          \
+            d_bcmbal_api_set_prop_present(&((_msg_ptr)->hdr.hdr), &((_msg_ptr)->data._fully_qualified_field_name)); \
+        else                                                                                                        \
+            printf("bcmbal_api_set_prop_present error\r\n");                                                        \
+    } while (0)
+
+#undef BCMOLT_MSG_FIELD_GET
+#define BCMOLT_MSG_FIELD_GET(_msg_ptr, _fully_qualified_field_name) \
+    d_bcmbal_api_set_prop_present(&((_msg_ptr)->hdr.hdr), &((_msg_ptr)->data._fully_qualified_field_name))
+
 const uint32_t tm_upstream_sched_id_start = 1;
-const uint32_t tm_downstream_sched_id_start = 201;
-#else
-const uint32_t tm_upstream_sched_id_start = 600;
-const uint32_t tm_downstream_sched_id_start = 800;
-#endif
+const uint32_t tm_downstream_sched_id_start = 180;
 
 #define MAX_CHAR_LEN 20
 #define MAX_OMCI_MSG_LEN 44
 
-#if defined BAL31 || defined BAL32 || defined BAL34
 #define TM_Q_SET_ID (bcmolt_tm_queue_set_id)32768U
-#endif
 const std::string upstream = "upstream";
 const std::string downstream = "downstream";
 
@@ -62,14 +93,13 @@ const std::string downstream = "downstream";
 #define ONU_RANGING_STATE_IF_DOWN(state) \
     ((state != BCMOLT_RESULT_SUCCESS) ? BCMOS_TRUE : BCMOS_FALSE)
 
-static bcmcli_session *current_session;
-static bcmcli_entry *api_parent_dir;
+bcmolt_odid device_id = 0;
+#if defined BALCLI
 const char *bal_cli_thread_name = "acc_help_bal_cli_thread";
 bcmos_bool status_bcm_cli_quit = BCMOS_FALSE;
 bcmos_task bal_cli_thread;
-
-bcmolt_odid device_id = 0;
-
+static bcmcli_session *current_session;
+static bcmcli_entry *api_parent_dir;
 static int bal_apiend_cli_thread_handler(long data)
 {
     char init_string[] = "\n";
@@ -136,6 +166,7 @@ int get_status_bcm_cli_quit(void)
 {
     return status_bcm_cli_quit;
 }
+#endif
 
 static inline int get_default_tm_sched_id(int intf_id, std::string direction)
 {
@@ -159,7 +190,6 @@ static void OltBalReady(short unsigned int olt, bcmolt_msg *msg)
     if (msg->subgroup == BCMOLT_OLT_AUTO_SUBGROUP_BAL_READY)
     {
         //After BAL ready, enable OLT maple
-        bcmos_errno err;
         bcmolt_odid dev;
         printf("olt id[%d]\r\n", olt);
 
@@ -168,53 +198,79 @@ static void OltBalReady(short unsigned int olt, bcmolt_msg *msg)
 
         for (dev = 0; dev < maple_num; dev++)
         {
+            bcmos_errno err = BCM_ERR_INTERNAL;
             bcmolt_device_cfg dev_cfg = {};
             bcmolt_device_key dev_key = {};
             dev_key.device_id = dev;
             BCMOLT_CFG_INIT(&dev_cfg, device, dev_key);
             BCMOLT_MSG_FIELD_GET(&dev_cfg, system_mode);
-            err = bcmolt_cfg_get(dev_id, &dev_cfg.hdr);
 
-            if (err == BCM_ERR_NOT_CONNECTED)
+            if (d_bcmbal_cfg_get)
             {
-                bcmolt_device_key key = {.device_id = dev};
-                bcmolt_device_connect oper;
-                bcmolt_device_cfg cfg;
-                BCMOLT_OPER_INIT(&oper, device, connect, key);
-                BCMOLT_MSG_FIELD_SET(&oper, inni_config.mode, BCMOLT_INNI_MODE_ALL_10_G_XFI);
+                err = d_bcmbal_cfg_get(dev_id, &dev_cfg.hdr);
 
-                if (rOLT.get_platform() == "asxvolt16")
+                if (err == BCM_ERR_NOT_CONNECTED)
                 {
-                    printf("asxvolt16 Enable Maple - %d/%d\n", dev + 1, maple_num);
-                    BCMOLT_MSG_FIELD_SET(&oper, system_mode, BCMOLT_SYSTEM_MODE_XGS__2_X);
-                }
-                else if (rOLT.get_platform() == "asgvolt64")
-                {
-                    printf("asgvolt64 Enable Maple - %d/%d\n", dev + 1, maple_num);
-                    BCMOLT_MSG_FIELD_SET(&oper, inni_config.mux, BCMOLT_INNI_MUX_FOUR_TO_ONE);
-                    BCMOLT_MSG_FIELD_SET(&oper, system_mode, BCMOLT_SYSTEM_MODE_GPON__16_X);
+                    bcmolt_device_key key = {.device_id = dev};
+                    bcmolt_device_connect oper;
+                    bcmolt_device_cfg cfg;
+                    BCMOLT_OPER_INIT(&oper, device, connect, key);
+                    BCMOLT_MSG_FIELD_SET(&oper, inni_config.mode, BCMOLT_INNI_MODE_ALL_10_G_XFI);
+
+                    if (rOLT.get_platform() == "asxvolt16")
+                    {
+                        printf("asxvolt16 Enable Maple - %d/%d\n", dev + 1, maple_num);
+                        BCMOLT_MSG_FIELD_SET(&oper, system_mode, BCMOLT_SYSTEM_MODE_XGS__2_X);
+                    }
+                    else if (rOLT.get_platform() == "asgvolt64")
+                    {
+                        printf("asgvolt64 Enable Maple - %d/%d\n", dev + 1, maple_num);
+                        BCMOLT_MSG_FIELD_SET(&oper, inni_config.mux, BCMOLT_INNI_MUX_FOUR_TO_ONE);
+                        BCMOLT_MSG_FIELD_SET(&oper, system_mode, BCMOLT_SYSTEM_MODE_GPON__16_X);
+                    }
+                    else
+                    {
+                        printf("!!!!!!!Can't identify PLATFORM TYPE!!!!!!!\r\n");
+                        return;
+                    }
+
+                    if (d_bcmbal_oper_submit)
+                    {
+                        err = d_bcmbal_oper_submit(dev_id, &oper.hdr);
+                        if (err)
+                            printf("Enable Maple deivce %d failed\n", dev);
+                        d_bcmbal_usleep(200000);
+                    }
+                    else
+                    {
+                        printf("!!!!!!!d_bcmbal_oper_submit ERROR!!!!!!!\r\n");
+                    }
                 }
                 else
                 {
-                    printf("!!!!!!!Can't identify PLATFORM TYPE!!!!!!!\r\n");
-                    return;
+                    printf("Maple deivce %d already connected\n", dev);
                 }
-
-                err = bcmolt_oper_submit(dev_id, &oper.hdr);
-                if (err)
-                    printf("Enable Maple deivce %d failed\n", dev);
-                bcmos_usleep(200000);
             }
             else
             {
-                printf("Maple deivce %d already connected\n", dev);
+
+                printf("d_bcmbal_cfg_get error\r\n");
+                if (d_bcmbal_msg_free)
+                    d_bcmbal_msg_free(msg);
+                else
+                    printf("d_bcmbal_msg_free error\r\n");
+                return;
             }
         }
         rOLT.register_callback();
         printf("BAL Ready !!!!!!!!\r\n");
         rOLT.set_bal_status(true);
     }
-    bcmolt_msg_free(msg);
+    if (d_bcmbal_msg_free)
+        d_bcmbal_msg_free(msg);
+    else
+        printf("d_bcmbal_msg_free error\r\n");
+    return;
 }
 
 static void Olt_itf_change(short unsigned int olt, bcmolt_msg *msg)
@@ -257,7 +313,12 @@ static void Olt_itf_change(short unsigned int olt, bcmolt_msg *msg)
     default:
         break;
     }
-    bcmolt_msg_free(msg);
+
+    if (d_bcmbal_msg_free)
+        d_bcmbal_msg_free(msg);
+    else
+        printf("d_bcmbal_msg_free error\r\n");
+
     return;
 }
 
@@ -282,7 +343,12 @@ static void OltOmciIndication(short unsigned int olt, bcmolt_msg *msg)
     default:
         break;
     }
-    bcmolt_msg_free(msg);
+
+    if (d_bcmbal_msg_free)
+        d_bcmbal_msg_free(msg);
+    else
+        printf("d_bcmbal_msg_free error\r\n");
+    return;
 }
 
 static void OltOperIndication(short unsigned int olt, bcmolt_msg *msg)
@@ -301,7 +367,15 @@ static void OltOperIndication(short unsigned int olt, bcmolt_msg *msg)
             cb_cfg.rx_cb = OltOmciIndication;
             cb_cfg.subgroup = bcmolt_onu_auto_subgroup_omci_packet;
             cb_cfg.module = BCMOS_MODULE_ID_OMCI_TRANSPORT;
-            bcmolt_ind_subscribe(dev_id, &cb_cfg);
+            if (d_bcmbal_ind_subscribe)
+                d_bcmbal_ind_subscribe(dev_id, &cb_cfg);
+            else
+            {
+
+                printf("d_bcmbal_ind_subscribe error\r\n");
+                return;
+            }
+
             printf("OLT Ready !!!!!!!!\r\n");
             rOLT.set_olt_status(true);
             count = 0;
@@ -319,7 +393,10 @@ static void OltOperIndication(short unsigned int olt, bcmolt_msg *msg)
     {
         printf("OltOperIndication no match case !!!!");
     }
-    bcmolt_msg_free(msg);
+    if (d_bcmbal_msg_free)
+        d_bcmbal_msg_free(msg);
+    else
+        printf("d_bcmbal_msg_free error\r\n");
     return;
 }
 
@@ -340,6 +417,7 @@ static void OltLosIndication(short unsigned int olt, bcmolt_msg *msg)
 {
     printf("olt id[%d]\r\n", olt);
     if (msg->subgroup == BCMOLT_DEVICE_AUTO_SUBGROUP_CONNECTION_COMPLETE)
+    {
         switch (msg->obj_type)
         {
         case BCMOLT_OBJ_ID_PON_INTERFACE:
@@ -358,7 +436,13 @@ static void OltLosIndication(short unsigned int olt, bcmolt_msg *msg)
         default:
             printf("BCMOLT_OBJ_ID_PON_INTERFACE obj type [%d]\r\n", msg->obj_type);
         }
-    bcmolt_msg_free(msg);
+    }
+
+    if (d_bcmbal_msg_free)
+        d_bcmbal_msg_free(msg);
+    else
+        printf("d_bcmbal_msg_free error\r\n");
+
     return;
 }
 
@@ -382,7 +466,11 @@ static void OltOnuActivationFailureIndication(short unsigned int olt, bcmolt_msg
     default:
         break;
     }
-    bcmolt_msg_free(msg);
+    if (d_bcmbal_msg_free)
+        d_bcmbal_msg_free(msg);
+    else
+        printf("d_bcmbal_msg_free error\r\n");
+
     return;
 }
 
@@ -396,7 +484,10 @@ static void OltOnuAllIndication(short unsigned int olt, bcmolt_msg *msg)
     default:
         break;
     }
-    bcmolt_msg_free(msg);
+    if (d_bcmbal_msg_free)
+        d_bcmbal_msg_free(msg);
+    else
+        printf("d_bcmbal_msg_free error\r\n");
     return;
 }
 
@@ -462,7 +553,11 @@ static void OltOnuDiscoveryIndication(short unsigned int olt, bcmolt_msg *msg)
     default:
         break;
     }
-    bcmolt_msg_free(msg);
+    if (d_bcmbal_msg_free)
+        d_bcmbal_msg_free(msg);
+    else
+        printf("d_bcmbal_msg_free error\r\n");
+
     return;
 }
 
@@ -490,7 +585,11 @@ static void OltOnuOperIndication(short unsigned int olt, bcmolt_msg *msg)
     default:
         break;
     }
-    bcmolt_msg_free(msg);
+    if (d_bcmbal_msg_free)
+        d_bcmbal_msg_free(msg);
+    else
+        printf("d_bcmbal_msg_free error\r\n");
+
     return;
 }
 
@@ -518,7 +617,11 @@ static void OltOnuO5(short unsigned int olt, bcmolt_msg *msg)
     default:
         break;
     }
-    bcmolt_msg_free(msg);
+    if (d_bcmbal_msg_free)
+        d_bcmbal_msg_free(msg);
+    else
+        printf("d_bcmbal_msg_free error\r\n");
+
     return;
 }
 
@@ -529,8 +632,13 @@ static bool OnuRssiMeasurement(int in_onu_id, int in_pon_id)
 
     BCMOLT_OPER_INIT(&rssi_oper, onu, rssi_measurement, onu_key);
 
-    if (bcmolt_oper_submit(dev_id, &rssi_oper.hdr) == BCM_ERR_OK)
-        return true;
+    if (d_bcmbal_oper_submit)
+    {
+        if (d_bcmbal_oper_submit(dev_id, &rssi_oper.hdr) == BCM_ERR_OK)
+            return true;
+        else
+            return false;
+    }
     else
         return false;
 }
@@ -577,7 +685,7 @@ void Olt_Device::set_intf_type(int port, int type)
 
 int Olt_Device::get_board_basic_info()
 {
-    bcmos_errno err;
+    bcmos_errno err = BCM_ERR_INTERNAL;
     bcmolt_device_cfg dev_cfg = {};
     bcmolt_device_key dev_key = {};
     bcmolt_olt_cfg olt_cfg = {};
@@ -589,94 +697,84 @@ int Olt_Device::get_board_basic_info()
     BCMOLT_MSG_FIELD_GET(&dev_cfg, chip_family);
     BCMOLT_MSG_FIELD_GET(&dev_cfg, system_mode);
 
-    err = bcmolt_cfg_get(dev_id, &dev_cfg.hdr);
-
-    if (err)
+    if (d_bcmbal_cfg_get)
     {
-        printf("device: Failed to query OLT\n");
-        return 0;
-    }
-    else
-    {
-        bcmolt_topology_map topo_map[BCM_MAX_PONS_PER_OLT] = {};
-        bcmolt_topology topo = {};
-        topo.topology_maps.len = BCM_MAX_PONS_PER_OLT;
-        topo.topology_maps.arr = &topo_map[0];
-        BCMOLT_CFG_INIT(&olt_cfg, olt, olt_key);
-        BCMOLT_MSG_FIELD_GET(&olt_cfg, bal_state);
-        BCMOLT_FIELD_SET_PRESENT(&olt_cfg.data, olt_cfg_data, topology);
-        BCMOLT_CFG_LIST_BUF_SET(&olt_cfg, olt, topo.topology_maps.arr, sizeof(bcmolt_topology_map) * topo.topology_maps.len);
-
-        err = bcmolt_cfg_get(dev_id, &olt_cfg.hdr);
-
+        err = d_bcmbal_cfg_get(dev_id, &dev_cfg.hdr);
         if (err)
         {
-            printf("cfg: Failed to query OLT\n");
+            printf("cfg: Failed to get board basic info\n");
             return 0;
         }
-
-        printf("OLT  oper_state:[%s]\n", olt_cfg.data.bal_state == BCMOLT_BAL_STATE_BAL_AND_SWITCH_READY ? "up" : "down");
-
-        m_nni_ports_num = olt_cfg.data.topology.num_switch_ports;
-        m_pon_ports_num = olt_cfg.data.topology.topology_maps.len;
-
-        m_bal_version = std::to_string(dev_cfg.data.firmware_sw_version.major) + "." + std::to_string(dev_cfg.data.firmware_sw_version.minor) + "." + std::to_string(dev_cfg.data.firmware_sw_version.revision);
-
-        m_firmware_version = "BAL." + m_bal_version + "__" + m_firmware_version;
-
-        switch (dev_cfg.data.system_mode)
+        else
         {
-        case 9 ... 12:
-            m_pon_type = "GPON";
-            break;
-        case 13 ... 16:
-            m_pon_type = "XGPON";
-            break;
-        case 18 ... 20:
-            m_pon_type = "XGS-PON";
-            break;
-        default:
-            break;
+            bcmolt_topology_map topo_map[BCM_MAX_PONS_PER_OLT] = {};
+            bcmolt_topology topo = {};
+            topo.topology_maps.len = BCM_MAX_PONS_PER_OLT;
+            topo.topology_maps.arr = &topo_map[0];
+            BCMOLT_CFG_INIT(&olt_cfg, olt, olt_key);
+            BCMOLT_MSG_FIELD_GET(&olt_cfg, bal_state);
+            BCMOLT_FIELD_SET_PRESENT(&olt_cfg.data, olt_cfg_data, topology);
+            BCMOLT_CFG_LIST_BUF_SET(&olt_cfg, olt, topo.topology_maps.arr, sizeof(bcmolt_topology_map) * topo.topology_maps.len);
+
+            err = d_bcmbal_cfg_get(dev_id, &olt_cfg.hdr);
+
+            if (err)
+            {
+                printf("cfg: Failed to query OLT\n");
+                return 0;
+            }
+
+            printf("OLT  oper_state:[%s]\n", olt_cfg.data.bal_state == BCMOLT_BAL_STATE_BAL_AND_SWITCH_READY ? "up" : "down");
+
+            m_nni_ports_num = olt_cfg.data.topology.num_switch_ports;
+            m_pon_ports_num = olt_cfg.data.topology.topology_maps.len;
+
+            m_bal_version = std::to_string(dev_cfg.data.firmware_sw_version.major) + "." + std::to_string(dev_cfg.data.firmware_sw_version.minor) + "." + std::to_string(dev_cfg.data.firmware_sw_version.revision);
+
+            m_firmware_version = "BAL." + m_bal_version + "__" + m_firmware_version;
+
+            switch (dev_cfg.data.system_mode)
+            {
+            case 9 ... 12:
+                m_pon_type = "GPON";
+                break;
+            case 13 ... 16:
+                m_pon_type = "XGPON";
+                break;
+            case 18 ... 20:
+                m_pon_type = "XGS-PON";
+                break;
+            default:
+                break;
+            }
+
+            switch (dev_cfg.data.chip_family)
+            {
+            case BCMOLT_CHIP_FAMILY_CHIP_FAMILY_6862_X:
+                m_chip_family = "Maple";
+                break;
+            case BCMOLT_CHIP_FAMILY_CHIP_FAMILY_6865_X:
+                m_chip_family = "Aspen";
+                break;
+            default:
+                break;
+            }
+
+            printf("topology nni:%d pon:%d maple dev number :%d pon number per device :%d family: %s\n",
+                   m_nni_ports_num,
+                   m_pon_ports_num,
+                   BCM_MAX_DEVS_PER_LINE_CARD,
+                   BCM_MAX_PONS_PER_DEV,
+                   m_chip_family.c_str());
+
+            printf("OLT info., [nni ports: %d] [pon ports: %d] [pon type %s]\n", m_nni_ports_num, m_pon_ports_num, m_pon_type.c_str());
+            printf("OLT info., [firware_ver:%s]\n", m_firmware_version.c_str());
         }
-
-        switch (dev_cfg.data.chip_family)
-        {
-//For BAL3.2 BAL3.4
-#if defined BAL32 || defined BAL34
-        case BCMOLT_CHIP_FAMILY_CHIP_FAMILY_6862_X:
-            m_chip_family = "Maple";
-            break;
-        case BCMOLT_CHIP_FAMILY_CHIP_FAMILY_6865_X:
-            m_chip_family = "Aspen";
-            break;
-        default:
-            break;
-#else
-        case BCMOLT_CHIP_FAMILY_CHIP_FAMILY_6862_X_:
-            m_chip_family = "Maple";
-            break;
-        case BCMOLT_CHIP_FAMILY_CHIP_FAMILY_6865_X_:
-            m_chip_family = "Aspen";
-            break;
-        default:
-            break;
-#endif
-        }
-
-        printf("topology nni:%d pon:%d maple dev number :%d pon number per device :%d family: %s\n",
-               m_nni_ports_num,
-               m_pon_ports_num,
-               BCM_MAX_DEVS_PER_LINE_CARD,
-               BCM_MAX_PONS_PER_DEV,
-               m_chip_family.c_str());
-
-        printf("OLT info., [nni ports: %d] [pon ports: %d] [pon type %s]\n", m_nni_ports_num, m_pon_ports_num, m_pon_type.c_str());
-        printf("OLT info., [firware_ver:%s]\n", m_firmware_version.c_str());
     }
-
     return 1;
 }
 
+#if defined BALCLI
 bool Olt_Device::enable_cli()
 {
     /* Create CLI session */
@@ -697,6 +795,7 @@ bool Olt_Device::enable_cli()
     else
         return true;
 }
+#endif
 
 bool Olt_Device::connect_bal(int argc, char *argv[])
 {
@@ -705,43 +804,56 @@ bool Olt_Device::connect_bal(int argc, char *argv[])
     bcmolt_host_init_parms init_parms = {};
     init_parms.transport.type = BCM_HOST_API_CONN_LOCAL;
 
-    if (BCM_ERR_OK != bcmolt_host_init(&init_parms))
+    if (d_bcmbal_host_init)
     {
-        printf("Failed to init bcmolt_host\r\n");
-        m_bcmbal_init = false;
-        return m_bcmbal_init;
-    }
-    else
-    {
-        printf("bcmolt_host_init OK!!!\r\n");
-        if (bcmolt_api_conn_mgr_is_connected(dev_id))
+        if (BCM_ERR_OK != d_bcmbal_host_init(&init_parms))
         {
-            //Need wait bal ready then register other callback indicator//
-            bcmolt_rx_cfg cb_cfg = {};
-            cb_cfg.obj_type = BCMOLT_OBJ_ID_OLT;
-            cb_cfg.rx_cb = OltBalReady;
-            cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
-            cb_cfg.subgroup = bcmolt_olt_auto_subgroup_bal_ready;
-
-            if (bcmolt_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
-            {
-                printf("Register_callback BCMOLT_OBJ_ID_OLT bcmolt_olt_auto_subgroup_bal_ready error!!!\r\n");
-                return false;
-            }
-            else
-                printf("Register_callback BCMOLT_OBJ_ID_OLT bcmolt_olt_auto_subgroup_bal_ready ok!!!\r\n");
-
-            m_bcmbal_init = true;
+            printf("Failed to init bcmolt_host\r\n");
+            m_bcmbal_init = false;
             return m_bcmbal_init;
         }
         else
         {
-            printf("bcmolt_api_conn_mgr_is_connected Fail!!\r\n");
-            m_bcmbal_init = false;
-            return m_bcmbal_init;
+            printf("bcmolt_host_init OK!!!\r\n");
+            if (d_bcmbal_api_conn_mgr_is_connected)
+            {
+                if (d_bcmbal_api_conn_mgr_is_connected(dev_id) == true)
+                {
+                    //Need wait bal ready then register other callback indicator//
+                    bcmolt_rx_cfg cb_cfg = {};
+                    cb_cfg.obj_type = BCMOLT_OBJ_ID_OLT;
+                    cb_cfg.rx_cb = OltBalReady;
+                    cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
+                    cb_cfg.subgroup = bcmolt_olt_auto_subgroup_bal_ready;
+
+                    if (d_bcmbal_ind_subscribe)
+                    {
+                        if (d_bcmbal_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
+                        {
+                            printf("Register_callback BCMOLT_OBJ_ID_OLT bcmolt_olt_auto_subgroup_bal_ready error!!!\r\n");
+                            return false;
+                        }
+                        else
+                            printf("Register_callback BCMOLT_OBJ_ID_OLT bcmolt_olt_auto_subgroup_bal_ready ok!!!\r\n");
+                    }
+                    else
+                        return false;
+                    m_bcmbal_init = true;
+                    return m_bcmbal_init;
+                }
+                else
+                {
+                    printf("bcmolt_api_conn_mgr_is_connected Fail!!\r\n");
+                    m_bcmbal_init = false;
+                    return m_bcmbal_init;
+                }
+            }
+            else
+                return false;
         }
     }
-    return false;
+    else
+        return false;
 }
 
 Olt_Device &Olt_Device::get_instance()
@@ -769,7 +881,7 @@ Olt_Device &Olt_Device::get_instance()
             g_Olt_Device = new G_PON_Olt_Device(sizeof(ARGV) / sizeof(char *), (char **)ARGV);
         }
         else
-            g_Olt_Device = NULL;
+            g_Olt_Device = new XGS_PON_Olt_Device(sizeof(ARGV) / sizeof(char *), (char **)ARGV);
     }
     return *g_Olt_Device;
 }
@@ -792,22 +904,31 @@ Olt_Device::~Olt_Device()
 
 Olt_Device::Olt_Device(int argc, char **argv)
 {
-#if defined BAL31 || defined BAL32 || defined BAL34
-    fHandle = dlopen("/lib/libbal_host_api.so", RTLD_LAZY);
-    m_bal_lib_init = true;
-#else
+    fHandle = dlopen("/usr/local/lib/libbal_host_api.so", RTLD_LAZY);
+
     if (fHandle)
     {
+        printf("Using dynamic loading function\r\n");
+        d_bcmbal_cfg_get = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_cfg * objinfo)) dlsym(fHandle, "bcmolt_cfg_get");
+        d_bcmbal_cfg_set = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_cfg * objinfo)) dlsym(fHandle, "bcmolt_cfg_set");
+        d_bcmbal_cfg_clear = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_cfg * objinfo)) dlsym(fHandle, "bcmolt_cfg_clear");
+        d_bcmbal_stat_get = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_stat * stat, bcmolt_stat_flags flags)) dlsym(fHandle, "bcmolt_stat_get");
+        d_bcmbal_oper_submit = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_oper * oper)) dlsym(fHandle, "bcmolt_oper_submit");
+        d_bcmbal_msg_free = (void (*)(bcmolt_msg * msg)) dlsym(fHandle, "bcmolt_msg_free");
+        d_bcmbal_api_set_prop_present = (void (*)(bcmolt_msg * msg, const void *prop_ptr)) dlsym(fHandle, "bcmolt_api_set_prop_present");
+        d_bcmbal_host_init = (bcmos_errno(*)(const bcmolt_host_init_parms *init_parms))dlsym(fHandle, "bcmolt_host_init");
+        d_bcmbal_usleep = (void (*)(uint32_t us))dlsym(fHandle, "bcmos_usleep");
+        d_bcmbal_ind_subscribe = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_rx_cfg * rx_cfg)) dlsym(fHandle, "bcmolt_ind_subscribe");
+        d_bcmbal_api_conn_mgr_is_connected = (bcmos_bool(*)(bcmolt_goid olt))dlsym(fHandle, "bcmolt_api_conn_mgr_is_connected");
+
         m_bal_lib_init = true;
+        connect_bal(argc, argv);
     }
     else
     {
         m_bal_lib_init = false;
-        printf("Cannot find libbal_api_dist.so and using loading function\r\n");
+        printf("Cannot find libbal_api_dist.so in /usr/local/lib/\r\n");
     }
-    fHandle = dlopen("/lib/x86_64-linux-gnu/libbal_host_api.so", RTLD_LAZY);
-#endif
-    connect_bal(argc, argv);
 }
 
 void Olt_Device::register_callback()
@@ -827,154 +948,158 @@ void Olt_Device::register_callback()
         cb_cfg.subgroup = bcmolt_device_auto_subgroup_connection_complete;
         cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
 
-        if (bcmolt_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
+        if (d_bcmbal_ind_subscribe)
         {
-            printf("Register_callback BCMOLT_OBJ_ID_DEVICE complete error!!!\r\n");
-            return;
+            if (d_bcmbal_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
+            {
+                printf("Register_callback BCMOLT_OBJ_ID_DEVICE complete error!!!\r\n");
+                return;
+            }
+            else
+            {
+                printf("Register_callback bcmolt_device_auto_subgroup_connection_complete ok!!!\r\n");
+            }
+
+            cb_cfg.obj_type = BCMOLT_OBJ_ID_DEVICE;
+            cb_cfg.subgroup = bcmolt_device_auto_subgroup_disconnection_complete;
+            cb_cfg.rx_cb = OltOperIndication;
+            cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
+
+            if (d_bcmbal_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
+            {
+                printf("Register_callback BCMOLT_OBJ_ID_DEVICE disconnection error!!!\r\n");
+                return;
+            }
+            else
+            {
+                printf("Register_callback bcmolt_device_auto_subgroup_disconnection_complete ok!!!\r\n");
+            }
+
+            cb_cfg.obj_type = BCMOLT_OBJ_ID_DEVICE;
+            cb_cfg.rx_cb = OltOperIndication;
+            cb_cfg.subgroup = bcmolt_device_auto_subgroup_connection_failure;
+            cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
+
+            if (d_bcmbal_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
+            {
+                printf("Register_callback BCMOLT_OBJ_ID_DEVICE connection failure error!!!\r\n");
+                return;
+            }
+            else
+            {
+                printf("Register_callback bcmolt_device_auto_subgroup_disconnection_complete ok!!!\r\n");
+            }
+
+            cb_cfg.obj_type = BCMOLT_OBJ_ID_PON_INTERFACE;
+            cb_cfg.subgroup = bcmolt_pon_interface_auto_subgroup_los;
+            cb_cfg.rx_cb = OltLosIndication;
+            cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
+
+            if (d_bcmbal_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
+            {
+                printf("Register_callback BCMOLT_OBJ_ID_PON_INTERFACE OltLosIndication error!!!\r\n");
+                return;
+            }
+            else
+            {
+                printf("Register_callback bcmolt_pon_interface_auto_subgroup_los ok!!!\r\n");
+            }
+
+            cb_cfg.obj_type = BCMOLT_OBJ_ID_PON_INTERFACE;
+            cb_cfg.subgroup = bcmolt_pon_interface_auto_subgroup_state_change_completed;
+            cb_cfg.rx_cb = Olt_itf_change;
+            cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
+
+            if (d_bcmbal_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
+            {
+                printf("Register_callback BCMOLT_OBJ_ID_PON_INTERFACE Olt_itf_change error!!!\r\n");
+                return;
+            }
+            else
+                printf("Register_callback bcmolt_pon_interface_auto_subgroup_state_change_completed ok!!!\r\n");
+
+            cb_cfg.obj_type = BCMOLT_OBJ_ID_PON_INTERFACE;
+            cb_cfg.rx_cb = OltOnuDiscoveryIndication;
+            cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
+            cb_cfg.subgroup = bcmolt_pon_interface_auto_subgroup_onu_discovered;
+
+            if (d_bcmbal_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
+            {
+                printf("Register_callback BCMOLT_OBJ_ID_PON_INTERFACE OltOnuDiscoveryIndication error!!!\r\n");
+                return;
+            }
+            else
+                printf("Register_callback bcmolt_pon_interface_auto_subgroup_onu_discovered ok!!!\r\n");
+
+            cb_cfg.obj_type = BCMOLT_OBJ_ID_NNI_INTERFACE;
+            cb_cfg.subgroup = bcmolt_nni_interface_auto_subgroup_state_change;
+            cb_cfg.rx_cb = Olt_itf_change;
+            cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
+
+            if (d_bcmbal_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
+            {
+                printf("Register_callback BCMOLT_OBJ_ID_NNI_INTERFACE error!!!\r\n");
+                return;
+            }
+            else
+                printf("Register_callback bcmolt_nni_interface_auto_subgroup_state_change ok!!!\r\n");
+
+            cb_cfg.obj_type = BCMOLT_OBJ_ID_ONU;
+            cb_cfg.rx_cb = OltOnuOperIndication;
+            cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
+            cb_cfg.subgroup = bcmolt_onu_auto_subgroup_state_change;
+
+            if (d_bcmbal_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
+            {
+                printf("Register_callback BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL error!!!\r\n");
+                return;
+            }
+            else
+                printf("Register_callback bcmolt_onu_auto_subgroup_state_change ok!!!\r\n");
+
+            cb_cfg.obj_type = BCMOLT_OBJ_ID_ONU;
+            cb_cfg.rx_cb = OltOnuActivationFailureIndication;
+            cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
+            cb_cfg.subgroup = bcmolt_onu_auto_subgroup_onu_deactivation_completed;
+
+            if (d_bcmbal_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
+            {
+                printf("Register_callback BCMOLT_OBJ_ID_ONU OltOnuActivationFailureIndication error!!!\r\n");
+                return;
+            }
+            else
+                printf("Register_callback bcmolt_onu_auto_subgroup_onu_deactivation_completed ok!!!\r\n");
+
+            cb_cfg.obj_type = BCMOLT_OBJ_ID_ONU;
+            cb_cfg.rx_cb = OltOnuAllIndication;
+            cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
+            cb_cfg.subgroup = BCMOLT_ONU_AUTO_SUBGROUP_ALL;
+
+            if (d_bcmbal_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
+            {
+                printf("Register_callback BCMOLT_OBJ_ID_ONU bcmolt_onu_auto_subgroup_all error!!!\r\n");
+                return;
+            }
+            else
+                printf("Register_callback BCMOLT_OBJ_ID_ONU bcmolt_onu_auto_subgroup_all ok!!!\r\n");
+
+            cb_cfg.obj_type = BCMOLT_OBJ_ID_ONU;
+            cb_cfg.rx_cb = OltOnuO5;
+            cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
+            cb_cfg.subgroup = bcmolt_onu_auto_subgroup_ranging_completed;
+
+            if (d_bcmbal_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
+            {
+                printf("Register_callback BCMOLT_OBJ_ID_ONU error!!!\r\n");
+                return;
+            }
+            else
+                printf("Register_callback bcmolt_onu_auto_subgroup_ranging_completed ok!!!\r\n");
+
+            m_subscribed = true;
         }
         else
-        {
-            printf("Register_callback bcmolt_device_auto_subgroup_connection_complete ok!!!\r\n");
-        }
-
-        cb_cfg.obj_type = BCMOLT_OBJ_ID_DEVICE;
-        cb_cfg.subgroup = bcmolt_device_auto_subgroup_disconnection_complete;
-        cb_cfg.rx_cb = OltOperIndication;
-        cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
-
-        if (bcmolt_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
-        {
-            printf("Register_callback BCMOLT_OBJ_ID_DEVICE disconnection error!!!\r\n");
             return;
-        }
-        else
-        {
-            printf("Register_callback bcmolt_device_auto_subgroup_disconnection_complete ok!!!\r\n");
-        }
-
-        cb_cfg.obj_type = BCMOLT_OBJ_ID_DEVICE;
-        cb_cfg.rx_cb = OltOperIndication;
-        cb_cfg.subgroup = bcmolt_device_auto_subgroup_connection_failure;
-        cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
-
-        if (bcmolt_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
-        {
-            printf("Register_callback BCMOLT_OBJ_ID_DEVICE connection failure error!!!\r\n");
-            return;
-        }
-        else
-        {
-            printf("Register_callback bcmolt_device_auto_subgroup_disconnection_complete ok!!!\r\n");
-        }
-
-        cb_cfg.obj_type = BCMOLT_OBJ_ID_PON_INTERFACE;
-        cb_cfg.subgroup = bcmolt_pon_interface_auto_subgroup_los;
-        cb_cfg.rx_cb = OltLosIndication;
-        cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
-
-        if (bcmolt_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
-        {
-            printf("Register_callback BCMOLT_OBJ_ID_PON_INTERFACE OltLosIndication error!!!\r\n");
-            return;
-        }
-        else
-        {
-            printf("Register_callback bcmolt_pon_interface_auto_subgroup_los ok!!!\r\n");
-        }
-
-        cb_cfg.obj_type = BCMOLT_OBJ_ID_PON_INTERFACE;
-        cb_cfg.subgroup = bcmolt_pon_interface_auto_subgroup_state_change_completed;
-        cb_cfg.rx_cb = Olt_itf_change;
-        cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
-
-        if (bcmolt_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
-        {
-            printf("Register_callback BCMOLT_OBJ_ID_PON_INTERFACE Olt_itf_change error!!!\r\n");
-            return;
-        }
-        else
-            printf("Register_callback bcmolt_pon_interface_auto_subgroup_state_change_completed ok!!!\r\n");
-
-        cb_cfg.obj_type = BCMOLT_OBJ_ID_PON_INTERFACE;
-        cb_cfg.rx_cb = OltOnuDiscoveryIndication;
-        cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
-        cb_cfg.subgroup = bcmolt_pon_interface_auto_subgroup_onu_discovered;
-
-        if (bcmolt_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
-        {
-            printf("Register_callback BCMOLT_OBJ_ID_PON_INTERFACE OltOnuDiscoveryIndication error!!!\r\n");
-            return;
-        }
-        else
-            printf("Register_callback bcmolt_pon_interface_auto_subgroup_onu_discovered ok!!!\r\n");
-
-        cb_cfg.obj_type = BCMOLT_OBJ_ID_NNI_INTERFACE;
-        cb_cfg.subgroup = bcmolt_nni_interface_auto_subgroup_state_change;
-        cb_cfg.rx_cb = Olt_itf_change;
-        cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
-
-        if (bcmolt_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
-        {
-            printf("Register_callback BCMOLT_OBJ_ID_NNI_INTERFACE error!!!\r\n");
-            return;
-        }
-        else
-            printf("Register_callback bcmolt_nni_interface_auto_subgroup_state_change ok!!!\r\n");
-
-        cb_cfg.obj_type = BCMOLT_OBJ_ID_ONU;
-        cb_cfg.rx_cb = OltOnuOperIndication;
-        cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
-        cb_cfg.subgroup = bcmolt_onu_auto_subgroup_state_change;
-
-        if (bcmolt_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
-        {
-            printf("Register_callback BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL error!!!\r\n");
-            return;
-        }
-        else
-            printf("Register_callback bcmolt_onu_auto_subgroup_state_change ok!!!\r\n");
-
-        cb_cfg.obj_type = BCMOLT_OBJ_ID_ONU;
-        cb_cfg.rx_cb = OltOnuActivationFailureIndication;
-        cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
-        cb_cfg.subgroup = bcmolt_onu_auto_subgroup_onu_deactivation_completed;
-
-        if (bcmolt_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
-        {
-            printf("Register_callback BCMOLT_OBJ_ID_ONU OltOnuActivationFailureIndication error!!!\r\n");
-            return;
-        }
-        else
-            printf("Register_callback bcmolt_onu_auto_subgroup_onu_deactivation_completed ok!!!\r\n");
-
-        cb_cfg.obj_type = BCMOLT_OBJ_ID_ONU;
-        cb_cfg.rx_cb = OltOnuAllIndication;
-        cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
-        cb_cfg.subgroup = BCMOLT_ONU_AUTO_SUBGROUP_ALL;
-
-        if (bcmolt_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
-        {
-            printf("Register_callback BCMOLT_OBJ_ID_ONU bcmolt_onu_auto_subgroup_all error!!!\r\n");
-            return;
-        }
-        else
-            printf("Register_callback BCMOLT_OBJ_ID_ONU bcmolt_onu_auto_subgroup_all ok!!!\r\n");
-
-        cb_cfg.obj_type = BCMOLT_OBJ_ID_ONU;
-        cb_cfg.rx_cb = OltOnuO5;
-        cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
-        cb_cfg.subgroup = bcmolt_onu_auto_subgroup_ranging_completed;
-
-        if (bcmolt_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
-        {
-            printf("Register_callback BCMOLT_OBJ_ID_ONU error!!!\r\n");
-            return;
-        }
-        else
-            printf("Register_callback bcmolt_onu_auto_subgroup_ranging_completed ok!!!\r\n");
-
-        m_subscribed = true;
-        return;
     }
     catch (const exception &e)
     {
@@ -982,8 +1107,6 @@ void Olt_Device::register_callback()
         return;
     }
 }
-
-#if defined BAL31 || defined BAL32 || defined BAL34
 
 bool Olt_Device::rssi_measurement(int in_onu_id, int in_pon_id)
 {
@@ -1011,7 +1134,6 @@ json::Value Olt_Device::get_port_statistic(int port)
         return status;
     }
 }
-
 json::Value Olt_Device::get_pon_statistic(int port)
 {
     json::Value status(json::Value::Type::OBJECT);
@@ -1030,56 +1152,61 @@ json::Value Olt_Device::get_pon_statistic(int port)
         BCMOLT_MSG_FIELD_GET(&itu_pon_stats, bip_errors);
         BCMOLT_MSG_FIELD_GET(&itu_pon_stats, rx_crc_error);
 
-        err = bcmolt_stat_get((bcmolt_oltid)device_id, &itu_pon_stats.hdr, clear_on_read);
-
-        if (err == BCM_ERR_OK)
+        if (d_bcmbal_stat_get)
         {
-            status["tx_packets"] = m_pon_port[port].m_port_statistic.tx_packets = itu_pon_stats.data.tx_packets;
-            status["bip_errors"] = m_pon_port[port].m_port_statistic.bip_errors = itu_pon_stats.data.bip_errors;
-            status["rx_crc_errors"] = m_pon_port[port].m_port_statistic.rx_crc_errors = itu_pon_stats.data.rx_crc_error;
-            printf("pon port_id[%d] \
+            err = d_bcmbal_stat_get((bcmolt_oltid)device_id, &itu_pon_stats.hdr, clear_on_read);
+
+            if (err == BCM_ERR_OK)
+            {
+                status["tx_packets"] = m_pon_port[port].m_port_statistic.tx_packets = itu_pon_stats.data.tx_packets;
+                status["bip_errors"] = m_pon_port[port].m_port_statistic.bip_errors = itu_pon_stats.data.bip_errors;
+                status["rx_crc_errors"] = m_pon_port[port].m_port_statistic.rx_crc_errors = itu_pon_stats.data.rx_crc_error;
+                printf("pon port_id[%d] \
                     tx_packets[%llu] \
                     bip_errors[%llu] \
                     rx_crc_errors[%llu]\r\n",
-                   m_pon_port[port].m_port_id,
-                   (unsigned long long)m_pon_port[port].m_port_statistic.tx_packets,
-                   (unsigned long long)m_pon_port[port].m_port_statistic.bip_errors,
-                   (unsigned long long)m_pon_port[port].m_port_statistic.rx_crc_errors);
-        }
-        else
-        {
-            printf("Failed to get pon port statistics, port_id %d\n", (int)port);
-        }
+                       m_pon_port[port].m_port_id,
+                       (unsigned long long)m_pon_port[port].m_port_statistic.tx_packets,
+                       (unsigned long long)m_pon_port[port].m_port_statistic.bip_errors,
+                       (unsigned long long)m_pon_port[port].m_port_statistic.rx_crc_errors);
+            }
+            else
+            {
+                printf("Failed to get pon port statistics, port_id %d\n", (int)port);
+            }
 
-        bcmolt_onu_key onu_key;
-        onu_key.pon_ni = (bcmolt_interface)port;
-        bcmolt_onu_itu_pon_stats pon_stats;
-        BCMOLT_STAT_INIT(&pon_stats, onu, itu_pon_stats, onu_key);
-        BCMOLT_MSG_FIELD_GET(&pon_stats, rx_bytes);
-        BCMOLT_MSG_FIELD_GET(&pon_stats, rx_packets);
-        BCMOLT_MSG_FIELD_GET(&pon_stats, tx_bytes);
+            bcmolt_onu_key onu_key;
+            onu_key.pon_ni = (bcmolt_interface)port;
+            bcmolt_onu_itu_pon_stats pon_stats;
+            BCMOLT_STAT_INIT(&pon_stats, onu, itu_pon_stats, onu_key);
+            BCMOLT_MSG_FIELD_GET(&pon_stats, rx_bytes);
+            BCMOLT_MSG_FIELD_GET(&pon_stats, rx_packets);
+            BCMOLT_MSG_FIELD_GET(&pon_stats, tx_bytes);
 
-        err = bcmolt_stat_get((bcmolt_oltid)device_id, &pon_stats.hdr, clear_on_read);
+            err = d_bcmbal_stat_get((bcmolt_oltid)device_id, &pon_stats.hdr, clear_on_read);
 
-        if (err == BCM_ERR_OK)
-        {
-            status["rx_bytes"] = m_pon_port[port].m_port_statistic.rx_bytes = pon_stats.data.rx_bytes;
-            status["rx_packets"] = m_pon_port[port].m_port_statistic.rx_packets = pon_stats.data.rx_packets;
-            status["tx_bytes"] = m_pon_port[port].m_port_statistic.tx_bytes = pon_stats.data.tx_bytes;
-            printf("pon port_id[%d] \
+            if (err == BCM_ERR_OK)
+            {
+                status["rx_bytes"] = m_pon_port[port].m_port_statistic.rx_bytes = pon_stats.data.rx_bytes;
+                status["rx_packets"] = m_pon_port[port].m_port_statistic.rx_packets = pon_stats.data.rx_packets;
+                status["tx_bytes"] = m_pon_port[port].m_port_statistic.tx_bytes = pon_stats.data.tx_bytes;
+                printf("pon port_id[%d] \
                     rx_bytes[%llu] \
                     rx_packets[%llu] \
                     tx_bytes[%llu]\r\n",
-                   port,
-                   (unsigned long long)m_pon_port[port].m_port_statistic.rx_bytes,
-                   (unsigned long long)m_pon_port[port].m_port_statistic.rx_packets,
-                   (unsigned long long)m_pon_port[port].m_port_statistic.tx_bytes);
+                       port,
+                       (unsigned long long)m_pon_port[port].m_port_statistic.rx_bytes,
+                       (unsigned long long)m_pon_port[port].m_port_statistic.rx_packets,
+                       (unsigned long long)m_pon_port[port].m_port_statistic.tx_bytes);
+            }
+            else
+            {
+                printf("Failed to get pon port statistics, port_id %d\n", (int)port);
+            }
+            return status;
         }
         else
-        {
-            printf("Failed to get pon port statistics, port_id %d\n", (int)port);
-        }
-        return status;
+            return status;
     }
     catch (const exception &e)
     {
@@ -1098,7 +1225,6 @@ json::Value Olt_Device::get_nni_statistic(int port)
         bcmolt_nni_interface_stats nni_stats;
         bcmolt_nni_interface_key nni_intf_key;
         nni_intf_key.id = port;
-        /* init the API struct */
         BCMOLT_STAT_INIT(&nni_stats, nni_interface, stats, nni_intf_key);
         BCMOLT_MSG_FIELD_GET(&nni_stats, rx_bytes);
         BCMOLT_MSG_FIELD_GET(&nni_stats, rx_packets);
@@ -1113,26 +1239,28 @@ json::Value Olt_Device::get_nni_statistic(int port)
         BCMOLT_MSG_FIELD_GET(&nni_stats, tx_bcast_packets);
         BCMOLT_MSG_FIELD_GET(&nni_stats, tx_error_packets);
 
-        err = bcmolt_stat_get((bcmolt_oltid)device_id, &nni_stats.hdr, clear_on_read);
-
-        if (err == BCM_ERR_OK)
+        if (d_bcmbal_stat_get)
         {
-            status["rx_bytes"] = m_nni_port[port].m_port_statistic.rx_bytes = nni_stats.data.rx_bytes;
-            status["rx_packets"] = m_nni_port[port].m_port_statistic.rx_packets = nni_stats.data.rx_packets;
-            status["rx_ucast_packets"] = m_nni_port[port].m_port_statistic.rx_ucast_packets = nni_stats.data.rx_ucast_packets;
-            status["rx_mcast_packets"] = m_nni_port[port].m_port_statistic.rx_mcast_packets = nni_stats.data.rx_mcast_packets;
-            status["rx_bcast_packets"] = m_nni_port[port].m_port_statistic.rx_bcast_packets = nni_stats.data.rx_bcast_packets;
-            status["rx_error_packets"] = m_nni_port[port].m_port_statistic.rx_error_packets = nni_stats.data.rx_error_packets;
+            err = d_bcmbal_stat_get((bcmolt_oltid)device_id, &nni_stats.hdr, clear_on_read);
 
-            status["tx_bytes"] = m_nni_port[port].m_port_statistic.tx_bytes = nni_stats.data.tx_bytes;
-            status["tx_packets"] = m_nni_port[port].m_port_statistic.tx_packets = nni_stats.data.tx_packets;
-            status["tx_ucast_packets"] = m_nni_port[port].m_port_statistic.tx_ucast_packets = nni_stats.data.tx_ucast_packets;
-            status["tx_mcast_packets"] = m_nni_port[port].m_port_statistic.tx_mcast_packets = nni_stats.data.tx_mcast_packets;
-            status["tx_bcast_packets"] = m_nni_port[port].m_port_statistic.tx_bcast_packets = nni_stats.data.tx_bcast_packets;
-            status["tx_error_packets"] = m_nni_port[port].m_port_statistic.tx_error_packets = nni_stats.data.tx_error_packets;
+            if (err == BCM_ERR_OK)
+            {
+                status["rx_bytes"] = m_nni_port[port].m_port_statistic.rx_bytes = nni_stats.data.rx_bytes;
+                status["rx_packets"] = m_nni_port[port].m_port_statistic.rx_packets = nni_stats.data.rx_packets;
+                status["rx_ucast_packets"] = m_nni_port[port].m_port_statistic.rx_ucast_packets = nni_stats.data.rx_ucast_packets;
+                status["rx_mcast_packets"] = m_nni_port[port].m_port_statistic.rx_mcast_packets = nni_stats.data.rx_mcast_packets;
+                status["rx_bcast_packets"] = m_nni_port[port].m_port_statistic.rx_bcast_packets = nni_stats.data.rx_bcast_packets;
+                status["rx_error_packets"] = m_nni_port[port].m_port_statistic.rx_error_packets = nni_stats.data.rx_error_packets;
 
-            printf(
-                "NNI port_id[%d]\r\n\
+                status["tx_bytes"] = m_nni_port[port].m_port_statistic.tx_bytes = nni_stats.data.tx_bytes;
+                status["tx_packets"] = m_nni_port[port].m_port_statistic.tx_packets = nni_stats.data.tx_packets;
+                status["tx_ucast_packets"] = m_nni_port[port].m_port_statistic.tx_ucast_packets = nni_stats.data.tx_ucast_packets;
+                status["tx_mcast_packets"] = m_nni_port[port].m_port_statistic.tx_mcast_packets = nni_stats.data.tx_mcast_packets;
+                status["tx_bcast_packets"] = m_nni_port[port].m_port_statistic.tx_bcast_packets = nni_stats.data.tx_bcast_packets;
+                status["tx_error_packets"] = m_nni_port[port].m_port_statistic.tx_error_packets = nni_stats.data.tx_error_packets;
+
+                printf(
+                    "NNI port_id[%d]\r\n\
                 rx_bytes[%llu]\r\n\
                 rx_packets[%llu]\r\n\
                 rx_ucast_packets[%llu]\r\n\
@@ -1145,39 +1273,42 @@ json::Value Olt_Device::get_nni_statistic(int port)
                 tx_mcast_packets[%llu]\r\n\
                 tx_bcast_packets[%llu]\r\n\
                     tx_error_packets[%llu]\r\n",
-                port,
-                (unsigned long long)m_nni_port[port].m_port_statistic.rx_bytes,
-                (unsigned long long)m_nni_port[port].m_port_statistic.rx_packets,
-                (unsigned long long)m_nni_port[port].m_port_statistic.rx_ucast_packets,
-                (unsigned long long)m_nni_port[port].m_port_statistic.rx_mcast_packets,
-                (unsigned long long)m_nni_port[port].m_port_statistic.rx_bcast_packets,
-                (unsigned long long)m_nni_port[port].m_port_statistic.rx_error_packets,
-                (unsigned long long)m_nni_port[port].m_port_statistic.tx_bytes,
-                (unsigned long long)m_nni_port[port].m_port_statistic.tx_packets,
-                (unsigned long long)m_nni_port[port].m_port_statistic.tx_ucast_packets,
-                (unsigned long long)m_nni_port[port].m_port_statistic.tx_mcast_packets,
-                (unsigned long long)m_nni_port[port].m_port_statistic.tx_bcast_packets,
-                (unsigned long long)m_nni_port[port].m_port_statistic.tx_error_packets);
+                    port,
+                    (unsigned long long)m_nni_port[port].m_port_statistic.rx_bytes,
+                    (unsigned long long)m_nni_port[port].m_port_statistic.rx_packets,
+                    (unsigned long long)m_nni_port[port].m_port_statistic.rx_ucast_packets,
+                    (unsigned long long)m_nni_port[port].m_port_statistic.rx_mcast_packets,
+                    (unsigned long long)m_nni_port[port].m_port_statistic.rx_bcast_packets,
+                    (unsigned long long)m_nni_port[port].m_port_statistic.rx_error_packets,
+                    (unsigned long long)m_nni_port[port].m_port_statistic.tx_bytes,
+                    (unsigned long long)m_nni_port[port].m_port_statistic.tx_packets,
+                    (unsigned long long)m_nni_port[port].m_port_statistic.tx_ucast_packets,
+                    (unsigned long long)m_nni_port[port].m_port_statistic.tx_mcast_packets,
+                    (unsigned long long)m_nni_port[port].m_port_statistic.tx_bcast_packets,
+                    (unsigned long long)m_nni_port[port].m_port_statistic.tx_error_packets);
+            }
+            else
+            {
+                status["rx_bytes"] = 0;
+                status["rx_packets"] = 0;
+                status["rx_ucast_packets"] = 0;
+                status["rx_mcast_packets"] = 0;
+                status["rx_bcast_packets"] = 0;
+                status["rx_error_packets"] = 0;
+
+                status["tx_bytes"] = 0;
+                status["tx_packets"] = 0;
+                status["tx_ucast_packets"] = 0;
+                status["tx_mcast_packets"] = 0;
+                status["tx_bcast_packets"] = 0;
+                status["tx_error_packets"] = 0;
+
+                printf("Failed to get nni port statistics, port_id %d, intf_type %d\n", (int)port);
+            }
+            return status;
         }
         else
-        {
-            status["rx_bytes"] = 0;
-            status["rx_packets"] = 0;
-            status["rx_ucast_packets"] = 0;
-            status["rx_mcast_packets"] = 0;
-            status["rx_bcast_packets"] = 0;
-            status["rx_error_packets"] = 0;
-
-            status["tx_bytes"] = 0;
-            status["tx_packets"] = 0;
-            status["tx_ucast_packets"] = 0;
-            status["tx_mcast_packets"] = 0;
-            status["tx_bcast_packets"] = 0;
-            status["tx_error_packets"] = 0;
-
-            printf("Failed to get nni port statistics, port_id %d, intf_type %d\n", (int)port);
-        }
-        return status;
+            return status;
     }
     catch (const exception &e)
     {
@@ -1185,7 +1316,6 @@ json::Value Olt_Device::get_nni_statistic(int port)
         return status;
     }
 }
-#endif
 
 bool CreateDefaultSchedQueue(uint32_t intf_id, const std::string direction)
 {
@@ -1197,7 +1327,7 @@ bool CreateDefaultSchedQueue(uint32_t intf_id, const std::string direction)
         tm_sched_key.id = get_default_tm_sched_id(intf_id, direction);
 
         printf("CreateDefaultSchedQueue for %s tm_sched id %d intf_id %d ", direction.c_str(), tm_sched_key.id, intf_id);
-        bcmos_usleep(200000);
+        d_bcmbal_usleep(200000);
 
         BCMOLT_CFG_INIT(&tm_sched_cfg, tm_sched, tm_sched_key);
         BCMOLT_MSG_FIELD_SET(&tm_sched_cfg, attachment_point.type, BCMOLT_TM_SCHED_OUTPUT_TYPE_INTERFACE);
@@ -1226,40 +1356,47 @@ bool CreateDefaultSchedQueue(uint32_t intf_id, const std::string direction)
         BCMOLT_MSG_FIELD_SET(&tm_sched_cfg, rate.pir, pir);
         BCMOLT_MSG_FIELD_SET(&tm_sched_cfg, rate.burst, burst);
 
-        err = bcmolt_cfg_set(dev_id, &tm_sched_cfg.hdr);
-        if (err)
+        if (d_bcmbal_cfg_set)
         {
-            printf("ERROR!!\r\n");
-            return false;
-        }
-        else
-            printf("OK!!\r\n");
-
-        for (int queue_id = 1; queue_id < 2; queue_id++)
-        {
-            bcmolt_tm_queue_cfg tm_queue_cfg;
-            bcmolt_tm_queue_key tm_queue_key = {};
-            tm_queue_key.id = queue_id;
-            tm_queue_key.sched_id = get_default_tm_sched_id(intf_id, direction);
-#if defined BAL31 || defined BAL32 || defined BAL34
-            tm_queue_key.tm_q_set_id = TM_Q_SET_ID;
-#endif
-            BCMOLT_CFG_INIT(&tm_queue_cfg, tm_queue, tm_queue_key);
-            BCMOLT_MSG_FIELD_SET(&tm_queue_cfg, tm_sched_param.type, BCMOLT_TM_SCHED_PARAM_TYPE_PRIORITY);
-            BCMOLT_MSG_FIELD_SET(&tm_queue_cfg, tm_sched_param.u.priority.priority, queue_id);
-
-            err = bcmolt_cfg_set(dev_id, &tm_queue_cfg.hdr);
-
-            printf("CreateDefaultSchedQueue for %s tm_queue id %d, sched_id %d tm_queue_key.id \n", direction.c_str(), tm_queue_key.id, tm_queue_key.sched_id, tm_queue_key.id);
+            err = d_bcmbal_cfg_set(dev_id, &tm_sched_cfg.hdr);
             if (err)
             {
-                printf(" ERROR!!\n");
+                printf("ERROR!!\r\n");
                 return false;
             }
             else
-                printf(" OK!!\n");
+                printf("OK!!\r\n");
+
+            for (int queue_id = 1; queue_id < 2; queue_id++)
+            {
+                bcmolt_tm_queue_cfg tm_queue_cfg;
+                bcmolt_tm_queue_key tm_queue_key = {};
+                tm_queue_key.id = queue_id;
+                tm_queue_key.sched_id = get_default_tm_sched_id(intf_id, direction);
+                tm_queue_key.tm_q_set_id = TM_Q_SET_ID;
+                BCMOLT_CFG_INIT(&tm_queue_cfg, tm_queue, tm_queue_key);
+                BCMOLT_MSG_FIELD_SET(&tm_queue_cfg, tm_sched_param.type, BCMOLT_TM_SCHED_PARAM_TYPE_PRIORITY);
+                BCMOLT_MSG_FIELD_SET(&tm_queue_cfg, tm_sched_param.u.priority.priority, queue_id);
+
+                if (d_bcmbal_cfg_set)
+                {
+                    err = d_bcmbal_cfg_set(dev_id, &tm_queue_cfg.hdr);
+                    printf("CreateDefaultSchedQueue for %s tm_queue id %d, sched_id %d tm_queue_key.id \n", direction.c_str(), tm_queue_key.id, tm_queue_key.sched_id, tm_queue_key.id);
+                    if (err)
+                    {
+                        printf(" ERROR!!\n");
+                        return false;
+                    }
+                    else
+                        printf(" OK!!\n");
+                }
+                else
+                    return false;
+            }
+            return true;
         }
-        return true;
+        else
+            return false;
     }
     catch (const exception &e)
     {
@@ -1272,16 +1409,22 @@ bcmos_errno get_nni_interface_status(bcmolt_interface id, bcmolt_interface_state
 {
     try
     {
-        bcmos_errno err;
+        bcmos_errno err = BCM_ERR_INTERNAL;
         bcmolt_nni_interface_key nni_key;
         bcmolt_nni_interface_cfg nni_cfg;
         nni_key.id = id;
 
         BCMOLT_CFG_INIT(&nni_cfg, nni_interface, nni_key);
         BCMOLT_FIELD_SET_PRESENT(&nni_cfg.data, nni_interface_cfg_data, state);
-        err = bcmolt_cfg_get(dev_id, &nni_cfg.hdr);
-        *state = nni_cfg.data.state;
-        return err;
+
+        if (d_bcmbal_cfg_get)
+        {
+            err = d_bcmbal_cfg_get(dev_id, &nni_cfg.hdr);
+            *state = nni_cfg.data.state;
+            return err;
+        }
+        else
+            return err;
     }
     catch (const exception &e)
     {
@@ -1294,7 +1437,7 @@ bool Olt_Device::enable_nni_if(int intf_id)
 {
     try
     {
-        bcmos_errno err = BCM_ERR_OK;
+        bcmos_errno err = BCM_ERR_INTERNAL;
         bcmolt_nni_interface_key intf_key = {.id = (bcmolt_interface)intf_id};
         bcmolt_nni_interface_set_nni_state nni_interface_set_state;
         bcmolt_interface_state state;
@@ -1312,19 +1455,24 @@ bool Olt_Device::enable_nni_if(int intf_id)
 
         BCMOLT_OPER_INIT(&nni_interface_set_state, nni_interface, set_nni_state, intf_key);
         BCMOLT_FIELD_SET(&nni_interface_set_state.data, nni_interface_set_nni_state_data, nni_state, BCMOLT_INTERFACE_OPERATION_ACTIVE_WORKING);
-        err = bcmolt_oper_submit(dev_id, &nni_interface_set_state.hdr);
 
-        if (err != BCM_ERR_OK)
+        if (d_bcmbal_oper_submit)
         {
-            printf("Failed to enable NNI interface: %d, err %d\n", intf_id, err);
-            return false;
+            err = d_bcmbal_oper_submit(dev_id, &nni_interface_set_state.hdr);
+            if (err != BCM_ERR_OK)
+            {
+                printf("Failed to enable NNI interface: %d, err %d\n", intf_id, err);
+                return false;
+            }
+            else
+            {
+                printf("Successfully enabled NNI interface: %d\n", intf_id);
+                CreateDefaultSchedQueue(intf_id, upstream);
+            }
+            return true;
         }
         else
-        {
-            printf("Successfully enabled NNI interface: %d\n", intf_id);
-            CreateDefaultSchedQueue(intf_id, upstream);
-        }
-        return true;
+            return false;
     }
     catch (const exception &e)
     {
@@ -1335,7 +1483,7 @@ bool Olt_Device::enable_nni_if(int intf_id)
 
 bcmos_errno get_pon_interface_status(bcmolt_interface pon_ni, bcmolt_interface_state *state)
 {
-    bcmos_errno err;
+    bcmos_errno err = BCM_ERR_INTERNAL;
     try
     {
         bcmolt_pon_interface_key pon_key;
@@ -1345,9 +1493,15 @@ bcmos_errno get_pon_interface_status(bcmolt_interface pon_ni, bcmolt_interface_s
         BCMOLT_CFG_INIT(&pon_cfg, pon_interface, pon_key);
         BCMOLT_FIELD_SET_PRESENT(&pon_cfg.data, pon_interface_cfg_data, state);
         BCMOLT_FIELD_SET_PRESENT(&pon_cfg.data, pon_interface_cfg_data, itu);
-        err = bcmolt_cfg_get(dev_id, &pon_cfg.hdr);
-        *state = pon_cfg.data.state;
-        return err;
+
+        if (d_bcmbal_cfg_get)
+        {
+            err = d_bcmbal_cfg_get(dev_id, &pon_cfg.hdr);
+            *state = pon_cfg.data.state;
+            return err;
+        }
+        else
+            return err;
     }
     catch (const exception &e)
     {
@@ -1392,25 +1546,35 @@ bool Olt_Device::enable_pon_if(int intf_id)
 
         BCMOLT_FIELD_SET(&pon_interface_set_state.data, pon_interface_set_pon_interface_state_data, operation, BCMOLT_INTERFACE_OPERATION_ACTIVE_WORKING);
 
-        err = bcmolt_cfg_set(dev_id, &interface_obj.hdr);
-        if (err != BCM_ERR_OK)
+        if (d_bcmbal_cfg_set)
         {
-            printf("Failed to enable discovery onu: %d\n", intf_id);
-            return false;
-        }
-
-        err = bcmolt_oper_submit(dev_id, &pon_interface_set_state.hdr);
-        if (err != BCM_ERR_OK)
-        {
-            printf("Failed to enable PON interface: %d\n", intf_id);
-            return false;
+            err = d_bcmbal_cfg_set(dev_id, &interface_obj.hdr);
+            if (err != BCM_ERR_OK)
+            {
+                printf("Failed to enable discovery onu: %d\n", intf_id);
+                return false;
+            }
         }
         else
+            return false;
+
+        if (d_bcmbal_oper_submit)
         {
-            printf("Successfully enabled PON interface: %d\n", intf_id);
-            CreateDefaultSchedQueue(intf_id, downstream);
+            err = d_bcmbal_oper_submit(dev_id, &pon_interface_set_state.hdr);
+            if (err != BCM_ERR_OK)
+            {
+                printf("Failed to enable PON interface: %d error[%d]\n", intf_id, err);
+                return false;
+            }
+            else
+            {
+                printf("Successfully enabled PON interface: %d\n", intf_id);
+                CreateDefaultSchedQueue(intf_id, downstream);
+            }
+            return true;
         }
-        return true;
+        else
+            return false;
     }
     catch (const exception &e)
     {
@@ -1423,7 +1587,7 @@ bool Olt_Device::deactivate_onu(int intf_id, int onu_id)
 {
     try
     {
-        bcmos_errno err = BCM_ERR_OK;
+        bcmos_errno err = BCM_ERR_INTERNAL;
         bcmolt_onu_set_onu_state onu_oper;
         bcmolt_onu_cfg onu_cfg;
         bcmolt_onu_key onu_key;
@@ -1434,34 +1598,41 @@ bool Olt_Device::deactivate_onu(int intf_id, int onu_id)
         BCMOLT_CFG_INIT(&onu_cfg, onu, onu_key);
         BCMOLT_FIELD_SET_PRESENT(&onu_cfg.data, onu_cfg_data, onu_state);
 
-        err = bcmolt_cfg_get(dev_id, &onu_cfg.hdr);
-
-        if (err == BCM_ERR_OK)
+        if (d_bcmbal_cfg_get)
         {
-            switch (onu_state)
+            err = d_bcmbal_cfg_get(dev_id, &onu_cfg.hdr);
+            if (err == BCM_ERR_OK)
             {
-            case BCMOLT_ONU_OPERATION_ACTIVE:
-                BCMOLT_OPER_INIT(&onu_oper, onu, set_onu_state, onu_key);
-                BCMOLT_FIELD_SET(&onu_oper.data, onu_set_onu_state_data, onu_state, BCMOLT_ONU_OPERATION_INACTIVE);
-
-                err = bcmolt_oper_submit(dev_id, &onu_oper.hdr);
-
-                if (err != BCM_ERR_OK)
+                switch (onu_state)
                 {
-                    printf("Failed to deactivate ONU %d on PON %d, err %d\n", onu_id, intf_id, err);
-                    return false;
+                case BCMOLT_ONU_OPERATION_ACTIVE:
+                    BCMOLT_OPER_INIT(&onu_oper, onu, set_onu_state, onu_key);
+                    BCMOLT_FIELD_SET(&onu_oper.data, onu_set_onu_state_data, onu_state, BCMOLT_ONU_OPERATION_INACTIVE);
+
+                    if (d_bcmbal_oper_submit)
+                    {
+                        err = d_bcmbal_oper_submit(dev_id, &onu_oper.hdr);
+
+                        if (err != BCM_ERR_OK)
+                        {
+                            printf("Failed to deactivate ONU %d on PON %d, err %d\n", onu_id, intf_id, err);
+                            return false;
+                        }
+                    }
+                    break;
+                default:
+                    break;
                 }
-                break;
-            default:
-                break;
             }
+            else
+            {
+                printf("deactivate_onu::failed to bcmolt_cfg_get\r\n");
+                return false;
+            }
+            return true;
         }
         else
-        {
-            printf("deactivate_onu::failed to bcmolt_cfg_get\r\n");
             return false;
-        }
-        return true;
     }
     catch (const exception &e)
     {
@@ -1474,7 +1645,7 @@ bool XGS_PON_Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendo
 {
     try
     {
-        bcmos_errno err = BCM_ERR_OK;
+        bcmos_errno err = BCM_ERR_INTERNAL;
         bcmolt_onu_cfg onu_cfg;
         bcmolt_onu_key onu_key;
         bcmolt_serial_number serial_number;
@@ -1484,7 +1655,9 @@ bool XGS_PON_Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendo
         onu_key.pon_ni = intf_id;
         BCMOLT_CFG_INIT(&onu_cfg, onu, onu_key);
         BCMOLT_FIELD_SET_PRESENT(&onu_cfg.data, onu_cfg_data, onu_state);
-        err = bcmolt_cfg_get(dev_id, &onu_cfg.hdr);
+
+        if (d_bcmbal_cfg_get)
+            err = d_bcmbal_cfg_get(dev_id, &onu_cfg.hdr);
 
         if (err == BCM_ERR_OK)
         {
@@ -1494,23 +1667,23 @@ bool XGS_PON_Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendo
                  onu_cfg.data.onu_old_state == BCMOLT_ONU_STATE_NOT_CONFIGURED))
                 return true;
         }
+        else
+        {
+            printf("activate_onu::bcmbal_cfg_get error\r\n");
+            return false;
+        }
 
         printf("XGSPON Enabling ONU %d on PON %d : vendor id %s,  vendor specific %s", onu_id, intf_id, vendor_id, vendor_specific_to_str(vendor_specific).c_str());
         memcpy(serial_number.vendor_id.arr, vendor_id, 4);
         memcpy(serial_number.vendor_specific.arr, vendor_specific, 4);
         BCMOLT_CFG_INIT(&onu_cfg, onu, onu_key);
-#if !defined BAL31 && !defined BAL32 && !defined BAL34
-        BCMOLT_MSG_FIELD_SET(&onu_cfg, onu_rate, BCMOLT_ONU_RATE_RATE_10G_DS_10G_US);
-#endif
         BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.serial_number, serial_number);
         BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.auto_learning, BCMOS_TRUE);
-#if defined BAL31 || defined BAL32 || defined BAL34
         BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.xgpon.ranging_burst_profile, 2);
-#else
-        BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.xgpon.ranging_burst_profile, 0);
-#endif
         BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.xgpon.data_burst_profile, 1);
-        err = bcmolt_cfg_set(dev_id, &onu_cfg.hdr);
+
+        if (d_bcmbal_cfg_set)
+            err = d_bcmbal_cfg_set(dev_id, &onu_cfg.hdr);
 
         if (err != BCM_ERR_OK)
         {
@@ -1533,7 +1706,7 @@ bool G_PON_Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendor_
 {
     try
     {
-        bcmos_errno err = BCM_ERR_OK;
+        bcmos_errno err = BCM_ERR_INTERNAL;
         bcmolt_onu_cfg onu_cfg;
         bcmolt_onu_key onu_key;
         bcmolt_serial_number serial_number;
@@ -1543,7 +1716,9 @@ bool G_PON_Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendor_
         onu_key.pon_ni = intf_id;
         BCMOLT_CFG_INIT(&onu_cfg, onu, onu_key);
         BCMOLT_FIELD_SET_PRESENT(&onu_cfg.data, onu_cfg_data, onu_state);
-        err = bcmolt_cfg_get(dev_id, &onu_cfg.hdr);
+
+        if (d_bcmbal_cfg_get)
+            err = d_bcmbal_cfg_get(dev_id, &onu_cfg.hdr);
 
         if (err == BCM_ERR_OK)
         {
@@ -1552,6 +1727,11 @@ bool G_PON_Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendor_
                 (onu_cfg.data.onu_state == BCMOLT_ONU_STATE_INACTIVE &&
                  onu_cfg.data.onu_old_state == BCMOLT_ONU_STATE_NOT_CONFIGURED))
                 return true;
+        }
+        else
+        {
+            printf("activate_onu::bcmbal_cfg_get error\r\n");
+            return false;
         }
 
         printf("GPON Enabling ONU %d on PON %d : vendor id %s,  vendor specific %s", onu_id, intf_id, vendor_id, vendor_specific_to_str(vendor_specific).c_str());
@@ -1563,7 +1743,8 @@ bool G_PON_Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendor_
         BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.gpon.ds_ber_reporting_interval, 1000000);
         BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.gpon.omci_port_id, onu_id);
 
-        err = bcmolt_cfg_set(dev_id, &onu_cfg.hdr);
+        if (d_bcmbal_cfg_set)
+            err = d_bcmbal_cfg_set(dev_id, &onu_cfg.hdr);
 
         if (err != BCM_ERR_OK)
         {
@@ -1649,15 +1830,20 @@ bool XGS_PON_Olt_Device::alloc_id_add(int intf_id, int in_onu_id, int alloc_id)
         onu_id = in_onu_id;
         BCMOLT_FIELD_SET(&cfg.data, itupon_alloc_cfg_data, onu_id, onu_id);
 
-        err = bcmolt_cfg_set(dev_id, &cfg.hdr);
-
-        if (err != BCM_ERR_OK)
+        if (d_bcmbal_cfg_set)
         {
-            printf(" ERROR!! \n");
-            return false;
+            err = d_bcmbal_cfg_set(dev_id, &cfg.hdr);
+
+            if (err != BCM_ERR_OK)
+            {
+                printf(" ERROR!! \n");
+                return false;
+            }
+            printf(" OK!!!\r\n");
+            return true;
         }
-        printf(" OK!!!\r\n");
-        return true;
+        else
+            return false;
     }
     catch (const exception &e)
     {
@@ -1733,15 +1919,20 @@ bool G_PON_Olt_Device::alloc_id_add(int intf_id, int in_onu_id, int alloc_id)
         onu_id = in_onu_id;
         BCMOLT_FIELD_SET(&cfg.data, itupon_alloc_cfg_data, onu_id, onu_id);
 
-        err = bcmolt_cfg_set(dev_id, &cfg.hdr);
-
-        if (err != BCM_ERR_OK)
+        if (d_bcmbal_cfg_set)
         {
-            printf(" ERROR!! \n");
-            return false;
+            err = d_bcmbal_cfg_set(dev_id, &cfg.hdr);
+
+            if (err != BCM_ERR_OK)
+            {
+                printf(" ERROR!! \n");
+                return false;
+            }
+            printf(" OK!!!\r\n");
+            return true;
         }
-        printf(" OK!!!\r\n");
-        return true;
+        else
+            return false;
     }
     catch (const exception &e)
     {
@@ -1798,26 +1989,30 @@ bool Olt_Device::omci_msg_out(int intf_id, int onu_id, const std::string pkt)
         BCMOLT_MSG_FIELD_SET(&omci_cpu_packets, packet_size, buf.len);
         BCMOLT_MSG_FIELD_SET(&omci_cpu_packets, buffer, buf);
 
-        bcmos_errno err = bcmolt_oper_submit(dev_id, &omci_cpu_packets.hdr);
-        if (err)
+        if (d_bcmbal_oper_submit)
         {
-            printf("Error sending OMCI message to ONU %d on PON %d Err:%d\n", onu_id, intf_id, err);
+            bcmos_errno err = d_bcmbal_oper_submit(dev_id, &omci_cpu_packets.hdr);
+            if (err)
+            {
+                printf("Error sending OMCI message to ONU %d on PON %d Err:%d\n", onu_id, intf_id, err);
+            }
+            printf("OMCI raw data: ");
+            int count = 0;
+            int buf_len = buf.len;
+
+            for (count = 1; count <= buf_len; count++)
+            {
+                printf("%02X", buf.arr[count - 1]);
+            }
+            printf("\r\n");
+            free(buf.arr);
+            return true;
         }
-
-        printf("OMCI raw data: ");
-        int count = 0;
-        int buf_len = buf.len;
-
-        for (count = 1; count <= buf_len; count++)
+        else
         {
-            printf("%02X", buf.arr[count - 1]);
+            printf("d_bcmbal_oper_submit error\r\n");
+            return false;
         }
-
-        printf("\r\n");
-
-        free(buf.arr);
-
-        return true;
     }
     catch (const exception &e)
     {
@@ -1830,7 +2025,6 @@ bool Olt_Device::flow_remove(uint32_t flow_id, const std::string flow_type)
 {
     try
     {
-
         bcmolt_flow_cfg cfg;
         bcmolt_flow_key key = {};
 
@@ -1854,17 +2048,22 @@ bool Olt_Device::flow_remove(uint32_t flow_id, const std::string flow_type)
 
         BCMOLT_CFG_INIT(&cfg, flow, key);
 
-        bcmos_errno err = bcmolt_cfg_clear(dev_id, &cfg.hdr);
-
-        if (err)
+        if (d_bcmbal_cfg_clear)
         {
-            printf(" Error\n");
-            return false;
+            bcmos_errno err = d_bcmbal_cfg_clear(dev_id, &cfg.hdr);
+
+            if (err)
+            {
+                printf(" Error\n");
+                return false;
+            }
+            else
+                printf(" OK\n");
+
+            return true;
         }
         else
-            printf(" OK\n");
-
-        return true;
+            return false;
     }
     catch (const exception &e)
     {
@@ -2065,15 +2264,20 @@ bool Olt_Device::flow_add(int onu_id, int flow_id, const std::string flow_type, 
 
         BCMOLT_MSG_FIELD_SET(&cfg, state, BCMOLT_FLOW_STATE_ENABLE);
 
-        if (bcmolt_cfg_set(dev_id, &cfg.hdr))
+        if (d_bcmbal_cfg_set)
         {
-            printf("Flow add failed\n");
-            return false;
+            if (d_bcmbal_cfg_set(dev_id, &cfg.hdr))
+            {
+                printf("Flow add failed\n");
+                return false;
+            }
+            else
+                printf("Flow add OK!!\n");
+
+            return true;
         }
         else
-            printf("Flow add OK!!\n");
-
-        return true;
+            return false;
     }
     catch (const exception &e)
     {

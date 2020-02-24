@@ -52,7 +52,7 @@ void EndpointBuilder::build_endpoints(psme::rest::server::Multiplexer& mp) {
     // "/redfish/v1/metadata/{metadata_file:*}"
     mp.register_handler(Metadata::UPtr(new Metadata(constants::Routes::METADATA_PATH)), AccessType::ALL);
 
-#if defined BAL32 || defined BAL34
+#if defined BAL34
     // "/redfish/v1/Olt
     mp.register_handler(Olt::UPtr( new Olt(constants::Routes::OLT_PATH)), AccessType::ALL);
 #endif

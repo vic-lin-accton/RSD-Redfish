@@ -44,14 +44,12 @@
 #include <stdlib.h>
 #include "acc_onlp_helper/acc_onlp_helper.hpp"
 using namespace acc_onlp_helper;
-
-#if defined BAL31 || defined BAL32 || defined BAL34
+#ifdef BAL34
 #include "acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp"
 using namespace acc_bal3_api_dist_helper;
 #else
 #define UNUSED(x) (void)(x)
 #endif
-
 using namespace psme::rest;
 using namespace psme::rest::constants;
 using namespace psme::rest::error;
@@ -162,10 +160,10 @@ bool isValidIpAddress(char *ipAddress);
 
 bool endpoint::EthernetSwitchPort::trigger_rssi(int pon_id)
 {
-#if defined BAL31 || defined BAL32 || defined BAL34
     //For OLT BAL API usage only
     //Send RSSI trigger command
     //Get ONUs list
+#ifdef BAL34
     Json::Reader onu_list_j_reader = {};
     Json::Value j_return_value;
     std::string onu_list_file_path = "/tmp/pon_" + std::to_string(pon_id - 1) + "_onu_list";
@@ -187,11 +185,10 @@ bool endpoint::EthernetSwitchPort::trigger_rssi(int pon_id)
             }
         }
     }
-    return false;
 #else
     UNUSED(pon_id);
-    return true;
 #endif
+    return false;
 }
 
 void endpoint::EthernetSwitchPort::get(const server::Request &req, server::Response &res)
@@ -227,13 +224,13 @@ void endpoint::EthernetSwitchPort::get(const server::Request &req, server::Respo
         {
             if (port_->get_status().get_state() == enums::State::Enabled)
             {
+
                 r[Common::STATUS][Common::STATE] = "Enabled";
                 r[Common::STATUS][Common::HEALTH] = "OK";
                 r[Common::STATUS][Common::HEALTH_ROLLUP] = "OK";
                 r[constants::EthernetSwitchPort::LINK_TYPE] = "Ethernet";
                 r[constants::EthernetSwitchPort::TRANS_STATIC] = port_->get_trans_info_json();
                 //Send RSSI Trigger to get Rx Pwr//
-
                 if (r[constants::EthernetSwitchPort::PORT_ID] == "PON port")
                 {
                     //Show ONUs links under PON port//
@@ -243,9 +240,8 @@ void endpoint::EthernetSwitchPort::get(const server::Request &req, server::Respo
                         printf("RSSI M NG\r\n");
                     r[constants::EthernetSwitchPort::ONUS][Common::ODATA_ID] = PathBuilder(req).append(constants::EthernetSwitchPort::ONUS).build();
                 }
-#if defined BAL31 || defined BAL32 || defined BAL34
+#if defined BAL34
                 auto &pOLT = Olt_Device::Olt_Device::get_instance();
-
                 if (pOLT.is_bal_lib_init() == true)
                 {
                     r["Statistics"] = pOLT.get_port_statistic(port_id);

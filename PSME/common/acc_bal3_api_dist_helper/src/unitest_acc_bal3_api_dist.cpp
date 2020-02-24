@@ -41,7 +41,6 @@ int main(int argc, char** argv)
     sleep(10);
 
     OLT.activate_onu(0 , 1, cs_vendor_id, cs_vendor_spec);
-    //OLT.enable_cli();	
     OLT.enter_cmd_shell();
     return 1;
 }

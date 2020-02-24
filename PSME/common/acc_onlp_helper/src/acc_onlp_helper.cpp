@@ -1637,7 +1637,6 @@ void Switch::get_port_oom_info()
                         {
                             gADbg.acc_printf("SFP port [%d] present\r\n", ii);
 #if 1
-                            auto start = std::chrono::system_clock::now();
                             if (!(*pObj)->get_eeprom_raw())
                             {
                                 gADbg.acc_printf("catch eeprom 8472 data error");
@@ -1646,12 +1645,6 @@ void Switch::get_port_oom_info()
                             {
                                 gADbg.acc_printf("catch eeprom 8472 data ok");
                             }
-
-                            auto end = std::chrono::system_clock::now();
-                            std::chrono::duration<double> elapsed_seconds = end - start;
-                            std::time_t end_time = std::chrono::system_clock::to_time_t(end);
-                            std::cout << "finished computation at getting get_eeprom_raw info.. " << std::ctime(&end_time)
-                                      << "elapsed time: " << elapsed_seconds.count() << "s\n";
 #else
                             //Use ONLP API to get EEPROM data, but only 256 bytes , not enough ..//
                             if (!(*pObj)->get_eeprom_raw(rindex))
@@ -3194,7 +3187,7 @@ Switch &Switch::get_instance()
             ifstream ifs("/etc/onl/platform");
             std::string s;
             getline(ifs, s, (char)ifs.eof());
-            printf("Creating Olt_Device on platform [%s] size[%d]\r\n", s.c_str(), (int)s.size());
+            printf("Creating platform [%s] size[%d]\r\n", s.c_str(), (int)s.size());
 
             if (s.find("asxvolt16", 0) != std::string::npos)
             {

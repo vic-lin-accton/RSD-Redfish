@@ -47,8 +47,6 @@ cp ${PSME_ACC_SW_DIR}/mgmt_protocol.sh		$ITEM_PATH/usr/local/bin
 cp ${PSME_ACC_SW_DIR}/mgmt_vlan.sh		$ITEM_PATH/usr/local/bin
 cp ${PSME_ACC_SW_DIR}/logsrv.sh  		$ITEM_PATH/usr/local/bin
 cp ${PSME_ACC_SW_DIR}/mkpasswd                  $ITEM_PATH/usr/local/bin
-cp ${PSME_ACC_SW_DIR}/Kafka_agent.py            $ITEM_PATH/usr/local/bin
-cp ${PSME_ACC_SW_DIR}/Kafka_PM_agent.py         $ITEM_PATH/usr/local/bin
 cp -rf ${PSME_ACC_SW_DIR}/mod_conf              $ITEM_PATH/usr/local/bin
 cp ${PSME_ACC_SW_DIR}/HW_NODE_VM                $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS5916_54XM       $ITEM_PATH/etc/psme
@@ -67,6 +65,7 @@ cp ${PSME_ACC_SW_DIR}/HW_NODE_ASGVOLT64         $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS7316_26XB       $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS7726_32X        $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS7326_56X        $ITEM_PATH/etc/psme
+cp ${PSME_ACC_SW_DIR}/HW_NODE_AS7312_54X        $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS4610_54T        $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS7926_80XK       $ITEM_PATH/etc/psme
 cp ${PSME_ACC_SW_DIR}/HW_NODE_AS7926_40XKE      $ITEM_PATH/etc/psme
@@ -109,6 +108,7 @@ fi
 cp $PSME_PROJ_PATH/bin/psme-rest-server               $ITEM_PATH/usr/local/bin
 cp $PSME_PROJ_PATH/bin/psme-chassis                   $ITEM_PATH/usr/local/bin
 cp $PSME_PROJ_PATH/lib/libjsoncpp.so.999              $ITEM_PATH/usr/local/lib
+cp $PSME_PROJ_PATH/lib/libmicrohttpd.so               $ITEM_PATH/usr/local/lib
 cp $PSME_PROJ_PATH/lib/libjsonrpccpp-server.so.999    $ITEM_PATH/usr/local/lib
 cp $PSME_PROJ_PATH/lib/libjsonrpccpp-client.so.999    $ITEM_PATH/usr/local/lib
 cp $PSME_PROJ_PATH/lib/libjsonrpccpp-common.so.999    $ITEM_PATH/usr/local/lib
@@ -138,7 +138,6 @@ fi
 cp $LIB_PREINSTALL/libgnutls-deb0.so.28               $ITEM_PATH/usr/local/lib
 cp $LIB_PREINSTALL/libnettle.so.4                     $ITEM_PATH/usr/local/lib
 cp $LIB_PREINSTALL/libhogweed.so.2                    $ITEM_PATH/usr/local/lib
-cp $LIB_PREINSTALL/libmicrohttpd.so.10                $ITEM_PATH/usr/local/lib
 cp $LIB_PREINSTALL/libcurl.so.4                       $ITEM_PATH/usr/local/lib
 cp $LIB_PREINSTALL/librtmp.so.1                       $ITEM_PATH/usr/local/lib
 cp $LIB_PREINSTALL/libssh2.so.1                       $ITEM_PATH/usr/local/lib
