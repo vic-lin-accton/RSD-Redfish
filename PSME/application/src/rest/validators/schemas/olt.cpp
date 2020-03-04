@@ -18,17 +18,18 @@
  * limitations under the License.
  * */
 
-#include "psme/rest/validators/schemas/chassis.hpp"
+#include "psme/rest/validators/schemas/olt.hpp"
 #include "psme/rest/constants/constants.hpp"
 
 using namespace psme::rest;
 using namespace psme::rest::validators::schema;
 
-const jsonrpc::ProcedureValidator& ChassisPatchSchema::get_procedure() {
+
+const jsonrpc::ProcedureValidator& OltPatchSchema::get_procedure() {
     static jsonrpc::ProcedureValidator procedure{
-        "chassis_patch",
+        "olt_patch",
         jsonrpc::PARAMS_BY_NAME,
-        constants::Common::ASSET_TAG, VALID_OPTIONAL(VALID_JSON_STRING),
+        constants::Olt::OLT_OPTR_STATE, VALID_OPTIONAL(VALID_JSON_BOOLEAN),
         nullptr
     };
     return procedure;

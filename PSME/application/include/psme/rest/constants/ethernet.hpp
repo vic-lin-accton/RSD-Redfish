@@ -92,6 +92,13 @@ namespace OLT
 extern const char OLT[];
 }
 
+namespace ONU
+{
+extern const char ONU_ID[];
+extern const char INTERFACE_ID[];
+extern const char VENDOR_ID[];
+extern const char VENDOR_SPECIFIC[];
+}
 /*!
  * @brief Constant Vlan literals for rest endpoints.
  */

@@ -41,6 +41,10 @@ public:
     virtual ~EthernetSwitchPortOnusCollection();
 
     void get(const server::Request& request, server::Response& response) override;
+
+    void del(const server::Request &request, server::Response &response) override;
+
+    void post(const server::Request &request, server::Response &response) override;
 };
 
 }

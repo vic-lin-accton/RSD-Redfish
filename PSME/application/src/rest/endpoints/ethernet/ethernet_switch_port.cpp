@@ -51,7 +51,6 @@ using namespace acc_bal3_api_dist_helper;
 #define UNUSED(x) (void)(x)
 #endif
 using namespace psme::rest;
-using namespace psme::rest::constants;
 using namespace psme::rest::error;
 using namespace psme::rest::utils;
 using namespace psme::rest::validators;
@@ -229,7 +228,12 @@ void endpoint::EthernetSwitchPort::get(const server::Request &req, server::Respo
                 r[Common::STATUS][Common::HEALTH] = "OK";
                 r[Common::STATUS][Common::HEALTH_ROLLUP] = "OK";
                 r[constants::EthernetSwitchPort::LINK_TYPE] = "Ethernet";
+
+                if (r[constants::EthernetSwitchPort::PORT_ID] != "RJ45 port")
+                {
                 r[constants::EthernetSwitchPort::TRANS_STATIC] = port_->get_trans_info_json();
+                }
+
                 //Send RSSI Trigger to get Rx Pwr//
                 if (r[constants::EthernetSwitchPort::PORT_ID] == "PON port")
                 {
@@ -245,15 +249,19 @@ void endpoint::EthernetSwitchPort::get(const server::Request &req, server::Respo
                 if (pOLT.is_bal_lib_init() == true)
                 {
                     r["Statistics"] = pOLT.get_port_statistic(port_id);
+                    if (pOLT.get_inf_active_state(port_id -1) == true)
+                        r[constants::EthernetSwitchPort::ADMINISTRATIVE_STATE] = "Up";
+                    else
+                        r[constants::EthernetSwitchPort::ADMINISTRATIVE_STATE] = "Down";
                 }
                 else
-                {
                     printf("bal lib not init !!\r\n");
-                }
+
                 if (Onlp.get_port_tx_status(port_id) == 1)
                     r[constants::EthernetSwitchPort::OPERATIONAL_STATE] = "Down";
                 else
                     r[constants::EthernetSwitchPort::OPERATIONAL_STATE] = "Up";
+
 #endif
             }
             else
@@ -348,9 +356,26 @@ void endpoint::EthernetSwitchPort::patch(const server::Request &request, server:
             Onlp.set_port_tx_status(iPort, true);
     }
 
+#if defined BAL34
+
+    if (json.is_member(constants::EthernetSwitchPort::ADMINISTRATIVE_STATE))
+    {
+        auto &pOLT = Olt_Device::Olt_Device::get_instance();
+        admin = json[constants::EthernetSwitchPort::ADMINISTRATIVE_STATE].as_string();
+        if (pOLT.is_bal_lib_init() == true)
+        {
+            if (!strcmp("Down", admin.c_str()))
+                pOLT.set_inf_active_state(iPort - 1, false);
+            else if (!strcmp("Up", admin.c_str()))
+                pOLT.set_inf_active_state(iPort - 1, true);
+        }
+        else
+            printf("bal lib not init !!\r\n");
+    }
+#endif
+
     sprintf(command, "port_status.sh set SFA %d %llu %llu %d", iPort, linkspeed, fsize, (int)autonego);
     memset(resultA, 0x0, sizeof(resultA));
-    //exec_shell(command, resultA);
 
     if (json[Common::LINKS].is_member(constants::EthernetSwitchPort::PRIMARY_VLAN))
     {
@@ -365,7 +390,6 @@ void endpoint::EthernetSwitchPort::patch(const server::Request &request, server:
 
         sprintf(command, "port_status.sh set pvid %d %s", iPort, pvid.c_str());
         memset(resultA, 0x0, sizeof(resultA));
-        //exec_shell(command, resultA);
     }
 
     get(request, response);
@@ -381,7 +405,6 @@ void endpoint::EthernetSwitchPort::del(const server::Request &req, server::Respo
     int max_port = 0;
     sprintf(command, "psme.sh get max_port_num");
     memset(resultA, 0x0, sizeof(resultA));
-    //exec_shell(command, resultA);
 
     if (strlen(resultA) != 0)
     {
@@ -390,7 +413,6 @@ void endpoint::EthernetSwitchPort::del(const server::Request &req, server::Respo
 
     sprintf(command, "trunk.sh set ID_del %d", atoi(LAG_ID.c_str()) - max_port);
     memset(resultA, 0x0, sizeof(resultA));
-    //exec_shell(command, resultA);
 
     res.set_status(server::status_2XX::NO_CONTENT);
 }

@@ -2315,7 +2315,7 @@ void Port_Info::set_info(int ID, int Type, int Present_Status, bool present)
 
 void Port_Info::set_tx(bool status , std::string in_tx_sys_path)
 {
-    //std::string tx_sys_path = m_sysfile_path + "/sfp_tx_disable";
+#if 0
     std::string tx_sys_path = in_tx_sys_path; 
     std::ofstream os;
     printf("set_tx[%s] status[%d]\r\n", tx_sys_path.c_str(), status);
@@ -2339,10 +2339,29 @@ void Port_Info::set_tx(bool status , std::string in_tx_sys_path)
     {
         std::cout << "set tx exception : " << e.what() << std::endl;
     }
+#else
+    UNUSED(in_tx_sys_path);
+    try
+    {
+        int value;
+        if (status == false)
+            value = 1;
+        else
+            value = 0;
+        std::cout << "Port Id is " << m_ID - 1 << std::endl;
+        int r = onlp_sfp_control_set(m_ID - 1, ONLP_SFP_CONTROL_TX_DISABLE, value);
+        std::cout << "TX_Disable set " << value << std::endl;
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << "set tx exception : " << e.what() << std::endl;
+    }
+#endif
 }
 
-int Port_Info::get_tx_status(std::string in_tx_sys_path)
+int Port_Info::(std::string in_tx_sys_path)
 {
+#if 0
     std::string tx_sys_path = in_tx_sys_path;
     printf("get_tx_status[%s]\r\n", tx_sys_path.c_str());
     std::ifstream is;
@@ -2376,6 +2395,22 @@ int Port_Info::get_tx_status(std::string in_tx_sys_path)
         std::cout << "get tx status exception : " << e.what() << std::endl;
         return -1;
     }
+#else
+    UNUSED(in_tx_sys_path);
+    try
+    {
+        int value;
+        std::cout << "Port Id is " << m_ID - 1 << std::endl;
+        int r = onlp_sfp_control_get(m_ID - 1 , ONLP_SFP_CONTROL_TX_DISABLE, &value);
+        std::cout << "TX_Disable get " << value << std::endl;
+        return value;
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << "get tx status exception : " << e.what() << std::endl;
+        return -1;
+    }
+#endif
 }
 
 void Switch::get_psu_info()

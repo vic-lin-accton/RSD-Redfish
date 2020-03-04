@@ -98,7 +98,6 @@ extern const char REGEX_MARK;
 extern const char ID_REGEX[];
 extern const char USERNAME_REGEX[];
 extern const char XML_REGEX[];
-/*Nick Added Begin: */
 extern const char FAN_ID[];     
 extern const char PSU_ID[];  
 extern const char THERMAL_ID[];
@@ -106,7 +105,12 @@ extern const char SESSION_ID[];
 extern const char SER_ID[];
 extern const char LOGSER_ID[];
 extern const char ONU_ID[];
-/*Nick Added End  : */
+}
+
+namespace Olt
+{
+extern const char BAL_STATE[];
+extern const char OLT_OPTR_STATE[];
 }
 
 /*!

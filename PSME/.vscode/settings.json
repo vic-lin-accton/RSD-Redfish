@@ -55,5 +55,6 @@
         "regex": "cpp",
         "utility": "cpp",
         "typeinfo": "cpp"
-    }
+    },
+    "git.ignoreLimitWarning": true
 }

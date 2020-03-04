@@ -18,18 +18,22 @@
  * limitations under the License.
  * */
 
-#include "psme/rest/validators/schemas/chassis.hpp"
+#include "psme/rest/validators/schemas/ethernet_switch_port_onus_collection.hpp"
+#include "psme/rest/validators/schemas/common.hpp"
 #include "psme/rest/constants/constants.hpp"
-
+#include "agent-framework/module/enum/network.hpp"
 using namespace psme::rest;
 using namespace psme::rest::validators::schema;
+using namespace agent_framework::model;
 
-const jsonrpc::ProcedureValidator& ChassisPatchSchema::get_procedure() {
+const jsonrpc::ProcedureValidator &EthernetSwitchPortOnusCollectionPostSchema::get_procedure()
+{
     static jsonrpc::ProcedureValidator procedure{
-        "chassis_patch",
+        "ethernet_switch_port_onus_collection_post",
         jsonrpc::PARAMS_BY_NAME,
-        constants::Common::ASSET_TAG, VALID_OPTIONAL(VALID_JSON_STRING),
-        nullptr
-    };
+        constants::ONU::ONU_ID, VALID_JSON_INTEGER,
+        constants::ONU::VENDOR_ID, VALID_JSON_STRING,
+        constants::ONU::VENDOR_SPECIFIC, VALID_JSON_STRING,
+        nullptr};
     return procedure;
 }

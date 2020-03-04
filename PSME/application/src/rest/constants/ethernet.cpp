@@ -89,6 +89,14 @@ namespace OLT
 const char OLT[] = "Olt";
 }
 
+namespace ONU
+{
+const char ONU_ID[] = "onu_id";
+const char INTERFACE_ID[] = "idnterface_id";
+const char VENDOR_ID[] = "vendor_id";
+const char VENDOR_SPECIFIC[] = "vendor_specific";
+} 
+
 namespace Vlan {
 const char VLAN[] = "VLAN";
 const char VLAN_ENABLE[] = "VLANEnable";

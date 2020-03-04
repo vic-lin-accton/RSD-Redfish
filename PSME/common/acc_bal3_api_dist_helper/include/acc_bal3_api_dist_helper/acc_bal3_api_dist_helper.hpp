@@ -106,8 +106,9 @@ public:
 class Olt_Device
 {
 public:
-    Olt_Device(int argc, char **argv);
+    Olt_Device();
     ~Olt_Device();
+
     static Olt_Device &get_instance();
     static void cleanup();
     int get_board_basic_info();
@@ -125,25 +126,35 @@ public:
     void set_olt_status(bool status);
     void set_bal_status(bool status);
     void set_intf_type(int port, int type);
-    bool connect_bal(int argc, char *argv[]);
+
+    bool connect_host();
+    bool connect_bal(bool wait_bal_ready);
     bool get_olt_status();
+    bool check_bal_ready();
     bool get_bal_status();
-    bool enable_bal();
+    bool get_connection_status();
     bool enable_cli();
     bool enable_pon_if(int intf_id);
     bool enable_nni_if(int intf_id);
+    bool disable_pon_if(int intf_id);
+    bool disable_nni_if(int intf_id);
     bool deactivate_onu(int intf_id, int onu_id);
     bool omci_msg_out(int intf_id, int onu_id, const std::string pkt);
     bool flow_add(int onu_id, int flow_id, const std::string flow_type, const std::string pkt_tag_type, int access_intf_id, int network_intf_id, int gemport_id, int classifier, int action, int action_cmd, struct action_val a_val, struct class_val c_val);
     bool flow_remove(uint32_t flow_id, const std::string flow_type);
     void set_pon_status(int port, int status);
+    bool get_pon_status(int port);
     void set_nni_status(int port, int status);
+    bool get_nni_status(int port);
+    bool get_inf_active_state(int port);
+    bool set_inf_active_state(int port, bool status);
     bool virtual activate_onu(int intf_id, int onu_id, const char *vendor_id, const char *vendor_specific) = 0;
     bool virtual alloc_id_add(int intf_id, int onu_id, int alloc_id) = 0;
     int virtual get_max_pon_num() = 0;
     int virtual get_max_nni_num() = 0;
     int virtual get_total_port_num() = 0;
     int virtual get_maple_num() = 0;
+    std::string get_bal_oper_state(){return m_oper_state;};
     std::string virtual get_platform() = 0;
     mutable std::mutex m_data_mutex{};
     json::Value get_port_statistic(int port);
@@ -170,11 +181,12 @@ private:
     std::string m_bal_version = {""};
     std::string m_firmware_version = {""};
     std::string m_chip_family = {""};
+    std::string m_oper_state = {"down"};
 
-    bool m_bal_enable = {false};
     bool m_bal_status = {false};
     bool m_olt_status = {false};
     bool m_bcmbal_init = {false};
+    bool m_bcm_host_init = {false};
     bool m_bal_lib_init = {false};
     bool m_subscribed = {false};
 
@@ -185,7 +197,7 @@ private:
 class XGS_PON_Olt_Device : public Olt_Device
 {
 public:
-    XGS_PON_Olt_Device(int argc, char **argv) : Olt_Device(argc, argv){};
+    XGS_PON_Olt_Device() : Olt_Device(){};
     ~XGS_PON_Olt_Device(){};
     int maple_num = 8;
     int get_max_pon_num() { return XGS_PON_MAX_PON_PORT_NUM; };
@@ -203,7 +215,7 @@ private:
 class G_PON_Olt_Device : public Olt_Device
 {
 public:
-    G_PON_Olt_Device(int argc, char **argv) : Olt_Device(argc, argv){};
+    G_PON_Olt_Device() : Olt_Device(){};
     ~G_PON_Olt_Device(){};
     int maple_num = 4;
     int get_max_pon_num() { return G_PON_MAX_PON_PORT_NUM; };

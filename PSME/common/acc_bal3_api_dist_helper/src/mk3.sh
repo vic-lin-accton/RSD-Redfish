@@ -1,7 +1,7 @@
 #!/bin/bash
 
 BUILD_DIR="../../../../../../../"
-OPENOLTDEVICE="asfvolt16"
+OPENOLTDEVICE="asgvolt64"
 BAL_DIR="${BUILD_DIR}/${OPENOLTDEVICE}-bal"
 BAL3_DIR="${BUILD_DIR}/bal-api-3.1"
 echo "BAL_3DIR[$BAL3_DIR]"
@@ -10,6 +10,8 @@ echo "BAL_DIR[$BAL_DIR]"
 #BAL_INC="-I./ -I${BAL_DIR}/host_driver/bal/bal_include  \
 BAL_INC="-I${BAL_DIR}/host_driver/bal/bal_include  \
     -I${BAL_DIR}/host_driver/topology  \
+    -I${BAL_DIR}/host_driver/metadata  \
+    -I${BAL_DIR}/host_driver/bal/bal_include/  \
     -I${BAL_DIR}/host_driver/utils  \
     -I${BAL_DIR}/host_driver/api  \
     -I${BAL_DIR}/host_driver/transport/  \
@@ -25,8 +27,9 @@ BAL_INC="-I${BAL_DIR}/host_driver/bal/bal_include  \
     -I${BAL_DIR}/host_reference/dev_log  \
     -I${BAL_DIR}/host_reference/host_api/  \
     -I${BAL_DIR}/lib/cmdline \
+    -I${BUILD_DIR}/asvolt-onl/OpenNetworkLinux/RSD-Redfish/PSME/common/json-cxx/include/ \
     "
-g++ -g -O2 -I/usr/local/include -std=c++11 -o unitest_acc_bal3_api_dist unitest_acc_bal3_api_dist.cpp acc_bal3_api_dist_helper.cpp  -DBCMOS_MSG_QUEUE_DOMAIN_SOCKET -DBCMOS_MSG_QUEUE_UDP_SOCKET -DBCMOS_MEM_CHECK  -DBCMOS_SYS_UNITTEST -DENABLE_LOG -DENABLE_CLI  -DBAL34 ${BAL_INC} -L${BUILD_DIR}/asfvolt16-bal/build/host_reference/host_api -L/usr/local/lib  -lbal_host_api -ldl
+g++ -g -O2 -I/usr/local/include -std=c++11 -o unitest_acc_bal3_api_dist unitest_acc_bal3_api_dist.cpp acc_bal3_api_dist_helper.cpp  -DBCMOS_MSG_QUEUE_DOMAIN_SOCKET -DBCMOS_MSG_QUEUE_UDP_SOCKET -DBCMOS_MEM_CHECK  -DBCMOS_SYS_UNITTEST -DENABLE_LOG -DENABLE_CLI  -DBAL34 ${BAL_INC} -L${BUILD_DIR}/asfvolt16-bal/build/host_reference/host_api -L./ -lbal_host_api -ldl
 
 scp unitest_acc_bal3_api_dist root@172.17.10.7:/broadcom
 

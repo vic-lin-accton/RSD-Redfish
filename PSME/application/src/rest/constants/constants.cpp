@@ -83,9 +83,7 @@ const char REGEX_MARK = ':';
 const char ID_REGEX[] = "[0-9]+";
 //const char USERNAME_REGEX[] = "[a-zA-Z0-9]+";
 const char USERNAME_REGEX[] = "[a-zA-Z0-9_]+";
-
 const char XML_REGEX[] = ".*.xml";
-/*Nick Added Begin: */
 const char FAN_ID[] = "FanId";  
 const char PSU_ID[] = "PsuId";  
 const char THERMAL_ID[] = "ThermalId";
@@ -93,7 +91,11 @@ const char SESSION_ID[] = "SessionId";
 const char SER_ID[] = "serId";
 const char LOGSER_ID[] = "logserId";
 const char ONU_ID[] = "onuId";
-/*Nick Added End  : */
+}
+
+namespace Olt {
+const char BAL_STATE[] = "BalState";
+const char OLT_OPTR_STATE[] = "OltOperateState";
 }
 
 namespace Common {

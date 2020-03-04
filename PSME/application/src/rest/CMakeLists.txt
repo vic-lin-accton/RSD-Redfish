@@ -233,6 +233,7 @@ set(SOURCES
     validators/schemas/ethernet_switch_port.cpp
     validators/schemas/ethernet_interface.cpp
     validators/schemas/ethernet_switch_port_collection.cpp
+    validators/schemas/ethernet_switch_port_onus_collection.cpp
     validators/schemas/rule.cpp
     validators/schemas/static_mac.cpp
     validators/schemas/vlan_network_interface_collection.cpp
@@ -244,6 +245,7 @@ set(SOURCES
     validators/schemas/switch.cpp
     validators/schemas/storage_subsystem.cpp
     validators/schemas/chassis.cpp
+    validators/schemas/olt.cpp
     validators/schemas/pcie_device.cpp
     validators/schemas/system.cpp
     validators/schemas/reset.cpp

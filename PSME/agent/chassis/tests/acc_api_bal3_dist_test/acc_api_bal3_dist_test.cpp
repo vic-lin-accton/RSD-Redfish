@@ -230,15 +230,16 @@ void TestClass1::SetUp()
     int pon_if_max = OLT.get_max_pon_num();
     int i = 0, count = 0;
 
-    printf("//////////// PON interface num[%d]  !!////////////\r\n", pon_if_max);
+    printf("//////////// PON interface num[%d]  !////////////\r\n", pon_if_max);
 
     //Wait BAL Ready !!
-    while (!OLT.get_bal_status())
+    if(!OLT.check_bal_ready())
     {
-        sleep(1);
-        printf("////////////Wait BAL Ready[%d] seconds\r\n", count);
-        count++;
+        printf("BAL not ready!!\r\n");
+        return ;
     }
+    //Enable Maples
+    OLT.connect_bal(false);
 
     //Wait OLT Ready !!
     while (!OLT.get_olt_status())
