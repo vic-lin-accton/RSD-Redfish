@@ -59,14 +59,18 @@ endpoint::Olt::~Olt() {}
 
 void endpoint::Olt::get(const server::Request &request, server::Response &response)
 {
-    auto &OLT = Olt_Device::Olt_Device::get_instance();
     auto r = make_prototype();
+#ifdef BAL34
+    auto &OLT = Olt_Device::Olt_Device::get_instance();
     OLT.get_board_basic_info();
     r[constants::Olt::BAL_STATE] = OLT.get_bal_oper_state();
     r[constants::Olt::OLT_OPTR_STATE] = OLT.get_olt_status();
 
     UNUSED(request);
+#else
+    UNUSED(request);
     set_response(response, r);
+#endif
 }
 
 void endpoint::Olt::del(const server::Request &request, server::Response &response)
@@ -78,13 +82,14 @@ void endpoint::Olt::del(const server::Request &request, server::Response &respon
 void endpoint::Olt::patch(const server::Request &request, server::Response &response)
 {
     using namespace psme::rest::error;
+#ifdef BAL34
     try
     {
         const auto json = JsonValidator::validate_request_body<schema::OltPatchSchema>(request);
         if (json.is_member(constants::Olt::OLT_OPTR_STATE))
         {
             const auto &olt_optr_state = json[constants::Olt::OLT_OPTR_STATE];
-            if(olt_optr_state == true)
+            if (olt_optr_state == true)
             {
                 auto &OLT = Olt_Device::Olt_Device::get_instance();
                 OLT.connect_bal(false);
@@ -98,4 +103,8 @@ void endpoint::Olt::patch(const server::Request &request, server::Response &resp
 
     server::Request get_request{request};
     get(get_request, response);
+#else
+    UNUSED(response);
+    UNUSED(request);
+#endif
 }

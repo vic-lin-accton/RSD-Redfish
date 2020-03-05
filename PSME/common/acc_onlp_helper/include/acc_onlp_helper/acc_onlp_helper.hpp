@@ -260,8 +260,9 @@ public:
     enum Port_Type
     {
         Ether_Port = 1,
-        XSFP_Port = 2,
-        PON_Port = 3
+        SFP_Port = 2,
+        PON_Port = 3,
+        QSFP_Port = 4
 
     };
     bool m_Present_Status = 0;

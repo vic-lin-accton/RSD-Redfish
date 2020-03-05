@@ -38,11 +38,9 @@ if [ ! -z "${HW_type}" ];then
         "x86"[-_]"64-accton"[-_]"asxvolt16")
         . /etc/psme/HW_NODE_ASXVOLT16
         ;;
-
         "x86"[-_]"64-accton"[-_]"asgvolt64")
         . /etc/psme/HW_NODE_ASGVOLT64
         ;;
-
         "x86"[-_]"64-accton"[-_]"as6812"[-_]"32x")
         . /etc/psme/HW_NODE_AS6812_32X
         ;;
@@ -67,7 +65,6 @@ if [ ! -z "${HW_type}" ];then
         "x86"[-_]"64-accton"[-_]"as9716"[-_]"32d")
         . /etc/psme/HW_NODE_AS9716_32D
         ;;
-
         "arm-accton-as4610-54")
         . /etc/psme/HW_NODE_AS4610_54T
         ;;
@@ -75,10 +72,4 @@ if [ ! -z "${HW_type}" ];then
         . /etc/psme/HW_NODE_AS4610_30T
         ;;
     esac
-elif [ "$Product_name" = "SAU5081" ];then
-        . /etc/psme/HW_NODE_SAU5081
-else
-    #VM node
-    HW_type="x86-64-accton-as7712-32x-r0"
-    . /etc/psme/HW_NODE_VM
 fi

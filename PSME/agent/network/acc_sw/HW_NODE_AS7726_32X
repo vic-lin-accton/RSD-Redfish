@@ -1,31 +1,11 @@
-#!/bin/sh
 #################################################################################
-# Support Platform  type
+# Support Platform type
 #################################################################################
-# Define currnt using variable depend on platform #
-CURRENT_FAN_NUM="8"
-CURRENT_THERMAL_NUM="8"
-CURRENT_PORT_NUM="34"
-CURRENT_PSU_NUM="2"	
-
-I2C_BUS="0"
-I2C_CPLD_OFFSET="0"
-SYSTEM_RESET_OFFSET="0"
-
-SYSTEM_HALT_VALUE="0"
-SYSTEM_RESTART_VALUE="0"
-
-
-mapping=("XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP" "XSFP") 
-
 
 fans_type=("S" "S" "S" "S" "S" "S" "P" "P")
-
 thermals_type=("C" "S" "S" "S" "S" "S" "P" "P")
-
 psus_type=("S" "S")
-
-get_max_fan_num()
-{
-    echo "${CURRENT_FAN_NUM}"
-}
+mapping=("QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" 
+"QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP"
+"QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP"
+"QSFP" "QSFP" "SFP" "SFP") 

@@ -47,9 +47,8 @@ using namespace acc_onlp_helper;
 #ifdef BAL34
 #include "acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp"
 using namespace acc_bal3_api_dist_helper;
-#else
-#define UNUSED(x) (void)(x)
 #endif
+#define UNUSED(x) (void)(x)
 using namespace psme::rest;
 using namespace psme::rest::error;
 using namespace psme::rest::utils;
@@ -234,6 +233,7 @@ void endpoint::EthernetSwitchPort::get(const server::Request &req, server::Respo
                 r[constants::EthernetSwitchPort::TRANS_STATIC] = port_->get_trans_info_json();
                 }
 
+#if defined BAL34
                 //Send RSSI Trigger to get Rx Pwr//
                 if (r[constants::EthernetSwitchPort::PORT_ID] == "PON port")
                 {
@@ -244,7 +244,6 @@ void endpoint::EthernetSwitchPort::get(const server::Request &req, server::Respo
                         printf("RSSI M NG\r\n");
                     r[constants::EthernetSwitchPort::ONUS][Common::ODATA_ID] = PathBuilder(req).append(constants::EthernetSwitchPort::ONUS).build();
                 }
-#if defined BAL34
                 auto &pOLT = Olt_Device::Olt_Device::get_instance();
                 if (pOLT.is_bal_lib_init() == true)
                 {
@@ -256,13 +255,11 @@ void endpoint::EthernetSwitchPort::get(const server::Request &req, server::Respo
                 }
                 else
                     printf("bal lib not init !!\r\n");
-
+#endif
                 if (Onlp.get_port_tx_status(port_id) == 1)
                     r[constants::EthernetSwitchPort::OPERATIONAL_STATE] = "Down";
                 else
                     r[constants::EthernetSwitchPort::OPERATIONAL_STATE] = "Up";
-
-#endif
             }
             else
             {
@@ -287,65 +284,10 @@ void endpoint::EthernetSwitchPort::patch(const server::Request &request, server:
     auto json = JsonValidator::validate_request_body<schema::EthernetSwitchPortPatchSchema>(request);
 
     int iPort = std::stoi(request.params[PathParam::SWITCH_PORT_ID]);
-    unsigned long long linkspeed = 0;
     std::string admin;
     std::string operate;
-    bool autonego = 0;
-    unsigned long long fsize = 0;
-
-    char resultA[256] = {0};
-    char command[256] = {0};
 
     auto &Onlp = acc_onlp_helper::Switch::Switch::get_instance();
-
-    if (json.is_member(constants::EthernetSwitchPort::LINK_SPEED))
-    {
-        linkspeed = json[constants::EthernetSwitchPort::LINK_SPEED].as_uint64();
-    }
-    else
-    {
-        sprintf(command, "port_status.sh get cfg_speed %d", iPort);
-        memset(resultA, 0x0, sizeof(resultA));
-        //exec_shell(command, resultA);
-
-        if (strlen(resultA) != 0)
-            linkspeed = (std::uint64_t)strtoull(resultA, NULL, 10);
-    }
-
-    if (json.is_member(constants::EthernetSwitchPort::FRAME_SIZE))
-    {
-        fsize = json[constants::EthernetSwitchPort::FRAME_SIZE].as_uint64();
-    }
-    else
-    {
-        sprintf(command, "port_status.sh get framesize %d", iPort);
-        memset(resultA, 0x0, sizeof(resultA));
-        //exec_shell(command, resultA);
-
-        if (strlen(resultA) != 0)
-        {
-            fsize = (std::uint64_t)strtoull(resultA, NULL, 10);
-        }
-    }
-
-    if (json.is_member(constants::EthernetSwitchPort::AUTOSENSE))
-    {
-        autonego = json[constants::EthernetSwitchPort::AUTOSENSE].as_bool();
-    }
-    else
-    {
-        sprintf(command, "port_status.sh get auto %d", iPort);
-        memset(resultA, 0x0, sizeof(resultA));
-        //exec_shell(command, resultA);
-
-        if (strlen(resultA) != 0)
-        {
-            if (!strncmp("1", resultA, 1))
-                autonego = true;
-            else
-                autonego = false;
-        }
-    }
 
     if (json.is_member(constants::EthernetSwitchPort::OPERATIONAL_STATE))
     {
@@ -357,7 +299,6 @@ void endpoint::EthernetSwitchPort::patch(const server::Request &request, server:
     }
 
 #if defined BAL34
-
     if (json.is_member(constants::EthernetSwitchPort::ADMINISTRATIVE_STATE))
     {
         auto &pOLT = Olt_Device::Olt_Device::get_instance();
@@ -373,46 +314,11 @@ void endpoint::EthernetSwitchPort::patch(const server::Request &request, server:
             printf("bal lib not init !!\r\n");
     }
 #endif
-
-    sprintf(command, "port_status.sh set SFA %d %llu %llu %d", iPort, linkspeed, fsize, (int)autonego);
-    memset(resultA, 0x0, sizeof(resultA));
-
-    if (json[Common::LINKS].is_member(constants::EthernetSwitchPort::PRIMARY_VLAN))
-    {
-        const auto &primary_vlan_url =
-            json[Common::LINKS][constants::EthernetSwitchPort::PRIMARY_VLAN][Common::ODATA_ID].as_string();
-        std::string pvid = "";
-
-        size_t pos = primary_vlan_url.find_last_of("VLANs/");
-
-        if (pos != string::npos)
-            pvid = primary_vlan_url.substr(pos + 1);
-
-        sprintf(command, "port_status.sh set pvid %d %s", iPort, pvid.c_str());
-        memset(resultA, 0x0, sizeof(resultA));
-    }
-
     get(request, response);
 }
 
 void endpoint::EthernetSwitchPort::del(const server::Request &req, server::Response &res)
 {
-
-    const auto &LAG_ID = req.params[PathParam::SWITCH_PORT_ID];
-
-    char command[256] = {0};
-    char resultA[256] = {0};
-    int max_port = 0;
-    sprintf(command, "psme.sh get max_port_num");
-    memset(resultA, 0x0, sizeof(resultA));
-
-    if (strlen(resultA) != 0)
-    {
-        max_port = atoi(resultA);
-    }
-
-    sprintf(command, "trunk.sh set ID_del %d", atoi(LAG_ID.c_str()) - max_port);
-    memset(resultA, 0x0, sizeof(resultA));
-
-    res.set_status(server::status_2XX::NO_CONTENT);
+   UNUSED(req);
+   res.set_status(server::status_2XX::NO_CONTENT);
 }

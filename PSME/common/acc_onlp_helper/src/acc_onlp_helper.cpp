@@ -18,6 +18,7 @@ extern "C"
 #include <syslog.h>
 #include <onlp/platformi/sysi.h>
 #include <onlp/platformi/sfpi.h>
+#include <onlp/sfp.h>
 #include <onlp/fan.h>
 #include <onlp/thermal.h>
 #include <onlp/sys.h>
@@ -1431,10 +1432,17 @@ void Switch::get_board_info()
                         std::string findex("port");
                         if (s[0]["onlp"]["ports"][findex + std::to_string(i)].asString() == "Ether")
                             p->m_Type = Port_Info::Ether_Port;
-                        else if (s[0]["onlp"]["ports"][findex + std::to_string(i)].asString() == "XSFP")
+                        else if (s[0]["onlp"]["ports"][findex + std::to_string(i)].asString() == "SFP")
                         {
-                            p->m_Type = Port_Info::XSFP_Port;
-                            /*Set XSFP eeprom mapping path*/
+                            p->m_Type = Port_Info::SFP_Port;
+                            /*Set SFP eeprom mapping path*/
+                            printf("set_eeprom_path port [%d] [%s]!!\r\n \r\n", i, mapping_s[std::to_string(i)].asString().c_str());
+                            p->set_eeprom_path(mapping_s[std::to_string(i)].asString());
+                        }
+                        else if (s[0]["onlp"]["ports"][findex + std::to_string(i)].asString() == "QSFP")
+                        {
+                            p->m_Type = Port_Info::QSFP_Port;
+                            /*Set SFP eeprom mapping path*/
                             printf("set_eeprom_path port [%d] [%s]!!\r\n \r\n", i, mapping_s[std::to_string(i)].asString().c_str());
                             p->set_eeprom_path(mapping_s[std::to_string(i)].asString());
                         }
@@ -2349,7 +2357,7 @@ void Port_Info::set_tx(bool status , std::string in_tx_sys_path)
         else
             value = 0;
         std::cout << "Port Id is " << m_ID - 1 << std::endl;
-        int r = onlp_sfp_control_set(m_ID - 1, ONLP_SFP_CONTROL_TX_DISABLE, value);
+        onlp_sfp_control_set(m_ID - 1, ONLP_SFP_CONTROL_TX_DISABLE, value);
         std::cout << "TX_Disable set " << value << std::endl;
     }
     catch (const std::exception &e)
@@ -2359,7 +2367,7 @@ void Port_Info::set_tx(bool status , std::string in_tx_sys_path)
 #endif
 }
 
-int Port_Info::(std::string in_tx_sys_path)
+int Port_Info::get_tx_status(std::string in_tx_sys_path)
 {
 #if 0
     std::string tx_sys_path = in_tx_sys_path;
@@ -2401,7 +2409,7 @@ int Port_Info::(std::string in_tx_sys_path)
     {
         int value;
         std::cout << "Port Id is " << m_ID - 1 << std::endl;
-        int r = onlp_sfp_control_get(m_ID - 1 , ONLP_SFP_CONTROL_TX_DISABLE, &value);
+        onlp_sfp_control_get(m_ID - 1 , ONLP_SFP_CONTROL_TX_DISABLE, &value);
         std::cout << "TX_Disable get " << value << std::endl;
         return value;
     }

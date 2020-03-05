@@ -78,7 +78,7 @@ public:
     /*!
      * Gets port identifier.
      * */
-    const OptionalField<std::string>& get_port_identifier() const {
+    const OptionalField<std::string>& get_port_identifier()  const {
         return m_port_identifier;
     }
 

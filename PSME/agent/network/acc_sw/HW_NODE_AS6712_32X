@@ -1,55 +1,12 @@
-#!/bin/sh
 #################################################################################
-# Support Platform  type
+# Support Platform type
 #################################################################################
 # Define currnt using variable depend on platform #
 
-CURRENT_FAN_NODE_PATH="/sys/devices/platform/as6812_32x_fan/"
-CURRENT_PSU1_FAN_NODE_PATH="/sys/bus/i2c/devices/35-003c/"
-CURRENT_PSU2_FAN_NODE_PATH="/sys/bus/i2c/devices/36-003f/"
-
-eval CURRENT_THERMAL_NODE1_PATH=/sys/devices/platform/coretemp.0/hwmon/hwmon0/temp2_input
-eval CURRENT_THERMAL_NODE2_PATH=/sys/bus/i2c/devices/38-0048/hwmon/hwmon42/temp1_input
-eval CURRENT_THERMAL_NODE3_PATH=/sys/bus/i2c/devices/39-0049/hwmon/hwmon43/temp1_input
-eval CURRENT_THERMAL_NODE4_PATH=/sys/bus/i2c/devices/40-004a/hwmon/hwmon44/temp1_input
-eval CURRENT_THERMAL_NODE5_PATH=/sys/bus/i2c/devices/41-004b/hwmon/hwmon45/temp1_input
-eval CURRENT_THERMAL_NODE6_PATH=/sys/bus/i2c/devices/35-003c/psu_temp1_input
-eval CURRENT_THERMAL_NODE7_PATH=/sys/bus/i2c/devices/36-003f/psu_temp1_input
-
-CURRENT_THERMAL_NUM="7"
-CURRENT_PORT_NUM="32"
-CURRENT_PSU_NUM="2"
-CURRENT_FAN_NUM="7"
-
-I2C_BUS="0"
-I2C_CPLD_OFFSET="0"
-SYSTEM_RESET_OFFSET="0"
-
-SYSTEM_HALT_VALUE="0"
-SYSTEM_RESTART_VALUE="0"
-
 fans_type=("S" "S" "S" "S" "S" "P" "P")
-
 thermals_type=("C" "S" "S" "S" "S" "P" "P")
-
 psus_type=("S" "S")
-
-
-get_sfp_port_path()
-{
-    if [ "${1}" -ge 1 -a "${1}" -le "${CURRENT_PORT_NUM}" ] ; then
-	p=`expr $1 + 1`
-	spath="${p}"-0050
-	eval CURRENT_SFP_PORT_PATH="/sys/bus/i2c/devices/${spath}"
-	echo "${CURRENT_SFP_PORT_PATH}"
-    else
-	echo "error port number"
-    fi
-}
-
-get_max_fan_num()
-{
-    echo "${CURRENT_FAN_NUM}"
-}
-
-
+mapping=("QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP"
+"QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP"
+"QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP" "QSFP"
+"QSFP" "QSFP" )

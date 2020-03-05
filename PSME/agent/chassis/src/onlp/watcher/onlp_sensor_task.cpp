@@ -516,10 +516,15 @@ void GetOnlpInfo::get_onlp_port_static_info()
                         port_->set_port_type(PortType::Downstream);
                         port_->set_port_identifier("PON port");
                     }
-                    else if (sonlp.get_port_info_by_(portid, Switch::Port_Content::Port_Type) == acc_onlp_helper::Port_Info::Port_Type::XSFP_Port)
+                    else if (sonlp.get_port_info_by_(portid, Switch::Port_Content::Port_Type) == acc_onlp_helper::Port_Info::Port_Type::SFP_Port)
                     {
                         port_->set_port_type(PortType::MeshPort);
-                        port_->set_port_identifier("xFP port");
+                        port_->set_port_identifier("SFP port");
+                    }
+                    else if (sonlp.get_port_info_by_(portid, Switch::Port_Content::Port_Type) == acc_onlp_helper::Port_Info::Port_Type::QSFP_Port)
+                    {
+                        port_->set_port_type(PortType::MeshPort);
+                        port_->set_port_identifier("QSFP port");
                     }
                     else
                     {
