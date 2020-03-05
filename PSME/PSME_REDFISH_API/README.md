@@ -169,7 +169,7 @@ HTTP Request Methods used in PSME service.
         "Protocol": "Redfish"
         }         
 
-      - Response : 204 NO_CONTENT 	  
+        - Response : 201 CREATED 	  
 	   
    Add a subscription about ResourceRemoved
 
@@ -187,7 +187,7 @@ HTTP Request Methods used in PSME service.
         "Protocol": "Redfish"
         }         
 
-      - Response : 204 NO_CONTENT
+        - Response : 201 CREATED
 
    Add a subscription about Alert
 
@@ -205,7 +205,7 @@ HTTP Request Methods used in PSME service.
         "Protocol": "Redfish"
         }         
 
-      - Response : 204 NO_CONTENT
+      - Response : 201 CREATED
 	       	   
    Get subscription events
 	  
