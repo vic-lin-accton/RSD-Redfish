@@ -179,6 +179,7 @@ public:
     static constexpr const char UPPER_THRESHOLD_CRITICAL[] = "UpperThresholdCritical";
     static constexpr const char LOWER_THRESHOLD_CRITICAL[] = "LowerThresholdCritical";
     static constexpr const char LOWER_THRESHOLD_FATAL[] ="LowerThresholdFatal";
+    static constexpr const char READING_UNIT[] ="ReadingUnits";
 };
 
 /*!

@@ -60,17 +60,25 @@ endpoint::Olt::~Olt() {}
 void endpoint::Olt::get(const server::Request &request, server::Response &response)
 {
     auto r = make_prototype();
+    try
+    {
 #ifdef BAL34
-    auto &OLT = Olt_Device::Olt_Device::get_instance();
-    OLT.get_board_basic_info();
-    r[constants::Olt::BAL_STATE] = OLT.get_bal_oper_state();
-    r[constants::Olt::OLT_OPTR_STATE] = OLT.get_olt_status();
+        auto &OLT = Olt_Device::Olt_Device::get_instance();
+        OLT.get_board_basic_info();
+        r[constants::Olt::BAL_STATE] = OLT.get_bal_oper_state();
+        r[constants::Olt::OLT_OPTR_STATE] = OLT.get_olt_status();
 
-    UNUSED(request);
+        UNUSED(request);
 #else
-    UNUSED(request);
-    set_response(response, r);
+        UNUSED(request);
 #endif
+        set_response(response, r);
+    }
+    catch (const agent_framework::exceptions::NotFound &ex)
+    {
+        printf("Olt get error!\r\n");
+        return;
+    }
 }
 
 void endpoint::Olt::del(const server::Request &request, server::Response &response)

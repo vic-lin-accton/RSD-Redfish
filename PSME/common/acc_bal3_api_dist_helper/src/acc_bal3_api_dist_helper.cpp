@@ -194,7 +194,7 @@ static void OltBalReady(short unsigned int olt, bcmolt_msg *msg)
     {
         //After BAL ready, enable OLT maple
         bcmolt_odid dev;
-        printf("olt id[%d]\r\n", olt);
+        UNUSED(olt);
 
         auto &rOLT = Olt_Device::Olt_Device::get_instance();
         int maple_num = rOLT.get_maple_num();
@@ -353,7 +353,7 @@ static void OltOmciIndication(short unsigned int olt, bcmolt_msg *msg)
 
 static void OltOperIndication(short unsigned int olt, bcmolt_msg *msg)
 {
-    printf("olt id[%d]\r\n", olt);
+    UNUSED(olt);
     if (msg->subgroup == BCMOLT_DEVICE_AUTO_SUBGROUP_CONNECTION_COMPLETE)
     {
         static int count = 0;
@@ -415,7 +415,7 @@ static int interface_key_to_port_no(bcmolt_interface_id intf_id, bcmolt_interfac
 
 static void OltLosIndication(short unsigned int olt, bcmolt_msg *msg)
 {
-    printf("olt id[%d]\r\n", olt);
+    UNUSED(olt);
     if (msg->subgroup == BCMOLT_DEVICE_AUTO_SUBGROUP_CONNECTION_COMPLETE)
     {
         switch (msg->obj_type)
@@ -448,7 +448,7 @@ static void OltLosIndication(short unsigned int olt, bcmolt_msg *msg)
 
 static void OltOnuActivationFailureIndication(short unsigned int olt, bcmolt_msg *msg)
 {
-    printf("olt id[%d]\r\n", olt);
+    UNUSED(olt);
     switch (msg->obj_type)
     {
     case BCMOLT_OBJ_ID_ONU:
@@ -476,7 +476,7 @@ static void OltOnuActivationFailureIndication(short unsigned int olt, bcmolt_msg
 
 static void OltOnuAllIndication(short unsigned int olt, bcmolt_msg *msg)
 {
-    printf("olt id[%d]\r\n", olt);
+    UNUSED(olt);
     switch (msg->obj_type)
     {
     case BCMOLT_OBJ_ID_ONU:
@@ -531,7 +531,7 @@ std::string vendor_specific_to_str(char const *const vendor_specific)
 
 static void OltOnuDiscoveryIndication(short unsigned int olt, bcmolt_msg *msg)
 {
-    printf("olt id[%d]\r\n", olt);
+    UNUSED(olt);
     switch (msg->obj_type)
     {
     case BCMOLT_OBJ_ID_PON_INTERFACE:
@@ -563,7 +563,7 @@ static void OltOnuDiscoveryIndication(short unsigned int olt, bcmolt_msg *msg)
 
 static void OltOnuOperIndication(short unsigned int olt, bcmolt_msg *msg)
 {
-    printf("olt id[%d]\r\n", olt);
+    UNUSED(olt);
     switch (msg->obj_type)
     {
     case BCMOLT_OBJ_ID_ONU:
@@ -595,7 +595,7 @@ static void OltOnuOperIndication(short unsigned int olt, bcmolt_msg *msg)
 
 static void OltOnuO5(short unsigned int olt, bcmolt_msg *msg)
 {
-    printf("olt id[%d]\r\n", olt);
+    UNUSED(olt);
     switch (msg->obj_type)
     {
     case BCMOLT_OBJ_ID_ONU:

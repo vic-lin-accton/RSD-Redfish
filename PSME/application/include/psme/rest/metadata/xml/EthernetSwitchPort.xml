@@ -237,6 +237,7 @@
       <ComplexType Name="Temperature">
         <Annotation Term="OData.AdditionalProperties" Bool="false"/>
         <Property Name="Reading" Type="Edm.Double"/>
+        <Property Name="ReadingUnits" Type="Edm.String"/>
         <Property Name="UpperThresholdFatal" Type="Edm.Double"/>
         <Property Name="UpperThresholdCritical" Type="Edm.Double"/>
         <Property Name="LowerThresholdCritical" Type="Edm.Double"/>
@@ -247,6 +248,7 @@
       <ComplexType Name="Voltage">
         <Annotation Term="OData.AdditionalProperties" Bool="false"/>
         <Property Name="Reading" Type="Edm.Double"/>
+        <Property Name="ReadingUnits" Type="Edm.String"/>
         <Property Name="UpperThresholdFatal" Type="Edm.Double"/>
         <Property Name="UpperThresholdCritical" Type="Edm.Double"/>
         <Property Name="LowerThresholdCritical" Type="Edm.Double"/>
@@ -257,6 +259,7 @@
       <ComplexType Name="BiasCurrent">
         <Annotation Term="OData.AdditionalProperties" Bool="false"/>
         <Property Name="Reading" Type="Edm.Double"/>
+        <Property Name="ReadingUnits" Type="Edm.String"/>
         <Property Name="UpperThresholdFatal" Type="Edm.Double"/>
         <Property Name="UpperThresholdCritical" Type="Edm.Double"/>
         <Property Name="LowerThresholdCritical" Type="Edm.Double"/>
@@ -267,6 +270,7 @@
       <ComplexType Name="TxPower">
         <Annotation Term="OData.AdditionalProperties" Bool="false"/>
         <Property Name="Reading" Type="Edm.Double"/>
+        <Property Name="ReadingUnits" Type="Edm.String"/>
         <Property Name="UpperThresholdFatal" Type="Edm.Double"/>
         <Property Name="UpperThresholdCritical" Type="Edm.Double"/>
         <Property Name="LowerThresholdCritical" Type="Edm.Double"/>
@@ -277,6 +281,7 @@
       <ComplexType Name="RxPower">
         <Annotation Term="OData.AdditionalProperties" Bool="false"/>
         <Property Name="Reading" Type="Edm.Double"/>
+        <Property Name="ReadingUnits" Type="Edm.String"/>
         <Property Name="UpperThresholdFatal" Type="Edm.Double"/>
         <Property Name="UpperThresholdCritical" Type="Edm.Double"/>
         <Property Name="LowerThresholdCritical" Type="Edm.Double"/>

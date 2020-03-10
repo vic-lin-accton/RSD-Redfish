@@ -155,7 +155,7 @@ constexpr const char EthernetSwitchPort::UPPER_THRESHOLD_FATAL[];
 constexpr const char EthernetSwitchPort::UPPER_THRESHOLD_CRITICAL[];
 constexpr const char EthernetSwitchPort::LOWER_THRESHOLD_CRITICAL[];
 constexpr const char EthernetSwitchPort::LOWER_THRESHOLD_FATAL[];
-
+constexpr const char EthernetSwitchPort::READING_UNIT[];
 
 constexpr const char EthernetSwitchPort::NEIGHBOR_MAC[];
 constexpr const char EthernetSwitchPort::VLAN_ENABLE[];

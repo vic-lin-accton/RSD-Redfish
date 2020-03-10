@@ -125,6 +125,7 @@ json::Value EthernetSwitchPort::get_trans_info_json() const
     r[literals::EthernetSwitchPort::MANUFACTURE_DATE] = tTransInfo.get_manufacture_date();
 
     //Temperature
+    r[literals::EthernetSwitchPort::TEMPERATURE][literals::EthernetSwitchPort::READING_UNIT] = "Celsius";
     signed int rr = tTransInfo.get_temp_reading();
     double tmp = (rr / 1000.000);
 
@@ -150,6 +151,7 @@ json::Value EthernetSwitchPort::get_trans_info_json() const
     r[literals::EthernetSwitchPort::TEMPERATURE][literals::EthernetSwitchPort::STATUS][literals::TransInfo::STATUS_HEALTH] = tTransInfo.get_temp_status_health();
 
     //Voltage
+    r[literals::EthernetSwitchPort::VOLTAGE][literals::EthernetSwitchPort::READING_UNIT] = "V";
     rr = tTransInfo.get_voltage_reading();
     tmp = (rr / 1000.000);
     r[literals::EthernetSwitchPort::VOLTAGE][literals::EthernetSwitchPort::READING] = tmp;
@@ -174,6 +176,7 @@ json::Value EthernetSwitchPort::get_trans_info_json() const
     r[literals::EthernetSwitchPort::VOLTAGE][literals::EthernetSwitchPort::STATUS][literals::TransInfo::STATUS_HEALTH] = tTransInfo.get_voltage_status_health();
 
     // Biascurrent
+    r[literals::EthernetSwitchPort::BIAS_CURRENT][literals::EthernetSwitchPort::READING_UNIT] = "mA";
     rr = tTransInfo.get_bias_current_reading();
     tmp = (rr / 1000.000);
     r[literals::EthernetSwitchPort::BIAS_CURRENT][literals::EthernetSwitchPort::READING] = tmp;
@@ -198,6 +201,7 @@ json::Value EthernetSwitchPort::get_trans_info_json() const
     r[literals::EthernetSwitchPort::BIAS_CURRENT][literals::EthernetSwitchPort::STATUS][literals::TransInfo::STATUS_HEALTH] = tTransInfo.get_bias_current_status_health();
 
     // TxPower
+    r[literals::EthernetSwitchPort::TX_POWER][literals::EthernetSwitchPort::READING_UNIT] = "mW";
     rr = tTransInfo.get_tx_power_reading();
     tmp = (rr / 1000.000);
     r[literals::EthernetSwitchPort::TX_POWER][literals::EthernetSwitchPort::READING] = tmp;
@@ -218,10 +222,12 @@ json::Value EthernetSwitchPort::get_trans_info_json() const
     tmp = (rr / 1000.000);
     r[literals::EthernetSwitchPort::TX_POWER][literals::EthernetSwitchPort::LOWER_THRESHOLD_FATAL] = tmp;
 
+
     r[literals::EthernetSwitchPort::TX_POWER][literals::EthernetSwitchPort::STATUS][literals::TransInfo::STATUS_STATE] = tTransInfo.get_tx_power_status_state();
     r[literals::EthernetSwitchPort::TX_POWER][literals::EthernetSwitchPort::STATUS][literals::TransInfo::STATUS_HEALTH] = tTransInfo.get_tx_power_status_health();
 
     // RxPower
+    r[literals::EthernetSwitchPort::RX_POWER][literals::EthernetSwitchPort::READING_UNIT] = "mW";
     rr = tTransInfo.get_rx_power_reading();
     tmp = (rr / 1000.000);
     r[literals::EthernetSwitchPort::RX_POWER][literals::EthernetSwitchPort::READING] = tmp;
