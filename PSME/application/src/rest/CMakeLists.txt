@@ -135,7 +135,9 @@ set(SOURCES
     endpoints/ethernet/ethernet_switch_port_collection.cpp
     endpoints/ethernet/ethernet_switch_port_onus_collection.cpp
     endpoints/ethernet/ethernet_switch_port_onus.cpp
+    endpoints/ethernet/ethernet_switch_port_onus_omci.cpp
     endpoints/ethernet/ethernet_switch_port.cpp
+    endpoints/ethernet/olt_flow.cpp
     endpoints/ethernet/acl.cpp
     endpoints/ethernet/acl_bind.cpp
     endpoints/ethernet/acl_collection.cpp
@@ -246,6 +248,8 @@ set(SOURCES
     validators/schemas/storage_subsystem.cpp
     validators/schemas/chassis.cpp
     validators/schemas/olt.cpp
+    validators/schemas/omci.cpp
+    validators/schemas/flow.cpp
     validators/schemas/pcie_device.cpp
     validators/schemas/system.cpp
     validators/schemas/reset.cpp

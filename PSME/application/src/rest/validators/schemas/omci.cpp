@@ -1,6 +1,6 @@
 /*!
  * @copyright
- * Copyright (c) 2016-2017 Intel Corporation
+ * Copyright (c) 2015-2017 Intel Corporation
  *
  * @copyright
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,38 +18,18 @@
  * limitations under the License.
  * */
 
-#pragma once
+#include "psme/rest/validators/schemas/omci.hpp"
+#include "psme/rest/constants/constants.hpp"
 
+using namespace psme::rest;
+using namespace psme::rest::validators::schema;
 
-
-#include "agent-framework/validators/procedure_validator.hpp"
-
-
-
-namespace psme {
-namespace rest {
-namespace validators {
-namespace schema {
-
-/*! @brief  DrivePatchSchema schema for validating PATCH drive requests */
-class DrivePatchSchema
-{
-    class OemSchema
-    {
-        class RackScaleSchema
-        {
-        public:
-            static const jsonrpc::ProcedureValidator &get_procedure();
-        };
-
-    public:
-        static const jsonrpc::ProcedureValidator &get_procedure();
+const jsonrpc::ProcedureValidator& OmciPostSchema::get_procedure() {
+    static jsonrpc::ProcedureValidator procedure{
+        "omci_post",
+        jsonrpc::PARAMS_BY_NAME,
+        constants::Olt::OMCI, VALID_OPTIONAL(VALID_JSON_STRING),
+        nullptr
     };
-
-public:
-    static const jsonrpc::ProcedureValidator &get_procedure();
-};
-}
-}
-}
+    return procedure;
 }

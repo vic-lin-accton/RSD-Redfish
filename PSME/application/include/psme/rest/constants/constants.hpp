@@ -111,7 +111,33 @@ namespace Olt
 {
 extern const char BAL_STATE[];
 extern const char OLT_OPTR_STATE[];
+extern const char OMCI[];
 }
+
+namespace OFlow
+{
+extern const char FLOW_ID[];
+extern const char NNI_ID[];
+extern const char PORT_ID[];
+extern const char FLOW_TYPE[];
+extern const char PKT_TAG_TYPE[];
+extern const char GEMPORT_ID[];
+extern const char CLASSIFIER[];
+extern const char ACTION[];
+extern const char ACTION_CMD[];
+extern const char ACTION_VAL[];
+extern const char CLASS_VAL[];
+extern const char OVID[];
+extern const char OPBITS[];
+extern const char OTPID[];
+extern const char IVID[];
+extern const char IPBITS[];
+extern const char ITPID[];
+extern const char ETHERTYPE[];
+extern const char IPPROTO[];
+extern const char SRCPORT[];
+extern const char DSTPORT[];
+} // namespace OFlow
 
 /*!
  * @brief Common constant literals for rest endpoints.

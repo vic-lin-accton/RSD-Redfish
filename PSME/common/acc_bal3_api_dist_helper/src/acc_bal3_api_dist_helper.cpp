@@ -1799,9 +1799,10 @@ bool Olt_Device::deactivate_onu(int intf_id, int onu_id)
             err = d_bcmbal_cfg_get(dev_id, &onu_cfg.hdr);
             if (err == BCM_ERR_OK)
             {
+                onu_state = onu_cfg.data.onu_state;
                 switch (onu_state)
                 {
-                case BCMOLT_ONU_OPERATION_ACTIVE:
+                case BCMOLT_ONU_STATE_ACTIVE:
                     BCMOLT_OPER_INIT(&onu_oper, onu, set_onu_state, onu_key);
                     BCMOLT_FIELD_SET(&onu_oper.data, onu_set_onu_state_data, onu_state, BCMOLT_ONU_OPERATION_INACTIVE);
 
@@ -1814,9 +1815,12 @@ bool Olt_Device::deactivate_onu(int intf_id, int onu_id)
                             printf("Failed to deactivate ONU %d on PON %d, err %d\n", onu_id, intf_id, err);
                             return false;
                         }
+                        else
+                            printf("Inactive ok!!\r\n");
                     }
                     break;
                 default:
+                    printf("Not Active!!\r\n");
                     break;
                 }
             }

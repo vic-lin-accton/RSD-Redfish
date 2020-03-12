@@ -29,22 +29,22 @@ namespace endpoint
 {
 
 /*!
- * A class representing the rest api EthernetSwitchPortOnus endpoint
+ * A class representing the rest api OltFlow endpoint
  */
-class EthernetSwitchPortOnus : public EndpointBase
+class OltFlow : public EndpointBase
 {
 public:
     /*!
-     * @brief The constructor for EthernetSwitchPortOnus class
+     * @brief The constructor for OltFlow class
      */
-    explicit EthernetSwitchPortOnus(const std::string &path);
-
+    explicit OltFlow(const std::string &path);
     /*!
-     * @brief EthernetSwitchPortOnus class destructor
+     * @brief OltFlow class destructor
      */
-    virtual ~EthernetSwitchPortOnus();
+    virtual ~OltFlow();
 
     void get(const server::Request &request, server::Response &response) override;
+    void post(const server::Request &request, server::Response &response) override;
     void del(const server::Request &request, server::Response &response) override;
 };
 

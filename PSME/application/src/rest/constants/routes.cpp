@@ -722,3 +722,15 @@ const std::string Routes::ONUS_COLLECTION_ONUS_PATH =
     PathBuilder(ONUS_COLLECTION_PATH)
         .append_regex(constants::PathParam::ONU_ID, constants::PathParam::ID_REGEX)
         .build();
+
+// "/redfish/v1/EthernetSwitches/{ethernetSwitchId:[0-9]+}/Ports/{portId:[0-9]+}/ONUs/{Id:[0-9]+}/Omci"
+const std::string Routes::ONUS_COLLECTION_ONUS_OMCI_PATH =
+    PathBuilder(ONUS_COLLECTION_ONUS_PATH)
+        .append(constants::EthernetSwitchPort::OMCI)
+        .build();
+
+// "/redfish/v1/Olt/Flow"
+const std::string Routes::FLOW_COLLECTION_PATH =
+    PathBuilder(OLT_PATH)
+        .append(constants::EthernetSwitchPort::FLOW)
+        .build();

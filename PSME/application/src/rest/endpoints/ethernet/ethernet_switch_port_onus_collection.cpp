@@ -120,9 +120,8 @@ void EthernetSwitchPortOnusCollection::get(const server::Request &req, server::R
 }
 void EthernetSwitchPortOnusCollection::del(const server::Request &req, server::Response &res)
 {
-    UNUSED(req);
     UNUSED(res);
-    return;
+    UNUSED(req);
 }
 
 void EthernetSwitchPortOnusCollection::post(const server::Request &req, server::Response &res)
@@ -159,6 +158,7 @@ void EthernetSwitchPortOnusCollection::post(const server::Request &req, server::
               vendor_id.c_str(), cs_vendor_spec[0], cs_vendor_spec[1], cs_vendor_spec[2], cs_vendor_spec[3]);
 
        OLT.activate_onu(port_id - 1, onu_id, vendor_id.c_str(), cs_vendor_spec);
+       UNUSED(res);
 #else
        UNUSED(res);
        UNUSED(req);

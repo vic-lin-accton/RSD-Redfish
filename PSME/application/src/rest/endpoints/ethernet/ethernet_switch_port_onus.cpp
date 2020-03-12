@@ -38,6 +38,7 @@
 #include "acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp"
 using namespace acc_bal3_api_dist_helper;
 #endif
+#define UNUSED(x) (void)(x)
 using namespace psme::rest;
 using namespace psme::rest::constants;
 using namespace psme::rest::endpoint;
@@ -90,4 +91,30 @@ void EthernetSwitchPortOnus::get(const server::Request &req, server::Response &r
         }
     }
     set_response(res, json);
+}
+
+void EthernetSwitchPortOnus::del(const server::Request &req, server::Response &res)
+{
+    using namespace psme::rest::error;
+    try
+    {
+#ifdef BAL34
+        auto json = ::make_prototype();
+        int port_id = std::stoi(req.params[PathParam::SWITCH_PORT_ID]);
+        json[Common::ODATA_ID] = PathBuilder(req).build();
+        json[Common::ID] = req.params[PathParam::ONU_ID];
+        int onu_id = std::stoi(req.params[PathParam::ONU_ID]);
+        auto &OLT = Olt_Device::Olt_Device::get_instance();
+        printf("id[%d], onuid[%d]\r\n", port_id -1 , onu_id);
+        OLT.deactivate_onu(port_id - 1, onu_id);
+        UNUSED(res);
+#else
+        UNUSED(res);
+        UNUSED(req);
+#endif
+    }
+    catch (const agent_framework::exceptions::NotFound &ex)
+    {
+        return;
+    }
 }

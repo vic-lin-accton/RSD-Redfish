@@ -81,6 +81,8 @@ const char ACTIVE_ACLS[] = "ActiveACLs";
 const char NEIGHBOR_INTERFACE[] = "NeighborInterface";
 const char STATIC_MACS[] = "StaticMACs";
 const char ONUS[] = "ONUs";
+const char OMCI[] = "Omci";
+const char FLOW[] = "Flow";
 const char TRANS_STATIC[] = "TransceiverStatistics";
 }
 

@@ -20,35 +20,18 @@
 
 #pragma once
 
-
-
 #include "agent-framework/validators/procedure_validator.hpp"
-
-
 
 namespace psme {
 namespace rest {
 namespace validators {
 namespace schema {
 
-/*! @brief  DrivePatchSchema schema for validating PATCH drive requests */
-class DrivePatchSchema
-{
-    class OemSchema
-    {
-        class RackScaleSchema
-        {
-        public:
-            static const jsonrpc::ProcedureValidator &get_procedure();
-        };
-
-    public:
-        static const jsonrpc::ProcedureValidator &get_procedure();
-    };
-
+class OmciPostSchema {
 public:
-    static const jsonrpc::ProcedureValidator &get_procedure();
+    static const jsonrpc::ProcedureValidator& get_procedure();
 };
+
 }
 }
 }

@@ -29,23 +29,22 @@ namespace endpoint
 {
 
 /*!
- * A class representing the rest api EthernetSwitchPortOnus endpoint
+ * A class representing the rest api EthernetSwitchPortOnusOmci endpoint
  */
-class EthernetSwitchPortOnus : public EndpointBase
+class EthernetSwitchPortOnusOmci : public EndpointBase
 {
 public:
     /*!
-     * @brief The constructor for EthernetSwitchPortOnus class
+     * @brief The constructor for EthernetSwitchPortOnusOmci class
      */
-    explicit EthernetSwitchPortOnus(const std::string &path);
+    explicit EthernetSwitchPortOnusOmci(const std::string &path);
 
     /*!
      * @brief EthernetSwitchPortOnus class destructor
      */
-    virtual ~EthernetSwitchPortOnus();
+    virtual ~EthernetSwitchPortOnusOmci();
 
-    void get(const server::Request &request, server::Response &response) override;
-    void del(const server::Request &request, server::Response &response) override;
+    void post(const server::Request &request, server::Response &response) override;
 };
 
 } // namespace endpoint

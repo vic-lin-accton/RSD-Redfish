@@ -93,10 +93,37 @@ const char LOGSER_ID[] = "logserId";
 const char ONU_ID[] = "onuId";
 }
 
-namespace Olt {
+namespace Olt
+{
 const char BAL_STATE[] = "BalState";
 const char OLT_OPTR_STATE[] = "OltOperateState";
-}
+const char OMCI[] = "Omci";
+} // namespace Olt
+
+namespace OFlow
+{
+const char FLOW_ID[] = "FlowId";
+const char NNI_ID[] = "NniId";
+const char PORT_ID[] = "PortId";
+const char FLOW_TYPE[] = "FlowType";
+const char PKT_TAG_TYPE[] = "PktTagType";
+const char GEMPORT_ID[] = "GemportId";
+const char CLASSIFIER[] = "Classifier";
+const char ACTION[] = "Action";
+const char ACTION_CMD[] = "ActionCmd";
+const char ACTION_VAL[] = "ActionVal";
+const char CLASS_VAL[] = "ClassVal";
+const char OVID[] = "OVid";
+const char OPBITS[] = "OPbits";
+const char OTPID[] = "OTpid";
+const char IVID[] = "IVid";
+const char IPBITS[] = "IPbits";
+const char ITPID[] = "ITpid";
+const char ETHERTYPE[] = "EtherType";
+const char IPPROTO[] = "IpProto";
+const char SRCPORT[] = "SrcPort";
+const char DSTPORT[] = "DstPort";
+} // namespace OltFlow
 
 namespace Common {
 const char INTEL[] = "Intel Corporation";
