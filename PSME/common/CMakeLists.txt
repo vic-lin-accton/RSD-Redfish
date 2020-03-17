@@ -35,5 +35,5 @@ add_subdirectory(acc_sys_helper)
 add_subdirectory(acc_onlp_helper)
 
 IF("${CUSE_ACC_BAL3_DISTLIB}" STREQUAL "TRUE" )
-    add_subdirectory(acc_bal3_api_dist_helper)
+    add_subdirectory(acc_bal_api_dist_helper)
 ENDIF()

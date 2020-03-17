@@ -94,6 +94,7 @@ public:
     static const std::string ONUS_COLLECTION_ONUS_PATH;
     static const std::string ONUS_COLLECTION_ONUS_OMCI_PATH;
     static const std::string FLOW_COLLECTION_PATH;
+    static const std::string FLOW_ID_PATH;
     static const std::string OLT_PATH;
 /*Nick Added End  : */
     static const std::string THERMAL_ZONE_COLLECTION_PATH;

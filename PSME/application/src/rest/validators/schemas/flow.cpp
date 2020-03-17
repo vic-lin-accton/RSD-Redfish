@@ -45,6 +45,17 @@ const jsonrpc::ProcedureValidator &FlowPostSchema::get_procedure()
     return procedure;
 }
 
+const jsonrpc::ProcedureValidator &FlowDelSchema::get_procedure()
+{
+    static jsonrpc::ProcedureValidator procedure{
+        "flow_delete",
+        jsonrpc::PARAMS_BY_NAME,
+        constants::OFlow::FLOW_ID, VALID_OPTIONAL(VALID_JSON_INTEGER),
+        constants::OFlow::FLOW_TYPE, VALID_OPTIONAL(VALID_JSON_STRING),
+       nullptr};
+    return procedure;
+}
+
 const jsonrpc::ProcedureValidator &FlowPostSchema::ActionVal::get_procedure()
 {
     static jsonrpc::ProcedureValidator procedure{

@@ -1,5 +1,5 @@
-#ifndef ACC_BAL3_API_DIST_HELPER_HPP
-#define ACC_BAL3_API_DIST_HELPER_HPP
+#ifndef ACC_BAL_API_DIST_HELPER_HPP
+#define ACC_BAL_API_DIST_HELPER_HPP
 
 #include <iostream>
 #include <fstream>
@@ -67,7 +67,7 @@ constexpr const size_t G_PON_TOTAL_INTF_NUM(G_PON_MAX_PON_PORT_NUM + G_PON_MAX_N
 #define MAX_PON_PORT_VALUES MAX(XGS_PON_MAX_PON_PORT_NUM, G_PON_MAX_PON_PORT_NUM)
 #define MAX_NNI_PORT_VALUES MAX(XGS_PON_MAX_NNI_PORT_NUM, G_PON_MAX_NNI_PORT_NUM)
 
-namespace acc_bal3_api_dist_helper
+namespace acc_bal_api_dist_helper
 {
 using namespace std;
 #define MAG_BASE_VAL 1023
@@ -148,6 +148,7 @@ public:
     bool get_nni_status(int port);
     bool get_inf_active_state(int port);
     bool set_inf_active_state(int port, bool status);
+    bool is_onu_active(int intf_id, int onu_id);
     bool virtual activate_onu(int intf_id, int onu_id, const char *vendor_id, const char *vendor_specific) = 0;
     bool virtual alloc_id_add(int intf_id, int onu_id, int alloc_id) = 0;
     int virtual get_max_pon_num() = 0;
@@ -163,7 +164,7 @@ public:
     bool rssi_measurement(int onu_id, int pon_id);
     void *fHandle = 0;
     Olt_Device(const Olt_Device &a) { this->fHandle = a.fHandle; };
-    Olt_Device &operator=(const acc_bal3_api_dist_helper::Olt_Device &a)
+    Olt_Device &operator=(const acc_bal_api_dist_helper::Olt_Device &a)
     {
         this->fHandle = a.fHandle;
         return *this;
@@ -172,6 +173,8 @@ public:
 protected:
     int m_pon_ports_num = {0};
     int m_nni_ports_num = {0};
+    uint32_t m_sla_guaranteed_bw = {0};
+    uint32_t m_sla_maximum_bw = {0};
 
 private:
     std::string m_VENDOR_ID = {""};
@@ -193,42 +196,6 @@ private:
     json::Value get_pon_statistic(int port);
     json::Value get_nni_statistic(int port);
 };
-
-class XGS_PON_Olt_Device : public Olt_Device
-{
-public:
-    XGS_PON_Olt_Device() : Olt_Device(){};
-    ~XGS_PON_Olt_Device(){};
-    int maple_num = 8;
-    int get_max_pon_num() { return XGS_PON_MAX_PON_PORT_NUM; };
-    int get_max_nni_num() { return XGS_PON_MAX_NNI_PORT_NUM; };
-    int get_total_port_num() { return get_max_pon_num() + get_max_nni_num(); };
-    int get_maple_num() { return maple_num; };
-    bool activate_onu(int intf_id, int onu_id, const char *vendor_id, const char *vendor_specific);
-    bool alloc_id_add(int intf_id, int onu_id, int alloc_id);
-    std::string platform_type = "asxvolt16";
-    std::string get_platform() { return platform_type; };
-
-private:
-};
-
-class G_PON_Olt_Device : public Olt_Device
-{
-public:
-    G_PON_Olt_Device() : Olt_Device(){};
-    ~G_PON_Olt_Device(){};
-    int maple_num = 4;
-    int get_max_pon_num() { return G_PON_MAX_PON_PORT_NUM; };
-    int get_max_nni_num() { return G_PON_MAX_NNI_PORT_NUM; };
-    int get_total_port_num() { return get_max_pon_num() + get_max_nni_num(); };
-    int get_maple_num() { return maple_num; };
-    bool activate_onu(int intf_id, int onu_id, const char *vendor_id, const char *vendor_specific);
-    bool alloc_id_add(int intf_id, int onu_id, int alloc_id);
-    std::string platform_type = "asgvolt64";
-    std::string get_platform() { return platform_type; };
-
-private:
-};
-} // namespace acc_bal3_api_dist_helper
+} // namespace acc_bal_api_dist_helper
 
 #endif

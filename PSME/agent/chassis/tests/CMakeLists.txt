@@ -29,7 +29,7 @@ IF("${CUSE_ACC_BAL_DISTLIB}" STREQUAL "TRUE" )
 ENDIF()
 
 IF("${CUSE_ACC_BAL3_DISTLIB}" STREQUAL "TRUE" )
-    add_subdirectory(acc_api_bal3_dist_test)
+    add_subdirectory(acc_api_bal_dist_test)
 ENDIF()
 
 add_subdirectory(md5)

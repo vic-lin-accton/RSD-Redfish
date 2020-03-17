@@ -60,9 +60,9 @@ if [ "$1" = "arm" ];then
 else
     cp $PSME_PROJ_PATH/bin/tests/unittest_psme-chassis_onlp $ITEM_PATH/usr/local/bin
 
-    if [ -f "$PSME_PROJ_PATH/bin/tests/unittest_psme-chassis_acc_api_bal3_dist_test" ];then
+    if [ -f "$PSME_PROJ_PATH/bin/tests/unittest_psme-chassis_acc_api_bal_dist_test" ];then
         #For bal api unit test
-        cp $PSME_PROJ_PATH/bin/tests/unittest_psme-chassis_acc_api_bal3_dist_test $ITEM_PATH/broadcom
+        cp $PSME_PROJ_PATH/bin/tests/unittest_psme-chassis_acc_api_bal_dist_test $ITEM_PATH/broadcom
         cp ${BAL_TEST}/onu_cfg                            $ITEM_PATH/broadcom
         cp ${BAL_TEST}/rm_g_onu_cfg                       $ITEM_PATH/broadcom
         cp ${BAL_TEST}/xgspon_unit_test_onu_cfg           $ITEM_PATH/broadcom

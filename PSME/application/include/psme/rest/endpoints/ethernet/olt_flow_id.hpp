@@ -29,22 +29,22 @@ namespace endpoint
 {
 
 /*!
- * A class representing the rest api OltFlow endpoint
+ * A class representing the rest api OltFlowId endpoint
  */
-class OltFlow : public EndpointBase
+class OltFlowId : public EndpointBase
 {
 public:
     /*!
-     * @brief The constructor for OltFlow class
+     * @brief The constructor for OltFlowId class
      */
-    explicit OltFlow(const std::string &path);
+    explicit OltFlowId(const std::string &path);
     /*!
-     * @brief OltFlow class destructor
+     * @brief OltFlowId class destructor
      */
-    virtual ~OltFlow();
+    virtual ~OltFlowId();
 
     void get(const server::Request &request, server::Response &response) override;
-    void post(const server::Request &request, server::Response &response) override;
+    void del(const server::Request &request, server::Response &response) override;
 };
 
 } // namespace endpoint

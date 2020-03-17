@@ -52,7 +52,7 @@ void EndpointBuilder::build_endpoints(psme::rest::server::Multiplexer& mp) {
     // "/redfish/v1/metadata/{metadata_file:*}"
     mp.register_handler(Metadata::UPtr(new Metadata(constants::Routes::METADATA_PATH)), AccessType::ALL);
 
-#if defined BAL34
+#if defined BAL
     // "/redfish/v1/Olt
     mp.register_handler(Olt::UPtr( new Olt(constants::Routes::OLT_PATH)), AccessType::ALL);
 #endif
@@ -353,6 +353,10 @@ void EndpointBuilder::build_endpoints(psme::rest::server::Multiplexer& mp) {
     // "/redfish/v1/Olt/Flow"
     mp.register_handler(OltFlow::UPtr(
         new OltFlow(constants::Routes::FLOW_COLLECTION_PATH)));
+
+    // "/redfish/v1/Olt/Flow/{Id:[0-9]+}"
+    mp.register_handler(OltFlow::UPtr(
+        new OltFlow(constants::Routes::FLOW_ID_PATH)));
 
     // "/redfish/v1/EthernetSwitches/{ethernetSwitchId:[0-9]+}/Ports/{portId:[0-9]+}/staticMACs/{staticMacId:[0-9]+}"
     mp.register_handler(StaticMac::UPtr(new StaticMac(constants::Routes::STATIC_MAC_PATH)));

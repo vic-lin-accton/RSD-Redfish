@@ -43,9 +43,9 @@
 #include <csignal>
 #include <iostream>
 #include <string>
-#ifdef BAL34
-#include "acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp"
-using namespace acc_bal3_api_dist_helper;
+#ifdef BAL
+#include "acc_bal_api_dist_helper/acc_bal_api_dist_helper.hpp"
+using namespace acc_bal_api_dist_helper;
 #endif
 #ifdef ONLP
 #include "acc_onlp_helper/acc_onlp_helper.hpp"
@@ -225,7 +225,7 @@ void App::init() {
 }
 void App::init_bal()
 {
-#ifdef BAL34
+#ifdef BAL
     auto &pOLT = Olt_Device::Olt_Device::get_instance();
     if (pOLT.is_bal_lib_init() != true)
     {

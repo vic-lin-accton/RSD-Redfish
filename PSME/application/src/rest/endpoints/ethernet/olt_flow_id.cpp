@@ -18,11 +18,11 @@
  * limitations under the License.
  * */
 
-#include "psme/rest/endpoints/ethernet/ethernet_switch_port_onus_omci.hpp"
+#include "psme/rest/endpoints/ethernet/olt_flow_id.hpp"
 #include "psme/rest/constants/constants.hpp"
 #include "psme/rest/utils/mapper.hpp"
 #include "psme/rest/validators/json_validator.hpp"
-#include "psme/rest/validators/schemas/omci.hpp"
+#include "psme/rest/validators/schemas/flow.hpp"
 #include "psme/rest/utils/lag_utils.hpp"
 #include "psme/rest/server/error/error_factory.hpp"
 #include "psme/rest/model/handlers/handler_manager.hpp"
@@ -48,43 +48,62 @@ using namespace psme::rest::utils;
 using namespace psme::rest::validators;
 using namespace agent_framework::model;
 
-EthernetSwitchPortOnusOmci::EthernetSwitchPortOnusOmci(const std::string &path) : EndpointBase(path) {}
+OltFlowId::~OltFlowId(){}
+OltFlowId::OltFlowId(const std::string &path) : EndpointBase(path) {}
 
-EthernetSwitchPortOnusOmci::~EthernetSwitchPortOnusOmci() {}
-
-void EthernetSwitchPortOnusOmci::post(const server::Request &req, server::Response &res)
+void OltFlowId::del(const server::Request &req, server::Response &res)
 {
     using namespace psme::rest::error;
     try
     {
 #ifdef BAL
-        int port_id = std::stoi(req.params[PathParam::SWITCH_PORT_ID]);
-        int onu_id = std::stoi(req.params[PathParam::ONU_ID]);
+        std::string sft;
+        int flow_id = 0;
 
-        const auto json = JsonValidator::validate_request_body<schema::OmciPostSchema>(req);
-        if (json.is_member(constants::Olt::OMCI))
+        const auto json = JsonValidator::validate_request_body<schema::FlowDelSchema>(req);
+
+        if (json.is_member(constants::OFlow::FLOW_ID))
         {
-            char m_raw_omci[256] = {0x0};
-            memcpy(m_raw_omci, json[constants::Olt::OMCI].as_string().c_str(), 90);
-
-            auto &pOLT = Olt_Device::Olt_Device::get_instance();
-            if (pOLT.is_bal_lib_init() == true)
-            {
-                if (pOLT.omci_msg_out(port_id - 1, onu_id, m_raw_omci))
-                {
-                    printf("Send OMCI OK!\r\n");
-                    res.set_status(server::status_2XX::OK);
-                    return;
-                }
-                else
-                {
-                    printf("Send OMCI NG!\r\n");
-                    res.set_status(server::status_5XX::INTERNAL_SERVER_ERROR);
-                    return;
-                }
-            }
+            flow_id = json[constants::OFlow::FLOW_ID].as_int();
         }
-        return ;
+
+        if (json.is_member(constants::OFlow::FLOW_TYPE))
+        {
+            sft = json[constants::OFlow::FLOW_TYPE].as_string();
+        }
+
+        auto &OLT = Olt_Device::Olt_Device::get_instance();
+        if (OLT.is_bal_lib_init() == true)
+        {
+            bool result = OLT.flow_remove(flow_id, sft);
+
+            if (result)
+                return res.set_status(server::status_2XX::OK);
+            else
+                return res.set_status(server::status_5XX::INTERNAL_SERVER_ERROR);
+        }
+        else
+            return res.set_status(server::status_5XX::INTERNAL_SERVER_ERROR);
+
+#else
+        UNUSED(res);
+        UNUSED(req);
+#endif
+    }
+    catch (const agent_framework::exceptions::NotFound &ex)
+    {
+        return;
+    }
+}
+
+void OltFlowId::get(const server::Request &req, server::Response &res)
+{
+    using namespace psme::rest::error;
+    try
+    {
+#ifdef BAL
+        UNUSED(res);
+        UNUSED(req);
 #else
         UNUSED(res);
         UNUSED(req);

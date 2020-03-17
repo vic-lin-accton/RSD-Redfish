@@ -34,9 +34,9 @@
 
 #include "psme/core/agent/agent_manager.hpp"
 #include <regex>
-#ifdef BAL34
-#include "acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp"
-using namespace acc_bal3_api_dist_helper;
+#ifdef BAL
+#include "acc_bal_api_dist_helper/acc_bal_api_dist_helper.hpp"
+using namespace acc_bal_api_dist_helper;
 #endif
 #define UNUSED(x) (void)(x)
 using namespace psme::rest;
@@ -72,7 +72,7 @@ void EthernetSwitchPortOnus::get(const server::Request &req, server::Response &r
     int port_id = std::stoi(req.params[PathParam::SWITCH_PORT_ID]);
     json[Common::ODATA_ID] = PathBuilder(req).build();
     json[Common::ID] = req.params[PathParam::ONU_ID]; 
-#ifdef BAL34
+#ifdef BAL
     int onu_id = std::stoi(req.params[PathParam::ONU_ID]);
     auto &pOLT = Olt_Device::Olt_Device::get_instance();
     if (pOLT.is_bal_lib_init() == true)
@@ -98,7 +98,7 @@ void EthernetSwitchPortOnus::del(const server::Request &req, server::Response &r
     using namespace psme::rest::error;
     try
     {
-#ifdef BAL34
+#ifdef BAL
         auto json = ::make_prototype();
         int port_id = std::stoi(req.params[PathParam::SWITCH_PORT_ID]);
         json[Common::ODATA_ID] = PathBuilder(req).build();

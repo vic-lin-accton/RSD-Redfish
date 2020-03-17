@@ -138,6 +138,7 @@ set(SOURCES
     endpoints/ethernet/ethernet_switch_port_onus_omci.cpp
     endpoints/ethernet/ethernet_switch_port.cpp
     endpoints/ethernet/olt_flow.cpp
+    endpoints/ethernet/olt_flow_id.cpp
     endpoints/ethernet/acl.cpp
     endpoints/ethernet/acl_bind.cpp
     endpoints/ethernet/acl_collection.cpp

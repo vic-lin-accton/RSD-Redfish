@@ -20,18 +20,22 @@ cd build
 
 if [ "$1" != "C" ];then
     echo "Build all"
-    if [ "$1" == "bal34" ];then
-	echo "Build for bal sdk 3.4 platform!"
+    if [ "$1" == "bal" ];then
+	echo "Build for latest bal sdk platform!"
 	cp ../CMakeLists.txt ../CMakeLists.txt-org
-	`sed -i 's/-DONLP)/-DBAL34 -DBCMOS_MSG_QUEUE_DOMAIN_SOCKET -DBCMOS_MSG_QUEUE_UDP_SOCKET -DBCMOS_MEM_CHECK  -DBCMOS_SYS_UNITTEST -DENABLE_LOG -DENABLE_CLI &\nset(CUSE_ACC_BAL3_DISTLIB "TRUE")/' ../CMakeLists.txt`
+	`sed -i 's/-DONLP)/-DBAL -DBCMOS_MSG_QUEUE_DOMAIN_SOCKET -DBCMOS_MSG_QUEUE_UDP_SOCKET -DBCMOS_MEM_CHECK  -DBCMOS_SYS_UNITTEST -DENABLE_LOG -DENABLE_CLI &\nset(CUSE_ACC_BAL3_DISTLIB "TRUE")/' ../CMakeLists.txt`
     fi
 
     cmake ../
     grep -rl Werror . | grep flags.make | xargs sed -i 's/-Werror//g'
     #make unittest_psme-chassis_onlp
     #make unittest_psme-chassis_acc_api_bal_dist_test 
-    #make unittest_psme-chassis_acc_api_bal3_dist_test 
     make all 2>&1 | tee  onl.log    
+    if [ "$?" == 1 ];then
+        echo "Build_all.sh error!!"
+        exit 1
+    fi
+
     find ./ -name control  | xargs sed -i 's/armel/amd64/g'
     find ../tools/deb_maker/install/allinone-deb/psme-allinone/DEBIAN -name control  | xargs sed -i 's/armel/amd64/g'
     ./psme_release.sh

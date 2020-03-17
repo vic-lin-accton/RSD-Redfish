@@ -1,6 +1,6 @@
-#include "../include/acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp"
+#include "../include/acc_bal_api_dist_helper/acc_bal_api_dist_helper.hpp"
 
-using namespace acc_bal3_api_dist_helper ;
+using namespace acc_bal_api_dist_helper ;
 
 int main(int argc, char** argv)
 {

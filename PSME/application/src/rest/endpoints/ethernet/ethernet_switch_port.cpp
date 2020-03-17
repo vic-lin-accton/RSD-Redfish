@@ -44,9 +44,9 @@
 #include <stdlib.h>
 #include "acc_onlp_helper/acc_onlp_helper.hpp"
 using namespace acc_onlp_helper;
-#ifdef BAL34
-#include "acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp"
-using namespace acc_bal3_api_dist_helper;
+#ifdef BAL
+#include "acc_bal_api_dist_helper/acc_bal_api_dist_helper.hpp"
+using namespace acc_bal_api_dist_helper;
 #endif
 #define UNUSED(x) (void)(x)
 using namespace psme::rest;
@@ -161,7 +161,7 @@ bool endpoint::EthernetSwitchPort::trigger_rssi(int pon_id)
     //For OLT BAL API usage only
     //Send RSSI trigger command
     //Get ONUs list
-#ifdef BAL34
+#ifdef BAL
     Json::Reader onu_list_j_reader = {};
     Json::Value j_return_value;
     std::string onu_list_file_path = "/tmp/pon_" + std::to_string(pon_id - 1) + "_onu_list";
@@ -233,7 +233,7 @@ void endpoint::EthernetSwitchPort::get(const server::Request &req, server::Respo
                 r[constants::EthernetSwitchPort::TRANS_STATIC] = port_->get_trans_info_json();
                 }
 
-#if defined BAL34
+#if defined BAL
                 //Send RSSI Trigger to get Rx Pwr//
                 if (r[constants::EthernetSwitchPort::PORT_ID] == "PON port")
                 {
@@ -273,22 +273,17 @@ void endpoint::EthernetSwitchPort::get(const server::Request &req, server::Respo
         r[Common::LINKS][constants::EthernetSwitchPort::SWITCH][Common::ODATA_ID] = get_switch(req);
         r[constants::EthernetSwitchPort::STATIC_MACS][Common::ODATA_ID] = PathBuilder(req).append(constants::EthernetSwitchPort::STATIC_MACS).build();
     }
-
     set_response(res, r);
 }
 
 void endpoint::EthernetSwitchPort::patch(const server::Request &request, server::Response &response)
 {
-    //   using HandlerManager = psme::rest::model::handler::HandlerManager;
-
-    auto json = JsonValidator::validate_request_body<schema::EthernetSwitchPortPatchSchema>(request);
-
-    int iPort = std::stoi(request.params[PathParam::SWITCH_PORT_ID]);
     std::string admin;
     std::string operate;
+    auto json = JsonValidator::validate_request_body<schema::EthernetSwitchPortPatchSchema>(request);
+    int iPort = std::stoi(request.params[PathParam::SWITCH_PORT_ID]);
 
     auto &Onlp = acc_onlp_helper::Switch::Switch::get_instance();
-
     if (json.is_member(constants::EthernetSwitchPort::OPERATIONAL_STATE))
     {
         operate = json[constants::EthernetSwitchPort::OPERATIONAL_STATE].as_string();
@@ -298,7 +293,7 @@ void endpoint::EthernetSwitchPort::patch(const server::Request &request, server:
             Onlp.set_port_tx_status(iPort, true);
     }
 
-#if defined BAL34
+#if defined BAL
     if (json.is_member(constants::EthernetSwitchPort::ADMINISTRATIVE_STATE))
     {
         auto &pOLT = Olt_Device::Olt_Device::get_instance();
@@ -306,9 +301,17 @@ void endpoint::EthernetSwitchPort::patch(const server::Request &request, server:
         if (pOLT.is_bal_lib_init() == true)
         {
             if (!strcmp("Down", admin.c_str()))
-                pOLT.set_inf_active_state(iPort - 1, false);
+            {
+                if (!pOLT.set_inf_active_state(iPort - 1, false))
+                    return response.set_status(server::status_5XX::INTERNAL_SERVER_ERROR);
+            }
             else if (!strcmp("Up", admin.c_str()))
-                pOLT.set_inf_active_state(iPort - 1, true);
+            {
+                if (!pOLT.set_inf_active_state(iPort - 1, true))
+                    return response.set_status(server::status_5XX::INTERNAL_SERVER_ERROR);
+            }
+            else
+                return response.set_status(server::status_5XX::INTERNAL_SERVER_ERROR);
         }
         else
             printf("bal lib not init !!\r\n");

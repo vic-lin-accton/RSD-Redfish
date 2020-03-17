@@ -40,9 +40,9 @@
 #include <fstream>
 #include <istream>
 
-#ifdef BAL34
-#include "acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp"
-using namespace acc_bal3_api_dist_helper;
+#ifdef BAL
+#include "acc_bal_api_dist_helper/acc_bal_api_dist_helper.hpp"
+using namespace acc_bal_api_dist_helper;
 #endif
 #define UNUSED(x) (void)(x)
 
@@ -126,47 +126,54 @@ void EthernetSwitchPortOnusCollection::del(const server::Request &req, server::R
 
 void EthernetSwitchPortOnusCollection::post(const server::Request &req, server::Response &res)
 {
+#define VENDOR_SPEC_SIZE 8
     using namespace psme::rest::error;
-   try
-   {
-#ifdef BAL34
-       auto json = JsonValidator::validate_request_body<schema::EthernetSwitchPortOnusCollectionPostSchema>(req);
-       int port_id = std::stoi(req.params[PathParam::SWITCH_PORT_ID]);
-       int onu_id = json[constants::ONU::ONU_ID].as_int();
-       std::string vendor_id = json[constants::ONU::VENDOR_ID].as_string();
-       std::string vendor_spec = json[constants::ONU::VENDOR_SPECIFIC].as_string();
+    try
+    {
+#ifdef BAL
+        auto json = JsonValidator::validate_request_body<schema::EthernetSwitchPortOnusCollectionPostSchema>(req);
+        int port_id = std::stoi(req.params[PathParam::SWITCH_PORT_ID]);
+        int onu_id = json[constants::ONU::ONU_ID].as_int();
+        std::string vendor_id = json[constants::ONU::VENDOR_ID].as_string();
+        std::string vendor_spec = json[constants::ONU::VENDOR_SPECIFIC].as_string();
 
-       auto &OLT = Olt_Device::Olt_Device::get_instance();
+        auto &OLT = Olt_Device::Olt_Device::get_instance();
 
-       long unsigned int buflen = vendor_spec.size();
-       char cs_vendor_spec[8] = {0x0};
-       uint16_t idx1 = 0;
-       uint16_t idx2 = 0;
-       char str1[20] = {0x0};
-       char str2[20] = {0x0};
-       memset(&cs_vendor_spec, 0, buflen);
+        long unsigned int buflen = vendor_spec.size();
+        char cs_vendor_spec[VENDOR_SPEC_SIZE] = {0x0};
+        uint16_t idx1 = 0;
+        uint16_t idx2 = 0;
+        char str1[20] = {0x0};
+        char str2[20] = {0x0};
 
-       for (idx1 = 0, idx2 = 0; idx1 < buflen; idx1++, idx2++)
-       {
-           sprintf(str1, "%c", vendor_spec[idx1]);
-           sprintf(str2, "%c", vendor_spec[++idx1]);
-           strcat(str1, str2);
-           cs_vendor_spec[idx2] = (char)strtol(str1, NULL, 16);
-       }
+        if (buflen == VENDOR_SPEC_SIZE)
+            memset(&cs_vendor_spec, 0, buflen);
+        else
+            return res.set_status(server::status_5XX::INTERNAL_SERVER_ERROR);
 
-       printf("////////////Active ONU[%s][0x%02X][0x%02X][0x%02X][0x%02X] !!////////////\r\n",
-              vendor_id.c_str(), cs_vendor_spec[0], cs_vendor_spec[1], cs_vendor_spec[2], cs_vendor_spec[3]);
+        for (idx1 = 0, idx2 = 0; idx1 < buflen; idx1++, idx2++)
+        {
+            sprintf(str1, "%c", vendor_spec[idx1]);
+            sprintf(str2, "%c", vendor_spec[++idx1]);
+            strcat(str1, str2);
+            cs_vendor_spec[idx2] = (char)strtol(str1, NULL, 16);
+        }
 
-       OLT.activate_onu(port_id - 1, onu_id, vendor_id.c_str(), cs_vendor_spec);
-       UNUSED(res);
+        printf("////////////Active ONU[%s][0x%02X][0x%02X][0x%02X][0x%02X] !!////////////\r\n",
+               vendor_id.c_str(), cs_vendor_spec[0], cs_vendor_spec[1], cs_vendor_spec[2], cs_vendor_spec[3]);
+
+        if (OLT.activate_onu(port_id - 1, onu_id, vendor_id.c_str(), cs_vendor_spec))
+            res.set_status(server::status_2XX::CREATED);
+        else
+            res.set_status(server::status_5XX::INTERNAL_SERVER_ERROR);
 #else
-       UNUSED(res);
-       UNUSED(req);
+        UNUSED(res);
+        UNUSED(req);
 #endif
-   }
-   catch (const agent_framework::exceptions::NotFound &ex)
-   {
-       return;
-   }
-   return;
+    }
+    catch (const agent_framework::exceptions::NotFound &ex)
+    {
+        return;
+    }
+    return;
 }

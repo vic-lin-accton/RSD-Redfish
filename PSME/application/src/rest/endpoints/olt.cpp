@@ -29,9 +29,9 @@
 #include "psme/rest/server/error/error_factory.hpp"
 #include "psme/rest/server/error/server_exception.hpp"
 #include "psme/rest/server/parameters.hpp"
-#ifdef BAL34
-#include "acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp"
-using namespace acc_bal3_api_dist_helper;
+#ifdef BAL
+#include "acc_bal_api_dist_helper/acc_bal_api_dist_helper.hpp"
+using namespace acc_bal_api_dist_helper;
 #else
 #define UNUSED(x) (void)(x)
 #endif
@@ -62,7 +62,7 @@ void endpoint::Olt::get(const server::Request &request, server::Response &respon
     auto r = make_prototype();
     try
     {
-#ifdef BAL34
+#ifdef BAL
         auto &OLT = Olt_Device::Olt_Device::get_instance();
         OLT.get_board_basic_info();
         r[constants::Olt::BAL_STATE] = OLT.get_bal_oper_state();
@@ -90,7 +90,7 @@ void endpoint::Olt::del(const server::Request &request, server::Response &respon
 void endpoint::Olt::patch(const server::Request &request, server::Response &response)
 {
     using namespace psme::rest::error;
-#ifdef BAL34
+#ifdef BAL
     try
     {
         const auto json = JsonValidator::validate_request_body<schema::OltPatchSchema>(request);
@@ -100,7 +100,10 @@ void endpoint::Olt::patch(const server::Request &request, server::Response &resp
             if (olt_optr_state == true)
             {
                 auto &OLT = Olt_Device::Olt_Device::get_instance();
-                OLT.connect_bal(false);
+                if (OLT.connect_bal(false))
+                    response.set_status(server::status_2XX::OK);
+                else
+                    response.set_status(server::status_5XX::INTERNAL_SERVER_ERROR);
             }
         }
     }
@@ -108,9 +111,6 @@ void endpoint::Olt::patch(const server::Request &request, server::Response &resp
     {
         return;
     }
-
-    server::Request get_request{request};
-    get(get_request, response);
 #else
     UNUSED(response);
     UNUSED(request);

@@ -20,8 +20,8 @@ if (NOT GTEST_FOUND)
     return()
 endif()
 
-add_gtest(acc_api_bal3_dist_test psme-chassis
-    acc_api_bal3_dist_test.cpp
+add_gtest(acc_api_bal_dist_test psme-chassis
+    acc_api_bal_dist_test.cpp
     test_runner.cpp
 )
 

@@ -43,6 +43,12 @@ public:
         static const jsonrpc::ProcedureValidator &get_procedure();
     };
 };
+
+class FlowDelSchema
+{
+public:
+    static const jsonrpc::ProcedureValidator &get_procedure();
+};
 }
 }
 }

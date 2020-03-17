@@ -23,8 +23,8 @@
  * */
 
 #include "gtest/gtest.h"
-#include <acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp>
-using namespace acc_bal3_api_dist_helper;
+#include <acc_bal_api_dist_helper/acc_bal_api_dist_helper.hpp>
+using namespace acc_bal_api_dist_helper;
 using namespace std;
 #include <json/json.h>
 #include <string>
@@ -185,7 +185,7 @@ TestClass1::~TestClass1()
 
 void TestClass1::SetUp()
 {
-    printf("////////////acc_bal3_api_dist_helper TESTING BEGIN \n");
+    printf("////////////acc_bal_api_dist_helper TESTING BEGIN \n");
 
     static constexpr char ONU_CFG_NAME[] = "onu_cfg";
     ifstream m_source_files = {};

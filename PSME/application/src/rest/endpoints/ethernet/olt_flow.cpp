@@ -35,9 +35,9 @@
 
 #include "psme/core/agent/agent_manager.hpp"
 #include <regex>
-#ifdef BAL34
-#include "acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp"
-using namespace acc_bal3_api_dist_helper;
+#ifdef BAL
+#include "acc_bal_api_dist_helper/acc_bal_api_dist_helper.hpp"
+using namespace acc_bal_api_dist_helper;
 #endif
 #define UNUSED(x) (void)(x)
 using namespace psme::rest;
@@ -49,7 +49,7 @@ using namespace psme::rest::validators;
 using namespace agent_framework::model;
 
 
-#ifdef BAL34
+#ifdef BAL
 typedef enum
 {
     BCMOLT_ACTION_CMD_ID_NONE = 0,
@@ -104,7 +104,7 @@ std::map<std::string, bcmolt_classifier_id> classifier_id_map = {};
 OltFlow::~OltFlow(){}
 OltFlow::OltFlow(const std::string &path) : EndpointBase(path) 
 {
-#ifdef BAL34
+#ifdef BAL
     action_cmd_id_map["BCMOLT_ACTION_CMD_ID_ADD_OUTER_TAG"] = BCMOLT_ACTION_CMD_ID_ADD_OUTER_TAG;
     action_cmd_id_map["BCMOLT_ACTION_CMD_ID_REMOVE_OUTER_TAG"] = BCMOLT_ACTION_CMD_ID_REMOVE_OUTER_TAG;
     action_cmd_id_map["BCMOLT_ACTION_CMD_ID_XLATE_OUTER_TAG"] = BCMOLT_ACTION_CMD_ID_XLATE_OUTER_TAG;
@@ -137,7 +137,7 @@ OltFlow::OltFlow(const std::string &path) : EndpointBase(path)
 #endif
 }
 
-#ifdef BAL34
+#ifdef BAL
 bool set_classifier_val(struct class_val *class_val_c_val, json::Value j_json);
 bool set_classifier_val(struct class_val *class_val_c_val, json::Value j_json)
 {
@@ -223,7 +223,7 @@ void OltFlow::post(const server::Request &req, server::Response &res)
     using namespace psme::rest::error;
     try
     {
-#ifdef BAL34
+#ifdef BAL
         std::string sft;  
         std::string sptt; 
         std::string action;
@@ -309,31 +309,14 @@ void OltFlow::post(const server::Request &req, server::Response &res)
         auto &OLT = Olt_Device::Olt_Device::get_instance();
         if (OLT.is_bal_lib_init() == true)
         {
-            OLT.flow_add(onu_id, flow_id, sft, sptt, port_id, nni_id, gem_id, classifier_in, \
-            action_in, action_cmd_in, action_val_a_val, class_val_c_val);
+            bool result = OLT.flow_add(onu_id, flow_id, sft, sptt, port_id, nni_id, gem_id, classifier_in,
+                                    action_in, action_cmd_in, action_val_a_val, class_val_c_val);
+
+            if (result)
+                return res.set_status(server::status_2XX::OK);
+            else
+                return res.set_status(server::status_5XX::INTERNAL_SERVER_ERROR);
         }
-
-        UNUSED(res);
-        UNUSED(req);
-#else
-        UNUSED(res);
-        UNUSED(req);
-#endif
-    }
-    catch (const agent_framework::exceptions::NotFound &ex)
-    {
-        return;
-    }
-}
-
-void OltFlow::del(const server::Request &req, server::Response &res)
-{
-    using namespace psme::rest::error;
-    try
-    {
-#ifdef BAL34
-        UNUSED(res);
-        UNUSED(req);
 #else
         UNUSED(res);
         UNUSED(req);
@@ -350,7 +333,7 @@ void OltFlow::get(const server::Request &req, server::Response &res)
     using namespace psme::rest::error;
     try
     {
-#ifdef BAL34
+#ifdef BAL
         UNUSED(res);
         UNUSED(req);
 #else

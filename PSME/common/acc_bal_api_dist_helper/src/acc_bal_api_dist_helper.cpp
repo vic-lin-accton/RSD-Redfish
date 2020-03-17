@@ -1,37 +1,31 @@
-#include "../include/acc_bal3_api_dist_helper/acc_bal3_api_dist_helper.hpp"
+#include "../include/acc_bal_api_dist_helper/acc_bal_api_dist_helper.hpp"
+#include "../include/acc_bal_api_dist_helper/asgvolt64.hpp"
+#include "../include/acc_bal_api_dist_helper/asxvolt16.hpp"
 #include <dlfcn.h>
 #include <stdlib.h>
-using namespace acc_bal3_api_dist_helper;
+using namespace acc_bal_api_dist_helper;
 
 #ifdef __cplusplus
-extern "C"
-{
-#if defined BAL34
+extern "C" {
 #include <bcmolt_api.h>
 #include <bcmolt_host_api.h>
 #include <bcmolt_api_model_supporting_enums.h>
 #include <bcmolt_api_conn_mgr.h>
-#if defined BALCLI
-#include <bcmcli_session.h>
-#include <bcmcli.h>
-#include <bcm_api_cli.h>
-#endif
 #include <bcmos_common.h>
 #include <bcm_config.h>
-#endif
-#if 0 // BALBAI Include usage //
-#include <bcmolt_api_macros.h>
-#include <bcmolt_api.h>
-#include <bcmolt_host_api.h>
-#include <bcmos_common.h>
-#include <bcmolt_api_model_supporting_enums.h>
-#include <bcmolt_api_conn_mgr.h>
-#endif 
 }
 #endif
-#define UNUSED(x) (void)(x)
+#include "../include/acc_bal_api_dist_helper/com_def.hpp"
 
 bcmolt_oltid dev_id = 0;
+const std::string upstream = "upstream";
+const std::string downstream = "downstream";
+
+#define SERIAL_NUMBER_SIZE 12
+#define EAP_ETHER_TYPE 34958
+#define TM_UPSTREAM_SCHED_ID_START 1
+#define TM_DOWNSTREAM_SCHED_ID_START 180
+#define TM_Q_SET_ID (bcmolt_tm_queue_set_id)32768U
 
 bcmos_errno (*d_bcmbal_cfg_get)(bcmolt_oltid olt, bcmolt_cfg *objinfo) = NULL;
 bcmos_errno (*d_bcmbal_cfg_set)(bcmolt_oltid olt, bcmolt_cfg *objinfo) = NULL;
@@ -41,145 +35,19 @@ bcmos_errno (*d_bcmbal_oper_submit)(bcmolt_oltid olt, bcmolt_oper *oper) = NULL;
 bcmos_errno (*d_bcmbal_ind_subscribe)(bcmolt_oltid olt, bcmolt_rx_cfg *rx_cfg) = NULL;
 bcmos_errno (*d_bcmbal_host_init)(const bcmolt_host_init_parms *init_parms) = NULL;
 bcmos_bool (*d_bcmbal_api_conn_mgr_is_connected)(bcmolt_goid olt) = NULL;
-
 void (*d_bcmbal_msg_free)(bcmolt_msg *msg) = NULL;
 void (*d_bcmbal_api_set_prop_present)(bcmolt_msg *msg, const void *prop_ptr) = NULL;
 void (*d_bcmbal_usleep)(uint32_t us) = NULL;
-
-#undef BCMOLT_MSG_FIELD_SET
-#define BCMOLT_MSG_FIELD_SET(_msg_ptr, _fully_qualified_field_name, _field_value)                                   \
-    do                                                                                                              \
-    {                                                                                                               \
-        (_msg_ptr)->data._fully_qualified_field_name = (_field_value);                                              \
-        if (d_bcmbal_api_set_prop_present)                                                                          \
-            d_bcmbal_api_set_prop_present(&((_msg_ptr)->hdr.hdr), &((_msg_ptr)->data._fully_qualified_field_name)); \
-        else                                                                                                        \
-            printf("bcmbal_api_set_prop_present error\r\n");                                                        \
-    } while (0)
-
-#undef BCMOLT_MSG_FIELD_GET
-#define BCMOLT_MSG_FIELD_GET(_msg_ptr, _fully_qualified_field_name) \
-    d_bcmbal_api_set_prop_present(&((_msg_ptr)->hdr.hdr), &((_msg_ptr)->data._fully_qualified_field_name))
-
-const uint32_t tm_upstream_sched_id_start = 1;
-const uint32_t tm_downstream_sched_id_start = 180;
-
-#define MAX_CHAR_LEN 20
-#define MAX_OMCI_MSG_LEN 44
-
-#define TM_Q_SET_ID (bcmolt_tm_queue_set_id)32768U
-const std::string upstream = "upstream";
-const std::string downstream = "downstream";
-
-#define CLI_HOST_PROMPT_FORMAT "BCM.%u> "
-#define SERIAL_NUMBER_SIZE 12
-#define EAP_ETHER_TYPE 34958
-
-#define INTERFACE_STATE_IF_DOWN(state)                \
-    ((state == BCMOLT_INTERFACE_STATE_INACTIVE ||     \
-      state == BCMOLT_INTERFACE_STATE_PROCESSING ||   \
-      state == BCMOLT_INTERFACE_STATE_ACTIVE_STANDBY) \
-         ? BCMOS_TRUE                                 \
-         : BCMOS_FALSE)
-#define INTERFACE_STATE_IF_UP(state) \
-    ((state == BCMOLT_INTERFACE_STATE_ACTIVE_WORKING) ? BCMOS_TRUE : BCMOS_FALSE)
-#define ONU_STATE_IF_DOWN(state)                    \
-    ((state == BCMOLT_ONU_OPERATION_INACTIVE ||     \
-      state == BCMOLT_ONU_OPERATION_DISABLE ||      \
-      state == BCMOLT_ONU_OPERATION_ACTIVE_STANDBY) \
-         ? BCMOS_TRUE                               \
-         : BCMOS_FALSE)
-#define ONU_STATE_IF_UP(state) \
-    ((state == BCMOLT_ONU_OPERATION_ACTIVE) ? BCMOS_TRUE : BCMOS_FALSE)
-#define ONU_RANGING_STATE_IF_UP(state) \
-    ((state == BCMOLT_RESULT_SUCCESS) ? BCMOS_TRUE : BCMOS_FALSE)
-#define ONU_RANGING_STATE_IF_DOWN(state) \
-    ((state != BCMOLT_RESULT_SUCCESS) ? BCMOS_TRUE : BCMOS_FALSE)
-
-bcmolt_odid device_id = 0;
-#if defined BALCLI
-const char *bal_cli_thread_name = "acc_help_bal_cli_thread";
-bcmos_bool status_bcm_cli_quit = BCMOS_FALSE;
-bcmos_task bal_cli_thread;
-static bcmcli_session *current_session;
-static bcmcli_entry *api_parent_dir;
-static int bal_apiend_cli_thread_handler(long data)
-{
-    char init_string[] = "\n";
-    bcmcli_session *sess = current_session;
-    bcmos_task_parm bal_cli_task_p_dummy;
-
-    if (!bcmcli_is_stopped(sess))
-    {
-        bcmcli_parse(sess, init_string);
-
-        bcmcli_driver(sess);
-    };
-
-    printf("BAL API End CLI terminated\n");
-    bcmcli_session_close(current_session);
-    bcmcli_token_destroy(NULL);
-    return 0;
-}
-
-bcmos_errno bcmolt_apiend_cli_init()
-{
-    bcmos_errno ret;
-    bcmos_task_parm bal_cli_task_p = {};
-    bcmos_task_parm bal_cli_task_p_dummy;
-
-    if (BCM_ERR_OK != bcmos_task_query(&bal_cli_thread, &bal_cli_task_p_dummy))
-    {
-        bal_cli_task_p.name = bal_cli_thread_name;
-        bal_cli_task_p.handler = bal_apiend_cli_thread_handler;
-        bal_cli_task_p.priority = TASK_PRIORITY_CLI;
-
-        ret = bcmos_task_create(&bal_cli_thread, &bal_cli_task_p);
-        if (BCM_ERR_OK != ret)
-        {
-            bcmos_printf("Couldn't create BAL API end CLI thread\n");
-            return ret;
-        }
-    }
-}
-
-static void openolt_cli_get_prompt_cb(bcmcli_session *session, char *buf, uint32_t max_len)
-{
-    snprintf(buf, max_len, CLI_HOST_PROMPT_FORMAT, dev_id);
-}
-
-bcmos_errno bcm_openolt_api_cli_init(bcmcli_entry *parent_dir, bcmcli_session *session)
-{
-    bcmos_errno rc;
-    api_parent_dir = parent_dir;
-    rc = bcm_api_cli_set_commands(session);
-    return rc;
-}
-
-static bcmos_errno bcm_cli_quit(bcmcli_session *session, const bcmcli_cmd_parm parm[], uint16_t n_parms)
-{
-    bcmcli_stop(session);
-    bcmcli_session_print(session, "CLI terminated by 'Quit' command\n");
-    status_bcm_cli_quit = BCMOS_TRUE;
-
-    return BCM_ERR_OK;
-}
-
-int get_status_bcm_cli_quit(void)
-{
-    return status_bcm_cli_quit;
-}
-#endif
 
 static inline int get_default_tm_sched_id(int intf_id, std::string direction)
 {
     if (direction.compare(upstream) == 0)
     {
-        return tm_upstream_sched_id_start + intf_id;
+        return TM_UPSTREAM_SCHED_ID_START + intf_id;
     }
     else if (direction.compare(downstream) == 0)
     {
-        return tm_downstream_sched_id_start + intf_id;
+        return TM_DOWNSTREAM_SCHED_ID_START + intf_id;
     }
     else
     {
@@ -246,7 +114,7 @@ static void OltBalReady(short unsigned int olt, bcmolt_msg *msg)
                     }
                     else
                         printf("!!!!!!!d_bcmbal_oper_submit ERROR!!!!!!!\r\n");
-                    }
+                }
                 else
                 {
                     printf("Maple deivce %d already connected\n", dev);
@@ -543,7 +411,7 @@ static void OltOnuDiscoveryIndication(short unsigned int olt, bcmolt_msg *msg)
             bcmolt_pon_interface_onu_discovered_data *data = &((bcmolt_pon_interface_onu_discovered *)msg)->data;
 
             bcmolt_serial_number *in_serial_number = &(data->serial_number);
-            //printf("onu discover indication, pon_ni %d, serial_number %s\n", key->pon_ni, serial_number_to_str(in_serial_number));
+            printf("onu discover indication, pon_ni %d, serial_number %s\n", key->pon_ni, serial_number_to_str(in_serial_number));
             //printf("onu discover indication, pon_ni %d, vendor_specific %s\n", key->pon_ni, in_serial_number->vendor_specific.arr);
             break;
         }
@@ -643,7 +511,7 @@ static bool OnuRssiMeasurement(int in_onu_id, int in_pon_id)
         return false;
 }
 
-namespace acc_bal3_api_dist_helper
+namespace acc_bal_api_dist_helper
 {
 static Olt_Device *g_Olt_Device = NULL;
 
@@ -706,10 +574,10 @@ bool Olt_Device::check_bal_ready()
     {
         if (--maxTrials == 0)
             return false;
-    if (d_bcmbal_cfg_get)
-    {
-            if (d_bcmbal_cfg_get(dev_id, &olt_cfg.hdr))
+        if (d_bcmbal_cfg_get)
         {
+            if (d_bcmbal_cfg_get(dev_id, &olt_cfg.hdr))
+            {
                 printf("////////////Wait connection\r\n");
                 sleep(1);
                 continue;
@@ -725,33 +593,33 @@ bool Olt_Device::check_bal_ready()
 }
 
 int Olt_Device::get_board_basic_info()
-        {
+{
     printf("get borad basic info!\r\n");
     bcmos_errno err;
-    bcmolt_device_cfg dev_cfg = { };
-    bcmolt_device_key dev_key = { };
-    bcmolt_olt_cfg olt_cfg = { };
-    bcmolt_olt_key olt_key = { };
-    bcmolt_topology_map topo_map[ get_max_pon_num()] = { };
-            bcmolt_topology topo = {};
+    bcmolt_device_cfg dev_cfg = {};
+    bcmolt_device_key dev_key = {};
+    bcmolt_olt_cfg olt_cfg = {};
+    bcmolt_olt_key olt_key = {};
+    bcmolt_topology_map topo_map[get_max_pon_num()] = {};
+    bcmolt_topology topo = {};
 
-    topo.topology_maps.len =  get_max_pon_num();
-            topo.topology_maps.arr = &topo_map[0];
-            BCMOLT_CFG_INIT(&olt_cfg, olt, olt_key);
-            BCMOLT_MSG_FIELD_GET(&olt_cfg, bal_state);
-            BCMOLT_FIELD_SET_PRESENT(&olt_cfg.data, olt_cfg_data, topology);
-            BCMOLT_CFG_LIST_BUF_SET(&olt_cfg, olt, topo.topology_maps.arr, sizeof(bcmolt_topology_map) * topo.topology_maps.len);
+    topo.topology_maps.len = get_max_pon_num();
+    topo.topology_maps.arr = &topo_map[0];
+    BCMOLT_CFG_INIT(&olt_cfg, olt, olt_key);
+    BCMOLT_MSG_FIELD_GET(&olt_cfg, bal_state);
+    BCMOLT_FIELD_SET_PRESENT(&olt_cfg.data, olt_cfg_data, topology);
+    BCMOLT_CFG_LIST_BUF_SET(&olt_cfg, olt, topo.topology_maps.arr, sizeof(bcmolt_topology_map) * topo.topology_maps.len);
 
     if (d_bcmbal_cfg_get)
-            {
+    {
         d_bcmbal_cfg_get(dev_id, &olt_cfg.hdr);
 
         if (olt_cfg.data.bal_state == BCMOLT_BAL_STATE_BAL_AND_SWITCH_READY)
             m_oper_state = "up";
         printf("OLT op_state:[%s]\n", m_oper_state.c_str());
 
-            m_nni_ports_num = olt_cfg.data.topology.num_switch_ports;
-            m_pon_ports_num = olt_cfg.data.topology.topology_maps.len;
+        m_nni_ports_num = olt_cfg.data.topology.num_switch_ports;
+        m_pon_ports_num = olt_cfg.data.topology.topology_maps.len;
 
         dev_key.device_id = dev_id;
         BCMOLT_CFG_INIT(&dev_cfg, device, dev_key);
@@ -861,10 +729,10 @@ bool Olt_Device::connect_bal(bool wait_bal_ready)
     bcmos_errno err;
     if (m_bcm_host_init)
     {
-            if (d_bcmbal_api_conn_mgr_is_connected)
+        if (d_bcmbal_api_conn_mgr_is_connected)
+        {
+            if (d_bcmbal_api_conn_mgr_is_connected(dev_id) == true)
             {
-                if (d_bcmbal_api_conn_mgr_is_connected(dev_id) == true)
-                {
                 if (d_bcmbal_ind_subscribe)
                 {
                     if (!wait_bal_ready)
@@ -881,12 +749,12 @@ bool Olt_Device::connect_bal(bool wait_bal_ready)
                     }
                     else
                     {
-                    //Need wait bal ready then register other callback indicator//
-                    bcmolt_rx_cfg cb_cfg = {};
-                    cb_cfg.obj_type = BCMOLT_OBJ_ID_OLT;
-                    cb_cfg.rx_cb = OltBalReady;
-                    cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
-                    cb_cfg.subgroup = bcmolt_olt_auto_subgroup_bal_ready;
+                        //Need wait bal ready then register other callback indicator//
+                        bcmolt_rx_cfg cb_cfg = {};
+                        cb_cfg.obj_type = BCMOLT_OBJ_ID_OLT;
+                        cb_cfg.rx_cb = OltBalReady;
+                        cb_cfg.flags = BCMOLT_AUTO_FLAGS_NONE;
+                        cb_cfg.subgroup = bcmolt_olt_auto_subgroup_bal_ready;
 
                         if (d_bcmbal_ind_subscribe(dev_id, &cb_cfg) != BCM_ERR_OK)
                         {
@@ -897,17 +765,17 @@ bool Olt_Device::connect_bal(bool wait_bal_ready)
                             printf("Register_callback BCMOLT_OBJ_ID_OLT bcmolt_olt_auto_subgroup_bal_ready ok!!!\r\n");
                     }
                 }
-                    else
-                        return false;
+                else
+                    return false;
 
                 return true;
-                }
-                else
-                {
-                    printf("bcmolt_api_conn_mgr_is_connected Fail!!\r\n");
+            }
+            else
+            {
+                printf("bcmolt_api_conn_mgr_is_connected Fail!!\r\n");
                 return false;
+            }
         }
-    }
     }
     else
         return false;
@@ -962,16 +830,16 @@ Olt_Device::Olt_Device()
     if (fHandle)
     {
         printf("Using dynamic loading function\r\n");
-        d_bcmbal_cfg_get = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_cfg * objinfo)) dlsym(fHandle, "bcmolt_cfg_get");
-        d_bcmbal_cfg_set = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_cfg * objinfo)) dlsym(fHandle, "bcmolt_cfg_set");
-        d_bcmbal_cfg_clear = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_cfg * objinfo)) dlsym(fHandle, "bcmolt_cfg_clear");
-        d_bcmbal_stat_get = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_stat * stat, bcmolt_stat_flags flags)) dlsym(fHandle, "bcmolt_stat_get");
-        d_bcmbal_oper_submit = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_oper * oper)) dlsym(fHandle, "bcmolt_oper_submit");
-        d_bcmbal_msg_free = (void (*)(bcmolt_msg * msg)) dlsym(fHandle, "bcmolt_msg_free");
-        d_bcmbal_api_set_prop_present = (void (*)(bcmolt_msg * msg, const void *prop_ptr)) dlsym(fHandle, "bcmolt_api_set_prop_present");
+        d_bcmbal_cfg_get = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_cfg * objinfo))dlsym(fHandle, "bcmolt_cfg_get");
+        d_bcmbal_cfg_set = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_cfg * objinfo))dlsym(fHandle, "bcmolt_cfg_set");
+        d_bcmbal_cfg_clear = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_cfg * objinfo))dlsym(fHandle, "bcmolt_cfg_clear");
+        d_bcmbal_stat_get = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_stat * stat, bcmolt_stat_flags flags))dlsym(fHandle, "bcmolt_stat_get");
+        d_bcmbal_oper_submit = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_oper * oper))dlsym(fHandle, "bcmolt_oper_submit");
+        d_bcmbal_msg_free = (void (*)(bcmolt_msg * msg))dlsym(fHandle, "bcmolt_msg_free");
+        d_bcmbal_api_set_prop_present = (void (*)(bcmolt_msg * msg, const void *prop_ptr))dlsym(fHandle, "bcmolt_api_set_prop_present");
         d_bcmbal_host_init = (bcmos_errno(*)(const bcmolt_host_init_parms *init_parms))dlsym(fHandle, "bcmolt_host_init");
         d_bcmbal_usleep = (void (*)(uint32_t us))dlsym(fHandle, "bcmos_usleep");
-        d_bcmbal_ind_subscribe = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_rx_cfg * rx_cfg)) dlsym(fHandle, "bcmolt_ind_subscribe");
+        d_bcmbal_ind_subscribe = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_rx_cfg * rx_cfg))dlsym(fHandle, "bcmolt_ind_subscribe");
         d_bcmbal_api_conn_mgr_is_connected = (bcmos_bool(*)(bcmolt_goid olt))dlsym(fHandle, "bcmolt_api_conn_mgr_is_connected");
         m_bal_lib_init = true;
         connect_host();
@@ -1192,10 +1060,9 @@ json::Value Olt_Device::get_pon_statistic(int port)
     json::Value status(json::Value::Type::OBJECT);
     try
     {
-        bcmolt_odid device_id = 0;
-        bcmos_errno err = BCM_ERR_INTERNAL;
         bcmolt_stat_flags clear_on_read = BCMOLT_STAT_FLAGS_NONE;
         bcmolt_pon_interface_itu_pon_stats itu_pon_stats;
+        bcmos_errno err = BCM_ERR_INTERNAL;
 
         bcmolt_pon_interface_key key;
         key.pon_ni = (bcmolt_interface)port;
@@ -1207,7 +1074,7 @@ json::Value Olt_Device::get_pon_statistic(int port)
 
         if (d_bcmbal_stat_get)
         {
-            err = d_bcmbal_stat_get((bcmolt_oltid)device_id, &itu_pon_stats.hdr, clear_on_read);
+            err = d_bcmbal_stat_get((bcmolt_oltid)dev_id, &itu_pon_stats.hdr, clear_on_read);
 
             if (err == BCM_ERR_OK)
             {
@@ -1236,7 +1103,7 @@ json::Value Olt_Device::get_pon_statistic(int port)
             BCMOLT_MSG_FIELD_GET(&pon_stats, rx_packets);
             BCMOLT_MSG_FIELD_GET(&pon_stats, tx_bytes);
 
-            err = d_bcmbal_stat_get((bcmolt_oltid)device_id, &pon_stats.hdr, clear_on_read);
+            err = d_bcmbal_stat_get((bcmolt_oltid)dev_id, &pon_stats.hdr, clear_on_read);
 
             if (err == BCM_ERR_OK)
             {
@@ -1294,7 +1161,7 @@ json::Value Olt_Device::get_nni_statistic(int port)
 
         if (d_bcmbal_stat_get)
         {
-            err = d_bcmbal_stat_get((bcmolt_oltid)device_id, &nni_stats.hdr, clear_on_read);
+            err = d_bcmbal_stat_get((bcmolt_oltid)dev_id, &nni_stats.hdr, clear_on_read);
 
             if (err == BCM_ERR_OK)
             {
@@ -1508,6 +1375,35 @@ bool Olt_Device::get_nni_status(int port)
     }
     catch (const exception &e)
     {
+        return false;
+    }
+}
+
+bool Olt_Device::is_onu_active(int intf_id, int onu_id)
+{
+    bcmos_errno err = BCM_ERR_INTERNAL;
+    bcmolt_onu_key onu_key;
+    bcmolt_bin_str_36 registration_id;
+    bcmolt_onu_cfg onu_cfg;
+    onu_key.onu_id = onu_id;
+    onu_key.pon_ni = intf_id;
+    BCMOLT_CFG_INIT(&onu_cfg, onu, onu_key);
+    BCMOLT_FIELD_SET_PRESENT(&onu_cfg.data, onu_cfg_data, onu_state);
+
+    if (d_bcmbal_cfg_get)
+        err = d_bcmbal_cfg_get(dev_id, &onu_cfg.hdr);
+
+    if (err == BCM_ERR_OK)
+    {
+        if ((onu_cfg.data.onu_state == BCMOLT_ONU_STATE_PROCESSING ||
+             onu_cfg.data.onu_state == BCMOLT_ONU_STATE_ACTIVE) ||
+            (onu_cfg.data.onu_state == BCMOLT_ONU_STATE_INACTIVE &&
+             onu_cfg.data.onu_old_state == BCMOLT_ONU_STATE_NOT_CONFIGURED))
+            return true;
+    }
+    else
+    {
+        printf("is_onu_active::bcmbal_cfg_get error\r\n");
         return false;
     }
 }
@@ -1733,7 +1629,6 @@ bool Olt_Device::disable_pon_if(int intf_id)
         }
         else
             return false;
-
     }
     catch (const exception &e)
     {
@@ -1769,7 +1664,7 @@ bool Olt_Device::disable_nni_if(int intf_id)
             return true;
         }
         else
-            return false;        
+            return false;
     }
     catch (const exception &e)
     {
@@ -1841,310 +1736,10 @@ bool Olt_Device::deactivate_onu(int intf_id, int onu_id)
     }
 }
 
-bool XGS_PON_Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendor_id, const char *vendor_specific)
-{
-    std::lock_guard<std::mutex> lock{m_data_mutex};
-    try
-    {
-        bcmos_errno err = BCM_ERR_INTERNAL;
-        bcmolt_onu_cfg onu_cfg;
-        bcmolt_onu_key onu_key;
-        bcmolt_serial_number serial_number;
-        bcmolt_bin_str_36 registration_id;
-
-        onu_key.onu_id = onu_id;
-        onu_key.pon_ni = intf_id;
-        BCMOLT_CFG_INIT(&onu_cfg, onu, onu_key);
-        BCMOLT_FIELD_SET_PRESENT(&onu_cfg.data, onu_cfg_data, onu_state);
-
-        if (d_bcmbal_cfg_get)
-            err = d_bcmbal_cfg_get(dev_id, &onu_cfg.hdr);
-
-        if (err == BCM_ERR_OK)
-        {
-            if ((onu_cfg.data.onu_state == BCMOLT_ONU_STATE_PROCESSING ||
-                 onu_cfg.data.onu_state == BCMOLT_ONU_STATE_ACTIVE) ||
-                (onu_cfg.data.onu_state == BCMOLT_ONU_STATE_INACTIVE &&
-                 onu_cfg.data.onu_old_state == BCMOLT_ONU_STATE_NOT_CONFIGURED))
-                return true;
-        }
-        else
-        {
-            printf("activate_onu::bcmbal_cfg_get error\r\n");
-            return false;
-        }
-
-        printf("XGSPON Enabling ONU %d on PON %d : vendor id %s,  vendor specific %s", onu_id, intf_id, vendor_id, vendor_specific_to_str(vendor_specific).c_str());
-        memcpy(serial_number.vendor_id.arr, vendor_id, 4);
-        memcpy(serial_number.vendor_specific.arr, vendor_specific, 4);
-        BCMOLT_CFG_INIT(&onu_cfg, onu, onu_key);
-        BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.serial_number, serial_number);
-        BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.auto_learning, BCMOS_TRUE);
-        BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.xgpon.ranging_burst_profile, 2);
-        BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.xgpon.data_burst_profile, 1);
-
-        if (d_bcmbal_cfg_set)
-            err = d_bcmbal_cfg_set(dev_id, &onu_cfg.hdr);
-
-        if (err != BCM_ERR_OK)
-        {
-            printf(" ERROR [%d]\n", err);
-            return false;
-        }
-        printf(" OK!!\r\n");
-
-        alloc_id_add(intf_id, onu_id, (MAG_BASE_VAL + onu_id));
-        return true;
-    }
-    catch (const exception &e)
-    {
-        printf("XGSPON activate_onu error\r\n");
-        return false;
-    }
-}
-
-bool G_PON_Olt_Device::activate_onu(int intf_id, int onu_id, const char *vendor_id, const char *vendor_specific)
-{
-    std::lock_guard<std::mutex> lock{m_data_mutex};
-    try
-    {
-        bcmos_errno err = BCM_ERR_INTERNAL;
-        bcmolt_onu_cfg onu_cfg;
-        bcmolt_onu_key onu_key;
-        bcmolt_serial_number serial_number;
-        bcmolt_bin_str_36 registration_id;
-
-        onu_key.onu_id = onu_id;
-        onu_key.pon_ni = intf_id;
-        BCMOLT_CFG_INIT(&onu_cfg, onu, onu_key);
-        BCMOLT_FIELD_SET_PRESENT(&onu_cfg.data, onu_cfg_data, onu_state);
-
-        if (d_bcmbal_cfg_get)
-            err = d_bcmbal_cfg_get(dev_id, &onu_cfg.hdr);
-
-        if (err == BCM_ERR_OK)
-        {
-            if ((onu_cfg.data.onu_state == BCMOLT_ONU_STATE_PROCESSING ||
-                 onu_cfg.data.onu_state == BCMOLT_ONU_STATE_ACTIVE) ||
-                (onu_cfg.data.onu_state == BCMOLT_ONU_STATE_INACTIVE &&
-                 onu_cfg.data.onu_old_state == BCMOLT_ONU_STATE_NOT_CONFIGURED))
-                return true;
-        }
-        else
-        {
-            printf("activate_onu::bcmbal_cfg_get error\r\n");
-            return false;
-        }
-
-        printf("GPON Enabling ONU %d on PON %d : vendor id %s,  vendor specific %s", onu_id, intf_id, vendor_id, vendor_specific_to_str(vendor_specific).c_str());
-        memcpy(serial_number.vendor_id.arr, vendor_id, 4);
-        memcpy(serial_number.vendor_specific.arr, vendor_specific, 4);
-        BCMOLT_CFG_INIT(&onu_cfg, onu, onu_key);
-        BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.serial_number, serial_number);
-        BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.auto_learning, BCMOS_TRUE);
-        BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.gpon.ds_ber_reporting_interval, 1000000);
-        BCMOLT_MSG_FIELD_SET(&onu_cfg, itu.gpon.omci_port_id, onu_id);
-
-        if (d_bcmbal_cfg_set)
-            err = d_bcmbal_cfg_set(dev_id, &onu_cfg.hdr);
-
-        if (err != BCM_ERR_OK)
-        {
-            printf(" ERROR [%d]\n", err);
-            return false;
-        }
-        printf(" OK!!\r\n");
-
-        alloc_id_add(intf_id, onu_id, (MAG_BASE_VAL + onu_id));
-        return true;
-    }
-    catch (const exception &e)
-    {
-        printf("GPON activate_onu error\r\n");
-        return false;
-    }
-}
-
-bool XGS_PON_Olt_Device::alloc_id_add(int intf_id, int in_onu_id, int alloc_id)
-{
-    try
-    {
-        bcmos_errno err = BCM_ERR_OK;
-        bcmolt_itupon_alloc_cfg cfg;      /* declare main API struct */
-        bcmolt_itupon_alloc_key key = {}; /* declare key */
-
-        key.pon_ni = intf_id;
-        key.alloc_id = alloc_id;
-
-        printf("XGSPON alloc_id_add pon_id[%d] onu_id[%d] alloc_id[%d]", intf_id, in_onu_id, alloc_id);
-
-        /* Initialize the API struct. */
-        BCMOLT_CFG_INIT(&cfg, itupon_alloc, key);
-
-        bcmolt_pon_alloc_sla sla = {};
-        uint32_t sla_cbr_rt_bw;
-        sla_cbr_rt_bw = 0;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, cbr_rt_bw, sla_cbr_rt_bw);
-
-        uint32_t sla_cbr_nrt_bw;
-        sla_cbr_nrt_bw = 0;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, cbr_nrt_bw, sla_cbr_nrt_bw);
-
-        uint32_t sla_guaranteed_bw;
-        sla_guaranteed_bw = 0;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, guaranteed_bw, sla_guaranteed_bw);
-
-        uint32_t sla_maximum_bw;
-        sla_maximum_bw = 155520000;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, maximum_bw, sla_maximum_bw);
-
-        bcmolt_additional_bw_eligibility sla_additional_bw_eligibility;
-        sla_additional_bw_eligibility = BCMOLT_ADDITIONAL_BW_ELIGIBILITY_BEST_EFFORT;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, additional_bw_eligibility, sla_additional_bw_eligibility);
-
-        bcmos_bool sla_cbr_rt_compensation;
-        sla_cbr_rt_compensation = BCMOS_FALSE;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, cbr_rt_compensation, sla_cbr_rt_compensation);
-
-        uint8_t sla_cbr_rt_ap_index;
-        sla_cbr_rt_ap_index = 0;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, cbr_rt_ap_index, sla_cbr_rt_ap_index);
-
-        uint8_t sla_cbr_nrt_ap_index;
-        sla_cbr_nrt_ap_index = 0;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, cbr_nrt_ap_index, sla_cbr_nrt_ap_index);
-
-        bcmolt_alloc_type sla_alloc_type;
-        sla_alloc_type = BCMOLT_ALLOC_TYPE_NSR;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, alloc_type, sla_alloc_type);
-
-        uint8_t sla_weight;
-        sla_weight = 0;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, weight, sla_weight);
-
-        uint8_t sla_priority;
-        sla_priority = 0;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, priority, sla_priority);
-
-        BCMOLT_FIELD_SET(&cfg.data, itupon_alloc_cfg_data, sla, sla);
-
-        bcmolt_onu_id onu_id;
-        onu_id = in_onu_id;
-        BCMOLT_FIELD_SET(&cfg.data, itupon_alloc_cfg_data, onu_id, onu_id);
-
-        if (d_bcmbal_cfg_set)
-        {
-            err = d_bcmbal_cfg_set(dev_id, &cfg.hdr);
-
-            if (err != BCM_ERR_OK)
-            {
-                printf(" ERROR!! \n");
-                return false;
-            }
-            printf(" OK!!!\r\n");
-            return true;
-        }
-        else
-            return false;
-    }
-    catch (const exception &e)
-    {
-        printf("XGSPON alloc_id_add error\r\n");
-        return false;
-    }
-}
-
-bool G_PON_Olt_Device::alloc_id_add(int intf_id, int in_onu_id, int alloc_id)
-{
-    try
-    {
-        bcmos_errno err = BCM_ERR_OK;
-        bcmolt_itupon_alloc_cfg cfg;      /* declare main API struct */
-        bcmolt_itupon_alloc_key key = {}; /* declare key */
-
-        key.pon_ni = intf_id;
-        key.alloc_id = alloc_id;
-
-        printf("GPON alloc_id_add pon_id[%d] onu_id[%d] alloc_id[%d]", intf_id, in_onu_id, alloc_id);
-
-        /* Initialize the API struct. */
-        BCMOLT_CFG_INIT(&cfg, itupon_alloc, key);
-
-        bcmolt_pon_alloc_sla sla = {};
-        uint32_t cbr_rt_bw;
-        cbr_rt_bw = 5120000;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, cbr_rt_bw, cbr_rt_bw);
-
-        uint32_t sla_cbr_nrt_bw;
-        sla_cbr_nrt_bw = 0;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, cbr_nrt_bw, sla_cbr_nrt_bw);
-
-        bcmolt_alloc_type sla_alloc_type;
-        sla_alloc_type = BCMOLT_ALLOC_TYPE_NONE;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, alloc_type, sla_alloc_type);
-
-        uint32_t sla_guaranteed_bw;
-        sla_guaranteed_bw = 5120000;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, guaranteed_bw, sla_guaranteed_bw);
-
-        uint32_t sla_maximum_bw;
-        sla_maximum_bw = 5120000;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, maximum_bw, sla_maximum_bw);
-
-        bcmolt_additional_bw_eligibility sla_additional_bw_eligibility;
-        sla_additional_bw_eligibility = BCMOLT_ADDITIONAL_BW_ELIGIBILITY_NONE;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, additional_bw_eligibility, sla_additional_bw_eligibility);
-
-        bcmos_bool sla_cbr_rt_compensation;
-        sla_cbr_rt_compensation = BCMOS_FALSE;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, cbr_rt_compensation, sla_cbr_rt_compensation);
-
-        uint8_t sla_cbr_rt_ap_index;
-        sla_cbr_rt_ap_index = 0;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, cbr_rt_ap_index, sla_cbr_rt_ap_index);
-
-        uint8_t sla_cbr_nrt_ap_index;
-        sla_cbr_nrt_ap_index = 0;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, cbr_nrt_ap_index, sla_cbr_nrt_ap_index);
-
-        uint8_t sla_weight;
-        sla_weight = 0;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, weight, sla_weight);
-
-        uint8_t sla_priority;
-        sla_priority = 0;
-        BCMOLT_FIELD_SET(&sla, pon_alloc_sla, priority, sla_priority);
-
-        BCMOLT_FIELD_SET(&cfg.data, itupon_alloc_cfg_data, sla, sla);
-
-        bcmolt_onu_id onu_id;
-        onu_id = in_onu_id;
-        BCMOLT_FIELD_SET(&cfg.data, itupon_alloc_cfg_data, onu_id, onu_id);
-
-        if (d_bcmbal_cfg_set)
-        {
-            err = d_bcmbal_cfg_set(dev_id, &cfg.hdr);
-
-            if (err != BCM_ERR_OK)
-            {
-                printf(" ERROR!! \n");
-                return false;
-            }
-            printf(" OK!!!\r\n");
-            return true;
-        }
-        else
-            return false;
-    }
-    catch (const exception &e)
-    {
-        printf("GPON alloc_id_add error\r\n");
-        return false;
-    }
-}
-
 bool Olt_Device::omci_msg_out(int intf_id, int onu_id, const std::string pkt)
 {
+#define MAX_CHAR_LEN 20
+#define MAX_OMCI_MSG_LEN 44
     std::lock_guard<std::mutex> lock{m_data_mutex};
     try
     {
@@ -2509,7 +2104,7 @@ bool Olt_Device::get_inf_active_state(int port)
     }
 }
 
-bool Olt_Device::set_inf_active_state(int port ,bool status)
+bool Olt_Device::set_inf_active_state(int port, bool status)
 {
     std::lock_guard<std::mutex> lock{m_data_mutex};
     try
@@ -2536,4 +2131,4 @@ bool Olt_Device::set_inf_active_state(int port ,bool status)
     }
 }
 
-} // namespace acc_bal3_api_dist_helper
+} // namespace acc_bal_api_dist_helper
