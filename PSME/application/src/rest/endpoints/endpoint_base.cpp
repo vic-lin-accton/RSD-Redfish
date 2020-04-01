@@ -105,18 +105,23 @@ bool EndpointBase::authen_check(const Request& request,const std::string& method
     else 
     {
         if( (token.length() !=0) && (SessionServiceEnable == true))
-        {   // Use Session Authen // 
-            if(SessionManager::get_instance()->updateSessionTimestamp(token) == true)	
+        { // Use Session Authen //
+            int session_size = SessionManager::get_instance()->Session_size();
+            if (session_size != 0)
             {
-                Session new_session  = SessionManager::get_instance()->getSession_by_Token(token);
-                const auto  & account  =AccountManager::get_instance()->getAccount(new_session.get_username());	
+                if (SessionManager::get_instance()->updateSessionTimestamp(token) == true)
+                {
+                    Session new_session = SessionManager::get_instance()->getSession_by_Token(token);
+                    const auto &account = AccountManager::get_instance()->getAccount(new_session.get_username());
 
-                /*Check read/write priviledge */
-                /*Todo , Use "Privilege Mappings" to do more specific constrain*/		
-                if((account.get_roleid() == "ReadOnlyUser") && (method == "POST" || method == "PATCH" || method == "DELETE") )
-                    return false;				
-                
-                return true;
+                    /*Check read/write priviledge */
+                    /*Todo , Use "Privilege Mappings" to do more specific constrain*/
+                    if ((account.get_roleid() == "ReadOnlyUser") && (method == "POST" || method == "PATCH" || method == "DELETE"))
+                        return false;
+                    return true;
+                }
+                else
+                    return false;
             }
             else
                 return false;

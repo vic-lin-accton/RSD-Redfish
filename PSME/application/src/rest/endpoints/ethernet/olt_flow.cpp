@@ -48,6 +48,21 @@ using namespace psme::rest::utils;
 using namespace psme::rest::validators;
 using namespace agent_framework::model;
 
+namespace
+{
+json::Value make_prototype()
+{
+    json::Value r(json::Value::Type::OBJECT);
+    r[Common::NAME] = "Flow Collection";
+    r[Common::DESCRIPTION] = "Collection of flows";
+    r[Collection::ODATA_COUNT] = json::Value::Type::NIL;
+    r[Collection::MEMBERS] = json::Value::Type::ARRAY;
+    return r;
+}
+
+} // namespace
+
+
 
 #ifdef BAL
 typedef enum
@@ -334,8 +349,38 @@ void OltFlow::get(const server::Request &req, server::Response &res)
     try
     {
 #ifdef BAL
-        UNUSED(res);
-        UNUSED(req);
+        auto json = make_prototype();
+        auto &OLT = Olt_Device::Olt_Device::get_instance();
+        if (OLT.is_bal_lib_init() == true)
+        {
+            std::map<flow_pair, int32_t> flow_map_r = OLT.get_flow_map();
+            long unsigned int count = flow_map_r.size();
+            if (count != 0)
+            {
+                json[Collection::ODATA_COUNT] = count;
+                std::map<flow_pair, int>::iterator it;
+                for (it = flow_map_r.begin(); it != flow_map_r.end(); it++)
+                {
+                    json::Value link_elem(json::Value::Type::OBJECT);
+                    std::string flow_name;
+                    if (it->first.second == 0)
+                        flow_name = std::to_string((unsigned int)it->first.first) + "_" + "upstream";
+                    else
+                        flow_name = std::to_string((unsigned int)it->first.first) + "_" + "downstream";
+
+                    link_elem[Common::ODATA_ID] = PathBuilder(req).append(flow_name).build();
+                    json[Collection::MEMBERS].push_back(std::move(link_elem));
+                }
+                set_response(res, json);
+            }
+            else
+            {
+                json[Collection::ODATA_COUNT] = 0;
+                set_response(res, json);
+            }
+        }
+        else
+            set_response(res, json);
 #else
         UNUSED(res);
         UNUSED(req);
@@ -343,6 +388,7 @@ void OltFlow::get(const server::Request &req, server::Response &res)
     }
     catch (const agent_framework::exceptions::NotFound &ex)
     {
+        printf("OltFlow get error!!\r\n");
         return;
     }
 }

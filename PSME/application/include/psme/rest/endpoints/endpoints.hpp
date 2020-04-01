@@ -97,6 +97,7 @@
 #include "ethernet/ethernet_switch_port_onus.hpp"
 #include "ethernet/ethernet_switch_port_onus_omci.hpp"
 #include "ethernet/olt_flow.hpp"
+#include "ethernet/olt_flow_id.hpp"
 #include "ethernet/ethernet_switch_port_onus_collection.hpp"
 #include "ethernet/vlan_network_interface.hpp"
 #include "ethernet/vlan_network_interface_collection.hpp"

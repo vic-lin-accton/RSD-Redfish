@@ -98,6 +98,7 @@ namespace Olt
 const char BAL_STATE[] = "BalState";
 const char OLT_OPTR_STATE[] = "OltOperateState";
 const char OMCI[] = "Omci";
+const char FLOWID_REGEX[] = "[a-zA-Z0-9_]+";
 } // namespace Olt
 
 namespace OFlow

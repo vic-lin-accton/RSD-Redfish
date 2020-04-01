@@ -2,29 +2,50 @@
 
 . raw_omci_data
 
+PON_NUM=16
+
+#################################
+PON_PORT=1
+UPLINK_PORT=1
+#################################
+
+
+#################################
+##Disable GPON NNI PORT
+sleep 1 
+res=`curl --insecure  -v  -X PATCH -d '{"AdministrativeState" : "Down"}'  https://172.17.8.6:8888/redfish/v1/EthernetSwitches/1/Ports/65/`
+
+PON_ID=$(($PON_PORT-1))
+
+NNI_PORT=$(($UPLINK_PORT+$PON_NUM))
+NNI_ID=$(($NNI_PORT-17))
+
+echo "NNI_ID[$NNI_ID]"
+sleep 2
+
 res=`curl --insecure  -v  -X PATCH -d '{"OltOperateState": true}'  https://"$1":8888/redfish/v1/Olt`
 
-sleep 25
+sleep 30 
 
-res=`curl --insecure  -v  -X PATCH -d '{"AdministrativeState" : "Up"}'  https://"$1":8888/redfish/v1/EthernetSwitches/1/Ports/1/`
+res=`curl --insecure  -v  -X PATCH -d '{"AdministrativeState" : "Up"}'  https://"$1":8888/redfish/v1/EthernetSwitches/1/Ports/"$PON_PORT"/`
+
+
+res=`curl --insecure  -v  -X PATCH -d '{"AdministrativeState" : "Up"}'  https://"$1":8888/redfish/v1/EthernetSwitches/1/Ports/"$NNI_PORT"/`
 
 sleep 1 
 
-res=`curl --insecure  -v  -X PATCH -d '{"AdministrativeState" : "Up"}'  https://"$1":8888/redfish/v1/EthernetSwitches/1/Ports/17/`
-
-sleep 1 
-
-res=`curl --insecure  -v  -X POST -d '{"onu_id":1,"vendor_id":"ISKT","vendor_specific":"71E80110"}' https://"$1":8888/redfish/v1/EthernetSwitches/1/Ports/1/ONUs `
+res=`curl --insecure  -v  -X POST -d '{"onu_id":1,"vendor_id":"ISKT","vendor_specific":"71E80110"}' https://"$1":8888/redfish/v1/EthernetSwitches/1/Ports/"$PON_PORT"/ONUs `
 
 echo "wait 10 secs"
 sleep 10
+echo "Create Flow!!!"
 
 res=`curl --insecure  -v  -X POST -d '
 {
     "onuId": 1,
     "FlowId": 16,
-    "PortId": 0,
-    "NniId": 0,
+    "PortId": '$PON_ID',
+    "NniId": '$NNI_ID',
     "FlowType": "upstream",
     "PktTagType": "single_tag",
     "GemportId": 1024,
@@ -66,8 +87,8 @@ res=`curl --insecure  -v  -X POST -d '
 {
     "onuId": 1,
     "FlowId": 16,
-    "PortId": 0,
-    "NniId": 0,
+    "PortId": '$PON_ID',
+    "NniId": '$NNI_ID',
     "FlowType": "downstream",
     "PktTagType": "double_tag",
     "GemportId": 1024,
@@ -120,7 +141,7 @@ res=`curl --insecure  -v  -X POST -d '
 {
 "Omci" : "'${OMCI_RAW[$i]}'"
 }
-' https://"$1":8888/redfish/v1/EthernetSwitches/1/Ports/1/ONUs/1/Omci
+' https://"$1":8888/redfish/v1/EthernetSwitches/1/Ports/"$PON_PORT"/ONUs/1/Omci
 `
 i=$(($i+1))
 sleep 0.3

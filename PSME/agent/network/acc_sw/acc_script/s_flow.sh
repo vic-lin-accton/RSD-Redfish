@@ -2,36 +2,22 @@
 
 . raw_omci_data
 
-PON_NUM=64
+PON_NUM=16
 
 #################################
 PON_PORT=1
 UPLINK_PORT=1
 #################################
 
-sleep 1 
-res=`curl --insecure  -v  -X PATCH -d '{"AdministrativeState" : "Down"}'  https://172.17.8.5:8888/redfish/v1/EthernetSwitches/1/Ports/17/`
-
 PON_ID=$(($PON_PORT-1))
 
 NNI_PORT=$(($UPLINK_PORT+$PON_NUM))
-NNI_ID=$(($NNI_PORT-65))
-
-echo "NNI_ID[$NNI_ID]"
-sleep 2
-
-res=`curl --insecure  -v  -X PATCH -d '{"OltOperateState": true}'  https://"$1":8888/redfish/v1/Olt`
-
-sleep 30 
+NNI_ID=$(($NNI_PORT-17))
 
 res=`curl --insecure  -v  -X PATCH -d '{"AdministrativeState" : "Up"}'  https://"$1":8888/redfish/v1/EthernetSwitches/1/Ports/"$PON_PORT"/`
-
-
 res=`curl --insecure  -v  -X PATCH -d '{"AdministrativeState" : "Up"}'  https://"$1":8888/redfish/v1/EthernetSwitches/1/Ports/"$NNI_PORT"/`
 
-sleep 1 
-
-res=`curl --insecure  -v  -X POST -d '{"onu_id":1,"vendor_id":"ISKT","vendor_specific":"428DA323"}' https://"$1":8888/redfish/v1/EthernetSwitches/1/Ports/"$PON_PORT"/ONUs `
+res=`curl --insecure  -v  -X POST -d '{"onu_id":1,"vendor_id":"ISKT","vendor_specific":"71E80110"}' https://"$1":8888/redfish/v1/EthernetSwitches/1/Ports/"$PON_PORT"/ONUs `
 
 echo "wait 10 secs"
 sleep 10

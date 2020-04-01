@@ -112,6 +112,7 @@ namespace Olt
 extern const char BAL_STATE[];
 extern const char OLT_OPTR_STATE[];
 extern const char OMCI[];
+extern const char FLOWID_REGEX[];
 }
 
 namespace OFlow

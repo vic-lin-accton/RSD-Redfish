@@ -26,6 +26,14 @@ public:
     {
         m_sla_guaranteed_bw = 5120000;
         m_sla_maximum_bw = 5120000;
+        m_onu_id_start = 1;
+        m_onu_id_end = 127;
+        m_alloc_id_start = 256;
+        m_alloc_id_end = 767;
+        m_gemport_id_start = 256;
+        m_gemport_id_end = 4095;
+        m_flow_id_start = 1;
+        m_flow_id_end = 16383;
     };
     ~G_PON_Olt_Device(){};
     int maple_num = 4;

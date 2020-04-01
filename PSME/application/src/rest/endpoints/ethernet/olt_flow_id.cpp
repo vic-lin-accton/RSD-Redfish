@@ -51,27 +51,39 @@ using namespace agent_framework::model;
 OltFlowId::~OltFlowId(){}
 OltFlowId::OltFlowId(const std::string &path) : EndpointBase(path) {}
 
+namespace
+{
+json::Value make_prototype()
+{
+    json::Value r(json::Value::Type::OBJECT);
+    r[Common::NAME] = "Flow information";
+    r[Common::DESCRIPTION] = "Detail information of flows";
+    return r;
+}
+
+} // namespace
+
+
+
 void OltFlowId::del(const server::Request &req, server::Response &res)
 {
     using namespace psme::rest::error;
     try
     {
 #ifdef BAL
+        vector<std::string> array;
+        std::string flow_id_type = req.params[OFlow::FLOW_ID];
         std::string sft;
-        int flow_id = 0;
-
-        const auto json = JsonValidator::validate_request_body<schema::FlowDelSchema>(req);
-
-        if (json.is_member(constants::OFlow::FLOW_ID))
+        int flow_id;
+        std::replace(flow_id_type.begin(), flow_id_type.end(), '_', ' '); // replace ':' by ' '
+        stringstream ss(flow_id_type);
+        std::string temp;
+        while (ss >> temp)
         {
-            flow_id = json[constants::OFlow::FLOW_ID].as_int();
+            array.push_back(temp);
         }
-
-        if (json.is_member(constants::OFlow::FLOW_TYPE))
-        {
-            sft = json[constants::OFlow::FLOW_TYPE].as_string();
-        }
-
+        flow_id = atoi(array[0].c_str());
+        sft = array[1];
         auto &OLT = Olt_Device::Olt_Device::get_instance();
         if (OLT.is_bal_lib_init() == true)
         {
@@ -102,8 +114,30 @@ void OltFlowId::get(const server::Request &req, server::Response &res)
     try
     {
 #ifdef BAL
-        UNUSED(res);
-        UNUSED(req);
+        auto r = ::make_prototype();
+        vector<std::string> array;
+        std::string flow_id_type = req.params[OFlow::FLOW_ID];
+        std::string sft;
+        int flow_id;
+        std::replace(flow_id_type.begin(), flow_id_type.end(), '_', ' '); // replace ':' by ' '
+        stringstream ss(flow_id_type);
+        std::string temp;
+        while (ss >> temp)
+        {
+            printf("[%s]\r\n", temp.c_str());
+            array.push_back(temp);
+        }
+        flow_id = atoi(array[0].c_str());
+        sft = array[1];
+        auto &OLT = Olt_Device::Olt_Device::get_instance();
+        if (OLT.is_bal_lib_init() == true)
+        {
+            r["FlowInformation"] = OLT.get_flow_info(flow_id, sft);
+            set_response(res, r);
+            return;
+        }
+        else
+            return res.set_status(server::status_5XX::INTERNAL_SERVER_ERROR);
 #else
         UNUSED(res);
         UNUSED(req);

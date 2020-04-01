@@ -735,8 +735,8 @@ const std::string Routes::FLOW_COLLECTION_PATH =
         .append(constants::EthernetSwitchPort::FLOW)
         .build();
 
-// "/redfish/v1/Olt/Flow/{FlowId:[0-9]+}"
+// "/redfish/v1/Olt/Flow/{FlowId:[a-zA-Z0-9_]+}"
 const std::string Routes::FLOW_ID_PATH =
     PathBuilder(FLOW_COLLECTION_PATH)
-        .append_regex(constants::OFlow::FLOW_ID, constants::PathParam::ID_REGEX)
+        .append_regex(constants::OFlow::FLOW_ID, constants::Olt::FLOWID_REGEX)
         .build();

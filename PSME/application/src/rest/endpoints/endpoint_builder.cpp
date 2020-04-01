@@ -355,8 +355,8 @@ void EndpointBuilder::build_endpoints(psme::rest::server::Multiplexer& mp) {
         new OltFlow(constants::Routes::FLOW_COLLECTION_PATH)));
 
     // "/redfish/v1/Olt/Flow/{Id:[0-9]+}"
-    mp.register_handler(OltFlow::UPtr(
-        new OltFlow(constants::Routes::FLOW_ID_PATH)));
+    mp.register_handler(OltFlowId::UPtr(
+        new OltFlowId(constants::Routes::FLOW_ID_PATH)));
 
     // "/redfish/v1/EthernetSwitches/{ethernetSwitchId:[0-9]+}/Ports/{portId:[0-9]+}/staticMACs/{staticMacId:[0-9]+}"
     mp.register_handler(StaticMac::UPtr(new StaticMac(constants::Routes::STATIC_MAC_PATH)));

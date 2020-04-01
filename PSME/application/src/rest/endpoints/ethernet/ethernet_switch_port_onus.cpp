@@ -105,9 +105,12 @@ void EthernetSwitchPortOnus::del(const server::Request &req, server::Response &r
         json[Common::ID] = req.params[PathParam::ONU_ID];
         int onu_id = std::stoi(req.params[PathParam::ONU_ID]);
         auto &OLT = Olt_Device::Olt_Device::get_instance();
-        printf("id[%d], onuid[%d]\r\n", port_id -1 , onu_id);
-        OLT.deactivate_onu(port_id - 1, onu_id);
-        UNUSED(res);
+
+        if (OLT.delete_onu(port_id - 1, onu_id))
+            res.set_status(server::status_2XX::OK);
+        else
+            res.set_status(server::status_5XX::INTERNAL_SERVER_ERROR);
+        return;
 #else
         UNUSED(res);
         UNUSED(req);

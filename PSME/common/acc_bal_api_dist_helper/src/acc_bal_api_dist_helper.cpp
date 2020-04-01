@@ -3,6 +3,7 @@
 #include "../include/acc_bal_api_dist_helper/asxvolt16.hpp"
 #include <dlfcn.h>
 #include <stdlib.h>
+#include <thread>
 using namespace acc_bal_api_dist_helper;
 
 #ifdef __cplusplus
@@ -38,6 +39,7 @@ bcmos_bool (*d_bcmbal_api_conn_mgr_is_connected)(bcmolt_goid olt) = NULL;
 void (*d_bcmbal_msg_free)(bcmolt_msg *msg) = NULL;
 void (*d_bcmbal_api_set_prop_present)(bcmolt_msg *msg, const void *prop_ptr) = NULL;
 void (*d_bcmbal_usleep)(uint32_t us) = NULL;
+const char *(*d_bcmbal_strerror)(bcmos_errno err) = NULL;
 
 static inline int get_default_tm_sched_id(int intf_id, std::string direction)
 {
@@ -841,6 +843,7 @@ Olt_Device::Olt_Device()
         d_bcmbal_usleep = (void (*)(uint32_t us))dlsym(fHandle, "bcmos_usleep");
         d_bcmbal_ind_subscribe = (bcmos_errno(*)(bcmolt_oltid olt, bcmolt_rx_cfg * rx_cfg))dlsym(fHandle, "bcmolt_ind_subscribe");
         d_bcmbal_api_conn_mgr_is_connected = (bcmos_bool(*)(bcmolt_goid olt))dlsym(fHandle, "bcmolt_api_conn_mgr_is_connected");
+        d_bcmbal_strerror = (const char *(*)(bcmos_errno err))dlsym(fHandle, "bcmos_strerror");
         m_bal_lib_init = true;
         connect_host();
     }
@@ -1055,6 +1058,7 @@ json::Value Olt_Device::get_port_statistic(int port)
         return status;
     }
 }
+
 json::Value Olt_Device::get_pon_statistic(int port)
 {
     json::Value status(json::Value::Type::OBJECT);
@@ -1233,6 +1237,90 @@ json::Value Olt_Device::get_nni_statistic(int port)
     catch (const exception &e)
     {
         printf("get_nni_statistic error\r\n");
+        return status;
+    }
+}
+
+json::Value Olt_Device::get_flow_info(int flow_id, std::string flowtype)
+{
+    json::Value status(json::Value::Type::OBJECT);
+    try
+    {
+        int iflowtype=0;
+        if (flowtype == "upstream")
+            iflowtype = 0;
+        else
+            iflowtype = 1;
+
+        status["FlowId"] = flow_id;
+        status["FlowType"] = flowtype;
+        status["GemPortId"] = get_flow_status(flow_id, iflowtype, SVC_PORT_ID);
+        status["Priority"] = get_flow_status(flow_id, iflowtype, PRIORITY);
+        status["Cookie"] = get_flow_status(flow_id, iflowtype, COOKIE);
+
+        if (get_flow_status(flow_id, iflowtype, INGRESS_INTF_TYPE) == BCMOLT_FLOW_INTERFACE_TYPE_PON)
+            status["IngressIntfType"] = "Pon";
+        else
+            status["IngressIntfType"] = "Nni";
+
+        if (get_flow_status(flow_id, iflowtype, EGRESS_INTF_TYPE) == BCMOLT_FLOW_INTERFACE_TYPE_PON)
+            status["EgressIntfType"] = "Pon";
+        else
+            status["EgressIntfType"] = "Nni";
+
+        status["IngressIntfId"] = get_flow_status(flow_id, iflowtype, INGRESS_INTF_ID);
+        status["EgressIntfid"] = get_flow_status(flow_id, iflowtype, EGRESS_INTF_ID);
+        status["ClassifierOVid"] = get_flow_status(flow_id, iflowtype, CLASSIFIER_O_VID);
+        status["ClassifierOPbits"] = get_flow_status(flow_id, iflowtype, CLASSIFIER_O_PBITS);
+        status["ClassifierIVid"] = get_flow_status(flow_id, iflowtype, CLASSIFIER_I_VID);
+        status["ClassifierIPBits"] = get_flow_status(flow_id, iflowtype, CLASSIFIER_I_PBITS);
+        status["ClassifierEtherType"] = get_flow_status(flow_id, iflowtype, CLASSIFIER_ETHER_TYPE);
+        status["ClassifierIpProto"] = get_flow_status(flow_id, iflowtype, CLASSIFIER_IP_PROTO);
+        status["ClassifierSrcPort"] = get_flow_status(flow_id, iflowtype, CLASSIFIER_SRC_PORT);
+        status["ClassifierDstPort"] = get_flow_status(flow_id, iflowtype, CLASSIFIER_DST_PORT);
+
+        if (get_flow_status(flow_id, iflowtype, CLASSIFIER_PKT_TAG_TYPE) == BCMOLT_PKT_TAG_TYPE_UNTAGGED)
+            status["ClassifierPktTagType"] = "Untagged";
+        else if (get_flow_status(flow_id, iflowtype, CLASSIFIER_PKT_TAG_TYPE) == BCMOLT_PKT_TAG_TYPE_SINGLE_TAG)
+            status["ClassifierPktTagType"] = "Singletagged";
+        else if (get_flow_status(flow_id, iflowtype, CLASSIFIER_PKT_TAG_TYPE) == BCMOLT_PKT_TAG_TYPE_DOUBLE_TAG)
+            status["ClassifierPktTagType"] = "Doubletagged";
+        else
+            status["ClassifierPktTagType"] = "na";
+
+        status["EgressQosType"] = get_flow_status(flow_id, iflowtype, EGRESS_QOS_TYPE);
+        status["EgressQosQueueId"] = get_flow_status(flow_id, iflowtype, EGRESS_QOS_QUEUE_ID);
+        status["EgressQosTmSchedId"] = get_flow_status(flow_id, iflowtype, EGRESS_QOS_TM_SCHED_ID);
+
+        if (get_flow_status(flow_id, iflowtype, ACTION_CMDS_BITMASK) == BCMOLT_ACTION_CMD_ID_ADD_OUTER_TAG)
+            status["ActionCmdsBitMask"] = "AddOuterTag";
+        else if (get_flow_status(flow_id, iflowtype, ACTION_CMDS_BITMASK) == BCMOLT_ACTION_CMD_ID_REMOVE_OUTER_TAG)
+            status["ActionCmdsBitMask"] = "RemoveOuterTag";
+        else if (get_flow_status(flow_id, iflowtype, ACTION_CMDS_BITMASK) == BCMOLT_ACTION_CMD_ID_XLATE_OUTER_TAG)
+            status["ActionCmdsBitMask"] = "XlateOuterTag";
+        else if (get_flow_status(flow_id, iflowtype, ACTION_CMDS_BITMASK) == BCMOLT_ACTION_CMD_ID_ADD_INNER_TAG)
+            status["ActionCmdsBitMask"] = "AddInnerTag";
+        else if (get_flow_status(flow_id, iflowtype, ACTION_CMDS_BITMASK) ==BCMOLT_ACTION_CMD_ID_REMOVE_INNER_TAG)
+            status["ActionCmdsBitMask"] = "RemoveInnerTag";
+        else if (get_flow_status(flow_id, iflowtype, ACTION_CMDS_BITMASK) ==BCMOLT_ACTION_CMD_ID_XLATE_INNER_TAG)
+            status["ActionCmdsBitMask"] = "XlateInnerTag";
+        else if (get_flow_status(flow_id, iflowtype, ACTION_CMDS_BITMASK) ==BCMOLT_ACTION_CMD_ID_REMARK_OUTER_PBITS)
+            status["ActionCmdsBitMask"] = "RemarkOuterPbits";
+        else if (get_flow_status(flow_id, iflowtype, ACTION_CMDS_BITMASK) ==BCMOLT_ACTION_CMD_ID_REMARK_INNER_PBITS)
+            status["ActionCmdsBitMask"] = "RemarkInnerPbits";
+        else
+            status["ActionCmdsBitMask"] = "na";
+        status["ActionOVid"] = get_flow_status(flow_id, iflowtype, ACTION_O_VID);
+        status["ActionIVid"] = get_flow_status(flow_id, iflowtype, ACTION_I_VID);
+        status["ActionOPbits"] = get_flow_status(flow_id, iflowtype, ACTION_O_PBITS);
+        status["ActionIPbits"] = get_flow_status(flow_id, iflowtype, ACTION_I_PBITS);
+        status["State"] = get_flow_status(flow_id, iflowtype, STATE);
+        status["GroupId"] = get_flow_status(flow_id, iflowtype, GROUP_ID);
+        return status;
+    }
+    catch (const exception &e)
+    {
+        printf("get_flow_info error\r\n");
         return status;
     }
 }
@@ -1673,9 +1761,335 @@ bool Olt_Device::disable_nni_if(int intf_id)
     }
 }
 
-bool Olt_Device::deactivate_onu(int intf_id, int onu_id)
+long Olt_Device::get_flow_status(uint16_t flow_id, uint16_t flow_type, uint16_t data_id)
+{
+    if (d_bcmbal_cfg_get == NULL || d_bcmbal_strerror == NULL)
+        return -1;
+    bcmos_errno err;
+    bcmolt_flow_key flow_key;
+    bcmolt_flow_cfg flow_cfg;
+
+    flow_key.flow_id = flow_id;
+    flow_key.flow_type = (bcmolt_flow_type)flow_type;
+
+    BCMOLT_CFG_INIT(&flow_cfg, flow, flow_key);
+
+    switch (data_id)
+    {
+    case ONU_ID: //onu_id
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, onu_id);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get onu_id, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.onu_id;
+    case FLOW_TYPE:
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get flow_type, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.key.flow_type;
+    case SVC_PORT_ID: //svc_port_id
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, svc_port_id);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get svc_port_id, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.svc_port_id;
+    case PRIORITY:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, priority);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get priority, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.priority;
+    case COOKIE: //cookie
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, cookie);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get cookie, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.cookie;
+    case INGRESS_INTF_TYPE: //ingress intf_type
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, ingress_intf);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get ingress intf_type, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.ingress_intf.intf_type;
+    case EGRESS_INTF_TYPE: //egress intf_type
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, egress_intf);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get egress intf_type, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.egress_intf.intf_type;
+    case INGRESS_INTF_ID: //ingress intf_id
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, ingress_intf);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get ingress intf_id, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.ingress_intf.intf_id;
+    case EGRESS_INTF_ID: //egress intf_id
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, egress_intf);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get egress intf_id, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.egress_intf.intf_id;
+    case CLASSIFIER_O_VID:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, classifier);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get classifier o_vid, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.classifier.o_vid;
+    case CLASSIFIER_O_PBITS:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, classifier);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get classifier o_pbits, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.classifier.o_pbits;
+    case CLASSIFIER_I_VID:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, classifier);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get classifier i_vid, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.classifier.i_vid;
+    case CLASSIFIER_I_PBITS:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, classifier);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get classifier i_pbits, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.classifier.i_pbits;
+    case CLASSIFIER_ETHER_TYPE:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, classifier);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get classifier ether_type, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.classifier.ether_type;
+    case CLASSIFIER_IP_PROTO:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, classifier);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get classifier ip_proto, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.classifier.ip_proto;
+    case CLASSIFIER_SRC_PORT:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, classifier);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get classifier src_port, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.classifier.src_port;
+    case CLASSIFIER_DST_PORT:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, classifier);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get classifier dst_port, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.classifier.dst_port;
+    case CLASSIFIER_PKT_TAG_TYPE:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, classifier);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get classifier pkt_tag_type, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.classifier.pkt_tag_type;
+    case EGRESS_QOS_TYPE:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, egress_qos);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get egress_qos type, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.egress_qos.type;
+    case EGRESS_QOS_QUEUE_ID:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, egress_qos);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get egress_qos queue_id, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        switch (flow_cfg.data.egress_qos.type)
+        {
+        case BCMOLT_EGRESS_QOS_TYPE_FIXED_QUEUE:
+            return flow_cfg.data.egress_qos.u.fixed_queue.queue_id;
+        case BCMOLT_EGRESS_QOS_TYPE_TC_TO_QUEUE:
+            return flow_cfg.data.egress_qos.u.tc_to_queue.tc_to_queue_id;
+        case BCMOLT_EGRESS_QOS_TYPE_PBIT_TO_TC:
+            return flow_cfg.data.egress_qos.u.pbit_to_tc.tc_to_queue_id;
+        case BCMOLT_EGRESS_QOS_TYPE_PRIORITY_TO_QUEUE:
+            return flow_cfg.data.egress_qos.u.priority_to_queue.tm_q_set_id;
+        case BCMOLT_EGRESS_QOS_TYPE_NONE:
+        default:
+            return -1;
+        }
+    case EGRESS_QOS_TM_SCHED_ID:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, egress_qos);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get egress_qos tm_sched_id, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.egress_qos.tm_sched.id;
+    case ACTION_CMDS_BITMASK:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, action);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get action cmds_bitmask, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.action.cmds_bitmask;
+    case ACTION_O_VID:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, action);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get action o_vid, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.action.o_vid;
+    case ACTION_O_PBITS:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, action);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get action o_pbits, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.action.o_pbits;
+    case ACTION_I_VID:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, action);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get action i_vid, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.action.i_vid;
+    case ACTION_I_PBITS:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, action);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get action i_pbits, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.action.i_pbits;
+    case STATE:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, state);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get state, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.state;
+    case GROUP_ID:
+        BCMOLT_FIELD_SET_PRESENT(&flow_cfg.data, flow_cfg_data, group_id);
+        err = d_bcmbal_cfg_get(dev_id, &flow_cfg.hdr);
+        if (err)
+        {
+            printf("Failed to get group_id, err = %s\n", d_bcmbal_strerror(err));
+            return err;
+        }
+        return flow_cfg.data.group_id;
+    default:
+        return BCM_ERR_INTERNAL;
+    }
+    return err;
+}
+
+bool Olt_Device::delete_onu(int intf_id, int onu_id)
 {
     std::lock_guard<std::mutex> lock{m_data_mutex};
+    try
+    {
+        if (deactivate_onu(intf_id, onu_id))
+        {
+            //Todo::Need a wait function to check if onu in inactive state//
+            std::this_thread::sleep_for(std::chrono::milliseconds(500)	);
+            if (d_bcmbal_cfg_clear)
+            {
+                bcmos_errno err;
+                bcmolt_onu_cfg cfg_obj;
+                bcmolt_onu_key key;
+                key.onu_id = onu_id;
+                key.pon_ni = intf_id;
+                BCMOLT_CFG_INIT(&cfg_obj, onu, key);
+                err = d_bcmbal_cfg_clear(dev_id, &cfg_obj.hdr);
+                if (err != BCM_ERR_OK)
+                {
+                    printf("delete_onu error!!\r\n");
+                    return false;
+                }
+                else
+                    return true;
+            }
+            else
+                return false;
+        }
+        else
+        {
+            printf("deactive_onu error!!\r\n");
+            return false;
+        }
+    }
+    catch (const exception &e)
+    {
+        printf("deactivate_onu error\r\n");
+        return false;
+    }
+}
+
+bool Olt_Device::deactivate_onu(int intf_id, int onu_id)
+{
     try
     {
         bcmos_errno err = BCM_ERR_INTERNAL;
@@ -1819,6 +2233,35 @@ bool Olt_Device::omci_msg_out(int intf_id, int onu_id, const std::string pkt)
     }
 }
 
+std::map<flow_pair, int32_t> Olt_Device::get_flow_map()
+{
+    std::lock_guard<std::mutex> lock{m_data_mutex};
+    try
+    {
+        printf("get_flow_map\r\n");
+        return flow_map;
+    }
+    catch (const exception &e)
+    {
+        printf("get_flow_map error\r\n");
+    }
+}
+
+int Olt_Device::get_flow_size()
+{
+    std::lock_guard<std::mutex> lock{m_data_mutex};
+    try
+    {
+        printf("get_flow_size [%d]\r\n", flow_map.size());
+        return flow_map.size();
+    }
+    catch (const exception &e)
+    {
+        printf("get_flow_size error\r\n");
+        return -1;
+    }
+}
+
 bool Olt_Device::flow_remove(uint32_t flow_id, const std::string flow_type)
 {
     std::lock_guard<std::mutex> lock{m_data_mutex};
@@ -1831,6 +2274,7 @@ bool Olt_Device::flow_remove(uint32_t flow_id, const std::string flow_type)
 
         key.flow_id = (bcmolt_flow_id)flow_id;
         key.flow_id = flow_id;
+
         if (flow_type.compare(upstream) == 0)
         {
             key.flow_type = BCMOLT_FLOW_TYPE_UPSTREAM;
@@ -1857,7 +2301,20 @@ bool Olt_Device::flow_remove(uint32_t flow_id, const std::string flow_type)
                 return false;
             }
             else
+            {
+                if (flow_map.size() != 0)
+                {
+                    std::map<flow_pair, int>::iterator it;
+                    for (it = flow_map.begin(); it != flow_map.end(); it++)
+                    {
+                        if (it->first.first == flow_id && it->first.second == key.flow_type)
+                        {
+                            flow_map.erase(it);
+                        }
+                    }
+                }
                 printf(" OK\n");
+            }
 
             return true;
         }
@@ -2073,8 +2530,11 @@ bool Olt_Device::flow_add(int onu_id, int flow_id, const std::string flow_type, 
                 return false;
             }
             else
-                printf("Flow add OK!!\n");
-
+            {
+                printf("Org Flow size[%d]\n", flow_map.size());
+                flow_map[std::pair<int, int>(key.flow_id, key.flow_type)] = flow_map.size();
+                printf("Flow add OK!! Flow size[%d]\n", flow_map.size());
+            }
             return true;
         }
         else
