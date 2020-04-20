@@ -119,142 +119,143 @@ void endpoint::SessionCollection::del(const server::Request& request, server::Re
 }
 
 
-void endpoint::SessionCollection::post(const server::Request& request, server::Response& response) {
+void endpoint::SessionCollection::post(const server::Request& request, server::Response& response)
+{
 
     bool Enabled = SessionManager::get_instance()->GetSessionConfigEnable();
-    if(Enabled == false)
+    if (Enabled == false)
     {
-        response.set_status(server::status_5XX::SERVICE_UNAVAILABLE); 	
+        response.set_status(server::status_5XX::SERVICE_UNAVAILABLE);
         return;
     }
 
     uint64_t Session_size = SessionManager::get_instance()->Session_size();
 
     uint64_t MaxSessions = SessionManager::get_instance()->GetSessionConfigMaxSessions();
-	
-    if(Session_size >= MaxSessions)
+
+    if (Session_size >= MaxSessions)
     {
-        response.set_status(server::status_5XX::SERVICE_UNAVAILABLE); 	
+        response.set_status(server::status_5XX::SERVICE_UNAVAILABLE);
         return;
     }
-	
-	
+
     json::Value r = make_session_post_prototype();
-	
+
     std::string username{};
     std::string password{};
-/*
+    std::string srcip{};
+    /*
     json::Value schema({
         JsonValidator::mandatory(constants::Common::USER_NAME, JsonValidator::has_type(JsonValidator::STRING_TYPE)),
         JsonValidator::mandatory(constants::Common::PASSWORD, JsonValidator::has_type(JsonValidator::STRING_TYPE))
     });
     const auto json = JsonValidator::validate_request_body(request, schema);
 */
-    const auto& json = JsonValidator::validate_request_body<schema::SessionCollectionPostSchema>(request);
-    Session session= to_model(json);
+    const auto &json = JsonValidator::validate_request_body<schema::SessionCollectionPostSchema>(request);
+    Session session = to_model(json);
 
     if (json.is_member(constants::Common::USER_NAME) || json.is_member(constants::Common::PASSWORD))
     {
         //Setup new session //
         username = json[constants::Common::USER_NAME].as_string();
-        password  = json[constants::Common::PASSWORD].as_string();
+        password = json[constants::Common::PASSWORD].as_string();
+        srcip = request.get_header("SrcIp");
+        printf("SessionCollection get srcip[%s]\r\n", srcip.c_str());
 
         /*Gen Token*/
         srand((unsigned int)time(0L));
         string str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         string AuthenToken;
         unsigned long int pos;
-		
-        while(AuthenToken.size() != 32) 
-	{  //Token len 32 bytes //
+
+        while (AuthenToken.size() != 32)
+        { //Token len 32 bytes //
             pos = ((rand() % (str.size() - 1)));
-            AuthenToken += str.substr(pos,1);
-        }	
+            AuthenToken += str.substr(pos, 1);
+        }
 
-	if(((username.length() <= 256) && (username.length() > 0)) && ((password.length() <= 256) && (password.length() > 0)))
-	{
-           /*Check if this username locked*/
-           const auto  & account  =AccountManager::get_instance()->getAccount(username);	
-	    if(account.get_locked() == true)
-	    {
-               response.set_status(server::status_5XX::SERVICE_UNAVAILABLE); 
-               log_error(GET_LOGGER("rest"), "Lock on user [" << username << "]");
-               return;
-           }
-		   
-           /*Check if correct username and password*/ 
-	    int res  = AccountManager::get_instance()->login(username,password) ;
-           if(res == 0)
-           {
-               /**/
-               const auto  & account_enable_chk  =AccountManager::get_instance()->getAccount(username);
-               if(account_enable_chk.get_enabled() != true)
-               {
-                   response.set_status(server::status_4XX::UNAUTHORIZED);    	
-                   return;
-               }
-			   
-               const auto& role = AccountManager::get_instance()->getRole(account.get_roleid());  
+        if (((username.length() <= 256) && (username.length() > 0)) && ((password.length() <= 256) && (password.length() > 0)))
+        {
+            /*Check if this username locked*/
+            const auto &account = AccountManager::get_instance()->getAccount(username);
+            if (account.get_locked() == true)
+            {
+                response.set_status(server::status_5XX::SERVICE_UNAVAILABLE);
+                log_error(GET_LOGGER("rest"), "Lock on user [" << username << "]");
+                return;
+            }
 
-               if(SessionManager::get_instance()->checkSession_by_name(username))
-               {
-                   printf("Found exist ID and del first to cerate new one session\r\n");
-                   SessionManager::get_instance()->delSession( SessionManager::get_instance()->getSession(username).get_id());				   
-               }
-               else
-                   printf("Not fund ID\r\n");
-			   	   
-               session.set_authen_token(AuthenToken);
-               session.set_userrole(role.get_roleid());  
-		   
-               uint64_t id = SessionManager::get_instance()->addSession(session, false);
-			   
-		 r[constants::Common::USER_NAME] =  username;
-		 r[constants::Common::ID] =  id;
-		 //r[constants::SessionService::AUTHENTOKEN] =  AuthenToken;
-		 
-	        const std::string odata_path="/redfish/v1/SessionService/Sessions/" + id;	 
-		 r[constants::Common::ODATA_ID] = odata_path;
+            /*Check if correct username and password*/
+            int res = AccountManager::get_instance()->login(username, password);
+            if (res == 0)
+            {
+                /**/
+                const auto &account_enable_chk = AccountManager::get_instance()->getAccount(username);
+                if (account_enable_chk.get_enabled() != true)
+                {
+                    response.set_status(server::status_4XX::UNAUTHORIZED);
+                    return;
+                }
 
-               /*Set Authen Token in header */
-               static const char * loginuri="/redfish/v1/SessionService/Sessions";
-               #define XAUTH_NAME "X-Auth-Token"
-               #define LOC_ID "Location"               
-               char cxauthstr[256];	
-               char cxlocation[256];	
+                const auto &role = AccountManager::get_instance()->getRole(account.get_roleid());
 
-               snprintf (cxauthstr, sizeof (cxauthstr), "%s", AuthenToken.c_str());
-               const std::string Xauth=XAUTH_NAME;
-               response.set_header(Xauth, cxauthstr);
-               
-               snprintf (cxlocation, sizeof (cxlocation), "%s/%d",loginuri, (int)id);
-               const std::string XLOCID=LOC_ID;
-               response.set_header(XLOCID, cxlocation);
+                if (SessionManager::get_instance()->checkSession_by_name(username))
+                {
+                    printf("Found exist ID and del first to cerate new one session\r\n");
+                    SessionManager::get_instance()->delSession(SessionManager::get_instance()->getSession(username).get_id());
+                }
+                else
+                    printf("Not fund ID\r\n");
 
-               response.set_status(server::status_2XX::CREATED);    
-			   
-               set_response(response, r);	
-           }
-           else  
-           {
-               //Todo: log 
-               if(res > Accountservice::get_instance()->get_aflt())
-                   log_error(GET_LOGGER("rest"), "user [" << username << "] over AuthFailureLoggingThreshold login times !!");
-			   	
-               response.set_status(server::status_4XX::UNAUTHORIZED);    	
-               return;
-           }
-	}
-	else
-	{
-           response.set_status(server::status_4XX::UNAUTHORIZED); 
-           return;		   
-	}	
+                session.set_authen_token(AuthenToken);
+                session.set_userrole(role.get_roleid());
+                session.set_srcip(srcip);
+
+                uint64_t id = SessionManager::get_instance()->addSession(session, false);
+
+                r[constants::Common::USER_NAME] = username;
+                r[constants::Common::ID] = id;
+
+                const std::string odata_path = "/redfish/v1/SessionService/Sessions/" + id;
+                r[constants::Common::ODATA_ID] = odata_path;
+
+                /*Set Authen Token in header */
+                static const char *loginuri = "/redfish/v1/SessionService/Sessions";
+#define XAUTH_NAME "X-Auth-Token"
+#define LOC_ID "Location"
+                char cxauthstr[256];
+                char cxlocation[256];
+
+                snprintf(cxauthstr, sizeof(cxauthstr), "%s", AuthenToken.c_str());
+                const std::string Xauth = XAUTH_NAME;
+                response.set_header(Xauth, cxauthstr);
+
+                snprintf(cxlocation, sizeof(cxlocation), "%s/%d", loginuri, (int)id);
+                const std::string XLOCID = LOC_ID;
+                response.set_header(XLOCID, cxlocation);
+
+                response.set_status(server::status_2XX::CREATED);
+
+                set_response(response, r);
+            }
+            else
+            {
+                //Todo: log
+                if (res > Accountservice::get_instance()->get_aflt())
+                    log_error(GET_LOGGER("rest"), "user [" << username << "] over AuthFailureLoggingThreshold login times !!");
+
+                response.set_status(server::status_4XX::UNAUTHORIZED);
+                return;
+            }
+        }
+        else
+        {
+            response.set_status(server::status_4XX::UNAUTHORIZED);
+            return;
+        }
     }
     return;
 }
-
-
 }
 }
 }

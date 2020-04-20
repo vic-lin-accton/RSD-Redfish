@@ -273,23 +273,30 @@ void SessionManager::delAllSession()
     return;
 }
 
-bool SessionManager::updateSessionTimestamp(const std::string& authen_token) 
+bool SessionManager::updateSessionTimestamp(const std::string& authen_token, const std::string & src_ip) 
 {
     if(authen_token.length() != 0)	
     {
         Session new_session  = getSession_by_Token(authen_token);
-        if(new_session.get_authen_token() == authen_token)	
+        if(new_session.get_authen_token() == authen_token)
         {
-            cout << "update sesssion name[" << new_session.get_username() << "]"<< endl;
-            cout << "update sesssion id[" << new_session.get_id() << "]"<< endl;
-        
+            cout << "update sesssion name[" << new_session.get_username() << "]" << endl;
+            cout << "update sesssion id[" << new_session.get_id() << "]" << endl;
+            cout << "sesssion src ip[" << new_session.get_srcip() << "]" << endl;
+            cout << "in src_ip[" << src_ip << "]" << endl;
             delSession(new_session.get_username());
             addSession(new_session, true);
-            return true;
+            if (src_ip == new_session.get_srcip())
+                return true;
+            else
+            {
+                cout << "Wrong src ip!!" << endl;      
+                return false;
+            }
         }
         else
         {
-            cout << "Wrong password!!" << endl;      
+            cout << "Wrong authen token!!" << endl;      
             return false;
         }
     }

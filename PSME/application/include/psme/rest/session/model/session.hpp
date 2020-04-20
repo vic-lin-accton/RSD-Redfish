@@ -87,12 +87,30 @@ public:
     }
 
     /*!
+     * @brief Set session srcip 
+     *
+     * @param name session set srcip 
+     */
+    void set_srcip(const std::string& srcip) {
+        m_srcip = srcip;
+    }
+
+    /*!
      * @brief Get session authe_token
      *
      * @return session authe_token
      */
     const std::string& get_authen_token() const {
         return m_authe_token;
+    }
+
+    /*!
+     * @brief Get session srcip 
+     *
+     * @return session get srcip 
+     */
+    const std::string& get_srcip() const {
+        return m_srcip;
     }
 
     /*!
@@ -171,6 +189,7 @@ public:
 private:
     uint64_t m_id{};
     std::string m_authe_token{};
+    std::string m_srcip{};
     std::string m_username{};
     std::string m_password{};
     std::string m_role{};

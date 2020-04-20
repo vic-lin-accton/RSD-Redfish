@@ -130,8 +130,25 @@ int access_handler_callback(void* cls, struct MHD_Connection *connection,
         free(user);
         free(pass);		
     }
-	
-    //printf("get from header X-Auth-Token[%s]\r\n", request->get_header(xAuth).c_str());    
+
+    const union MHD_ConnectionInfo* mciP = MHD_get_connection_info(connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS);
+    
+    if (mciP != NULL)
+    {
+        char ip[128] = {0};
+        struct sockaddr *addr = (struct sockaddr *)mciP->client_addr;
+        snprintf(ip, sizeof(ip), "%d.%d.%d.%d",
+                 addr->sa_data[2] & 0xFF,
+                 addr->sa_data[3] & 0xFF,
+                 addr->sa_data[4] & 0xFF,
+                 addr->sa_data[5] & 0xFF);
+        request->set_header("SrcIp", ip);	
+        printf("get ClientIp[%s] \r\n", ip);
+    }
+    else
+        printf("Can't get client Ip address!\r\n");
+    
+    printf("get from header X-Auth-Token[%s]\r\n", request->get_header(xAuth).c_str());    
 	
     if(strlen(xAuthGen.c_str()) !=0 || strlen(xAuthGen.c_str()))
     {

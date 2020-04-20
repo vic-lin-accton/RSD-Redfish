@@ -187,7 +187,7 @@ public:
      */
     uint32_t Session_size();
 
-    bool updateSessionTimestamp(const std::string& authen_token);
+    bool updateSessionTimestamp(const std::string& authen_token, const std::string& src_ip);
     /*!
      * @brief Destructor
      */

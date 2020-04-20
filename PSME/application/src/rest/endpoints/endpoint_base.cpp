@@ -88,20 +88,20 @@ bool EndpointBase::authen_check(const Request& request,const std::string& method
     std::string username{};
     std::string password{};
     std::string token{};
+    std::string srcip{};
 
     token	= request.get_header("xAuthGen");
     username	= request.get_header("UserName");
     password	= request.get_header("Password");
+    srcip       = request.get_header("SrcIp");
  	
-    std::cout << "url[" << request.get_url() << "]token[" << token << "]" << "username[" << username << "]" << "password[" << password << "]";
+    std::cout << "url[" << request.get_url() << "]token[" << token << "]" << "username[" << username << "]" << "password[" << password << "]" << "srcip[" << srcip << "]";
 
     bool SessionServiceEnable = SessionManager::get_instance()->GetSessionConfigEnable();	
     bool BasicAuthenEnable = SessionManager::get_instance()->GetBasicAuthenServiceConfigEnable();	
 
     if((SessionServiceEnable == false) && (BasicAuthenEnable == false) )
-    {  //No use any authen 
         return true;
-    }     
     else 
     {
         if( (token.length() !=0) && (SessionServiceEnable == true))
@@ -109,12 +109,12 @@ bool EndpointBase::authen_check(const Request& request,const std::string& method
             int session_size = SessionManager::get_instance()->Session_size();
             if (session_size != 0)
             {
-                if (SessionManager::get_instance()->updateSessionTimestamp(token) == true)
+                if (SessionManager::get_instance()->updateSessionTimestamp(token, srcip) == true)
                 {
                     Session new_session = SessionManager::get_instance()->getSession_by_Token(token);
                     const auto &account = AccountManager::get_instance()->getAccount(new_session.get_username());
 
-                    /*Check read/write priviledge */
+                    /*Check read/write privilege */
                     /*Todo , Use "Privilege Mappings" to do more specific constrain*/
                     if ((account.get_roleid() == "ReadOnlyUser") && (method == "POST" || method == "PATCH" || method == "DELETE"))
                         return false;
