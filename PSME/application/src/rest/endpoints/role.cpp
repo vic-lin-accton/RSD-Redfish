@@ -114,7 +114,7 @@ void endpoint::Role::patch(const server::Request& request, server::Response& res
     const auto& roleid = json[AccountConst::ROLEID].as_string();
 
     account.set_username(new_username);
-    account.set_password(password);
+    account.set_password(password, ? );
     account.set_roleid(roleid);
     account.set_enabled(enabled);
     account.set_locked(locked);   

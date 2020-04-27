@@ -152,6 +152,13 @@ public:
     void delAccount(const std::string& account_username);
     
     /*!
+     * @brief Check account existed  by username
+     *
+     * @param username
+     */
+    bool AccountExisted(const std::string& account_username);    
+    
+    /*!
      * @brief login by username/password
      *
      * @param account_username,account_password

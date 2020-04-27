@@ -19,6 +19,10 @@
  * */
 
 #pragma once
+#include <stdio.h>
+#include <crypt.h>
+#include <time.h>
+
 #include "agent-framework/module/enum/enum_builder.hpp"
 #include <string>
 #include <vector>
@@ -27,6 +31,8 @@
 
 
 #include "psme/rest/account/model/accountservice.hpp"
+
+#include "acc_net_helper/acc_net_helper.hpp"
 
 
 namespace json {
@@ -48,6 +54,58 @@ namespace model {
  * @brief Subscription representation
  */
 class Account final {
+private:
+
+std::string encry(const std::string passwd)
+{
+#if 0
+        std::string mypass{""};
+    	char salt[] = "$5$........";
+    	char *encpass;
+    	char* token;
+#else
+        unsigned long seed[2];
+        char salt[] = "$5$........";
+        const char *const seedchars =
+        "./0123456789ABCDEFGHIJKLMNOPQRST"
+        "UVWXYZabcdefghijklmnopqrstuvwxyz";
+        int i;
+        char *encpass,*token;
+        std::string mypass{""};
+
+       if ( m_salt.empty())
+       { 
+          /* Generate a (not very) random seed.
+             You should do it better than this... */
+             seed[0] = time(NULL);
+             seed[1] = getpid() ^ (seed[0] >> 14 & 0x30000);
+ 
+             /* Turn it into printable characters from ¡¥seedchars¡¦. */
+             for (i = 0; i < 8; i++)
+                 salt[3+i] = seedchars[(seed[i/5] >> (i%5)*6) & 0x3f];
+             m_salt.assign(salt+3);
+             std::cout << "m_salt is empty  assigned " << m_salt << std::endl;
+       }
+       else
+       {
+       	     std::cout << "m_salt is  not empty  ==> " << m_salt << std::endl;
+              for (i = 0; i < 8; i++)
+                 salt[3+i] = m_salt[i];    	    
+       }     
+#endif    	        
+        encpass = crypt(passwd.c_str(),salt);
+        //printf("encpass is %s\n", encpass);
+        token = strtok(encpass,"$");
+        while (token != NULL)  
+        {
+        	//printf("token is %s\n",token);
+        	mypass.assign(token);
+        	token = strtok(NULL, "$");
+        }
+        return mypass;
+}
+
+
 public:
     /*!
      * @brief Set account id
@@ -85,13 +143,41 @@ public:
         return m_name;
     }
 
+
+    /*!
+     * @brief Set account salt
+     *
+     * @param name account salt
+     */
+    void set_salt(const std::string& salt) {
+        m_salt = salt;
+    }
+
+    /*!
+     * @brief Get account salt
+     *
+     * @return account salt
+     */
+    const std::string& get_salt() const {
+        return m_salt;
+    }
+
+
+
     /*!
      * @brief Set account password
      *
      * @param  account password
      */
-    void set_password(const std::string& password) {
+    void set_password(const std::string& password, bool need_encrypt) {
+    	
+    	if ( need_encrypt )
+    	    m_password = encry( password ); 
+    	else
         m_password = password;
+            
+        std::cout << "finally password is " << m_password;
+
     }
     
     int checkpw(const std::string& password) 
@@ -100,14 +186,31 @@ public:
         if(!m_enabled)
 		return 1;
   
-    	 if (m_password == password)
+	/*Check this account is been locked */
+	if (m_locked)
+	        return 1; 
+  
+    	 if (m_password == encry(password) )
     	 {
     	     m_loginf=0;
         }
         else
         {
+            acc_net_helper::RFLogEntry Entry;
             m_loginf++;
-            if ( m_loginf > Accountservice::get_instance()->get_alt() )
+            //std::cout << "loginf count " << m_loginf << " fail threshold " << Accountservice::get_instance()->get_aflt() << std::endl;
+            if ( (m_loginf % Accountservice::get_instance()->get_aflt()) == 0 )
+            {
+            	  //std::cout << "Add log entry ............." << std::endl; 
+                  std::string event("Login Fail");
+                  std::string serverity("Warning");
+                  std::string sensor_type("Authentication");
+                  std::string message(m_username+" Fail over threshold");            	 
+            	 
+                  Entry.set_log_entry(event,serverity,sensor_type,message,2);
+            }
+            
+            if ( ( m_loginf > Accountservice::get_instance()->get_alt() ) && ( 0 != Accountservice::get_instance()->get_alt() ) )
             {
                 m_locked = true;
              }   
@@ -144,12 +247,17 @@ public:
     	   	}
     	   	    
     	   }
-    	   else  // account is not locked but ever login fail 
+    	   else  // account is not locked but ever login fail reset the loginf to 0 if alcra reached
     	   {
     	        if ( elapse > Accountservice::get_instance()->get_alcra()) // check AccountLockoutCounterResetAfter
     	           m_loginf=0;
     	   }
     	}
+    	else if (m_locked) /* create or patch to locked but no login fail, set it to no locked when ticked */
+    	{
+    	     m_locked=false;
+             std::cout << " locked " << m_username << " try to unlock " ;
+        }
     	   
     }
 
@@ -254,6 +362,7 @@ private:
     std::string m_name{};
     std::string m_username{};
     std::string m_roleid{};
+    std::string m_salt{""};
     std::string m_password{};
     bool m_enabled{true};
     bool m_locked{false};

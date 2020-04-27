@@ -413,7 +413,6 @@ extern const char ALLOWABLE_EVENT_TYPES[];
 }
 
 
-//viclin add begin
 namespace AccountService {
 extern const char SERVICE_ENABLED[];
 extern const char AUTHFAILURELOGGINGTHRESHOLD[];
@@ -429,6 +428,7 @@ extern const char ROLES[];
 
 namespace AccountConst {
 extern const char ENABLED[];
+extern const char SALT[];
 extern const char PASSWORD[];
 extern const char USERNAME[];
 extern const char ROLEID[];
@@ -443,8 +443,6 @@ extern const char ROLEID[];
 extern const char PRIVILEGE_TYPES[];
 	
 }
-
-//viclin add end
 
 
 /*!

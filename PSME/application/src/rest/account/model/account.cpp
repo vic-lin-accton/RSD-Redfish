@@ -35,6 +35,7 @@ json::Value Account::to_json() const {
     json::Value json(json::Value::Type::OBJECT);
     json[Common::NAME] = m_name;
     json[AccountConst::USERNAME] = m_username;
+    json[AccountConst::SALT]     = m_salt;
     json[AccountConst::PASSWORD] = m_password;
     json[AccountConst::ROLEID] = m_roleid;
     json[AccountConst::LOCKED] = m_locked;
@@ -45,6 +46,7 @@ json::Value Account::to_json() const {
 Account Account::from_json(const json::Value& json) {
     const auto& name = json[Common::NAME].as_string();
     const auto& username = json[AccountConst::USERNAME].as_string();
+    const auto& salt     = json[AccountConst::SALT].as_string();
     const auto& password = json[AccountConst::PASSWORD].as_string();
     const auto& roleid = json[AccountConst::ROLEID].as_string();    
     const auto& locked = json[AccountConst::LOCKED].as_bool();
@@ -53,7 +55,8 @@ Account Account::from_json(const json::Value& json) {
     Account account;
     account.set_name(name);
     account.set_username(username);
-    account.set_password(password);
+    account.set_salt(salt);
+    account.set_password(password,false);
     account.set_enabled(enabled);
     account.set_locked(locked);
     account.set_roleid(roleid);

@@ -377,7 +377,6 @@ const char TARGET[] = "target";
 const char ALLOWABLE_EVENT_TYPES[] = "EventType@Redfish.AllowableValues";
 }
 
-//viclin add begin
 namespace AccountService {
 const char  SERVICE_ENABLED[] = "ServiceEnabled";
 const char  AUTHFAILURELOGGINGTHRESHOLD[] = "AuthFailureLoggingThreshold" ;
@@ -391,6 +390,7 @@ const char  ROLES[]= "Roles";
 }
 namespace AccountConst{
 const char ENABLED[] = "Enabled";
+const char SALT[] = "Salt";
 const char PASSWORD[] = "Password";
 const char USERNAME[] = "UserName";
 const char ROLEID[] = "RoleId";
@@ -405,7 +405,7 @@ const char ROLEID[] = "RoleId" ;
 const char PRIVILEGE_TYPES[] = "AssignedPrivileges";
 	
 }
-//viclin add end
+
 namespace EventSubscription {
 const char ID[] = "Id";
 const char DESTINATION[] = "Destination";

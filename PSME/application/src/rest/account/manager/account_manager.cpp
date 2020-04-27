@@ -124,6 +124,17 @@ uint64_t AccountManager::addAccount(Account account) {
     return account.get_id();
 }
 
+bool AccountManager::AccountExisted(const std::string& account_username)   
+{
+
+  std::lock_guard<std::mutex> lock{m_mutex};
+  auto account = m_accounts.find(account_username);
+  if (m_accounts.end() == account) {
+      return false;
+  }
+  else return true;
+
+}
 Account AccountManager::getAccount(const std::string& account_username) {
     std::lock_guard<std::mutex> lock{m_mutex};
     return getAccount_by_name(account_username);

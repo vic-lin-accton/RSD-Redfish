@@ -230,6 +230,7 @@ set(SOURCES
     validators/schemas/common.cpp
     validators/schemas/accountservice.cpp
     validators/schemas/account_collection.cpp
+    validators/schemas/account.cpp
     validators/schemas/session_collection.cpp
     validators/schemas/subscription_collection.cpp
     validators/schemas/endpoints_collection.cpp

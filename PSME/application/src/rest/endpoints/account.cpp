@@ -21,7 +21,7 @@
 #include "psme/rest/endpoints/account.hpp"
 #include "psme/rest/endpoints/utils.hpp"
 #include "psme/rest/account/config/account_config.hpp"
-#include "psme/rest/validators/schemas/account_collection.hpp"
+#include "psme/rest/validators/schemas/account.hpp"
 #include "psme/rest/validators/json_validator.hpp"
 
 
@@ -130,36 +130,107 @@ void endpoint::Account::patch(const server::Request& request, server::Response& 
 #else
     account::model::Account account = AccountManager::get_instance()->getAccount(request.params[PathParam::ACCOUNT_ID]);
 #endif      
-    const auto json = JsonValidator::validate_request_body<schema::AccountCollectionPostSchema>(request);
+    const auto json = JsonValidator::validate_request_body<schema::AccountPatchSchema>(request);
     
     const auto old_username = account.get_username();
-    const auto& enabled = json[AccountConst::ENABLED].as_bool();
-    const auto& locked = json[AccountConst::LOCKED].as_bool();
+    std::string n_username {};
+   
+    if (json.is_member(AccountConst::USERNAME))
+    {   
     const std::string& new_username = json[AccountConst::USERNAME].as_string();
-    const auto& password = json[AccountConst::PASSWORD].as_string();
-    const auto& roleid = json[AccountConst::ROLEID].as_string();
+       if ( new_username.compare(old_username) != 0 )
+       { 
+       	  std::cout << " patch req old username " << old_username  << " is not same as new username " << new_username << std::endl;
+       	  //new_username account can not exist
+          const auto& Existed=AccountManager::get_instance()->AccountExisted( new_username );    	
+          if ( Existed == true )
+          {
+              throw agent_framework::exceptions::InvalidValue("new UserName already Existed");
+          }        	         	  
+       }
+       
+       account.set_username(new_username);
+       std::cout << " patch req old username " << old_username  << " new username " << new_username << std::endl;
+       n_username = new_username;
 
-    try {
-       const auto& role=AccountManager::get_instance()->getRole(json[AccountConst::ROLEID].as_string());    	
     }
-    catch (const agent_framework::exceptions::NotFound& ex) {
-        log_error(GET_LOGGER("rest"), "Not found exception: " << ex.what());
-        ServerError server_error = ErrorFactory::create_error_from_gami_exception(
-            agent_framework::exceptions::NotFound(ex.get_message(), request.get_url())
-        );
-        response.set_status(server_error.get_http_status_code());
-        response.set_body(server_error.as_string());;
-        return;
+    else
+    {
+    	n_username = old_username ;
+   	//const auto old_enabled = account.get_enabled();
+    	std::cout << " patch req keep USERNAME as old " << old_username  << std::endl;
+    }
+    
+    if (json.is_member(AccountConst::PASSWORD))
+    {
+       const auto& password = json[AccountConst::PASSWORD].as_string();
+       account.set_password(password,true);
+       
+
+    }
+    else
+    {
+   	//const auto old_enabled = account.get_enabled();
+    	std::cout << " patch req keep PASSWORD as old " << std::endl;    	
+    }
+
+
+    if (json.is_member(Common::NAME))
+    {
+       const auto& name = json[Common::NAME].as_string();
+       account.set_name(name);
+    }
+    else
+    {
+    	//const auto old_enabled = account.get_enabled();
+    	std::cout << " patch req keep name as old " << std::endl;
     }    
 
-
-    account.set_username(new_username);
-    account.set_password(password);
-    account.set_roleid(roleid);
-    account.set_enabled(enabled);
     
-    account.set_locked(locked);   
-    std::cout << " patch req old username " << old_username  << " new username " << new_username << std::endl;
+    if (json.is_member(AccountConst::ENABLED))
+    {
+       const auto& enabled = json[AccountConst::ENABLED].as_bool();
+       account.set_enabled(enabled);
+    }
+    else
+    {
+    	//const auto old_enabled = account.get_enabled();
+    	std::cout << " patch req keep ENABLED as old " << std::endl;
+    }    
+
+    if (json.is_member(AccountConst::LOCKED))
+    {    	
+       const auto& locked = json[AccountConst::LOCKED].as_bool();
+       account.set_locked(locked);   
+    }
+    else
+    {
+        //const auto old_locked = account.get_locked();
+    	std::cout << " patch req keep LOCKED as old " << std::endl;
+    }     
+
+    if (json.is_member(AccountConst::ROLEID))
+    {
+       try {
+          const auto& role=AccountManager::get_instance()->getRole(json[AccountConst::ROLEID].as_string());    	
+       }
+       catch (const agent_framework::exceptions::NotFound& ex) {
+           log_error(GET_LOGGER("rest"), "Not found exception: " << ex.what());
+           ServerError server_error = ErrorFactory::create_error_from_gami_exception(
+               agent_framework::exceptions::NotFound(ex.get_message(), request.get_url())
+           );
+           response.set_status(server_error.get_http_status_code());
+           response.set_body(server_error.as_string());;
+           return;
+       }    
+       const auto& roleid = json[AccountConst::ROLEID].as_string();    
+       account.set_roleid(roleid);
+    } 
+    else
+    {
+    	std::cout << " patch req keep ROLEID as old " << std::endl;
+    }   
+    
     
     AccountManager::get_instance()->modAccount(old_username,account);  //patch is equal to modify account
     AccountConfig::get_instance()->saveAccounts();
@@ -167,7 +238,7 @@ void endpoint::Account::patch(const server::Request& request, server::Response& 
     const std::string& key = PathParam::ACCOUNT_ID;
     
     server::Request get_request{request};
-    get_request.params.set(key,new_username);
+    get_request.params.set(key,n_username);
     std::cout << "change account_id to " << get_request.params[PathParam::ACCOUNT_ID] << std::endl;
     get(get_request, response);
     
