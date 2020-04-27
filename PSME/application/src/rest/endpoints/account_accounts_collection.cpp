@@ -59,7 +59,7 @@ json::Value make_prototype() {
 
 Account to_model(const json::Value& json) {
     Account s;    
-//    const auto& name = json[Common::NAME].as_string();
+    const auto& name = json[Common::NAME].as_string();
     const auto& enabled = json[AccountConst::ENABLED].as_bool();
     const auto& locked = json[AccountConst::LOCKED].as_bool();
     const auto& username = json[AccountConst::USERNAME].as_string();
@@ -69,7 +69,7 @@ Account to_model(const json::Value& json) {
 
  //   s.set_name(name);
     s.set_username(username);
-    s.set_password(password);
+    s.set_password(password,true);
     s.set_roleid(roleid);
     s.set_enabled(enabled);
     s.set_locked(locked);
