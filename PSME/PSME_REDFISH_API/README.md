@@ -89,7 +89,23 @@ HTTP Request Methods used in PSME service.
         }
       
       - Response : 200 OK
-                 
+        
+   Change password of admin
+
+      - URL     :  /redfish/v1/AccountService/Accounts/admin
+      - Method  :  PATCH
+      - Payload :
+      
+      {
+      "UserName": "admin",
+      "Password": "redfish_new_password",
+      "Locked": false,
+      "Enabled": true,
+      "RoleId": "Administrator"
+      }
+      
+      - Response : 200 OK
+	
    Create new account
       
       - URL     :  /redfish/v1/AccountService/Accounts
