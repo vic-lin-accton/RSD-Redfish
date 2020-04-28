@@ -67,7 +67,7 @@ Account to_model(const json::Value& json) {
     const auto& roleid = json[AccountConst::ROLEID].as_string();
                
 
- //   s.set_name(name);
+    s.set_name(name);
     s.set_username(username);
     s.set_password(password,true);
     s.set_roleid(roleid);
